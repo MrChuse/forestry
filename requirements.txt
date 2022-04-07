@@ -1,0 +1,6 @@
+jupyterlab
+notebook
+numpy
+matplotlib
+jupyterlab_materialdarker
+mypy_ipython
