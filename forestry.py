@@ -16,11 +16,8 @@ import random
 from pprint import pprint
 import asyncio
 import sys
-import threading
 import time
 import textwrap
-
-import ipywidgets as widgets
 
 
 # In[ ]:
@@ -409,10 +406,6 @@ class Slot:
 # In[ ]:
 
 
-import threading
-import time
-
-import ipywidgets as widgets
 class Inventory:
     def __init__(self, capacity=None, /):
         self.capacity = capacity or 100
