@@ -4,3 +4,4 @@ numpy
 matplotlib
 jupyterlab_materialdarker
 ipywidgets
+aiohttp
