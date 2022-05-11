@@ -558,7 +558,6 @@ class Game:
         if command in ['exit', 'q']: # tested
             self.exit_event.set()
             self.print('Exiting...')
-            self.console.layout.display = 'none'
         elif command == 'save':
             self.save(params[0])
         elif command == 'load':
