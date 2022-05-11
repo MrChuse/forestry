@@ -77,6 +77,7 @@ try:
     web_interface = WebInterface()
     app = web.Application(middlewares=[cors_middleware])
     app.add_routes([
+        web.static('/game', 'my-app/build'),
         web.get('/out', out),
         web.get('/command_out', command_out),
         web.post('/command', command)
