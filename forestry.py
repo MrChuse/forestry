@@ -654,3 +654,22 @@ class Game:
             for apiary in self.apiaries:
                 apiary.update()
             self.render_event.set()
+    
+    def save(self, filename):
+        with open(filename+'.forestry', 'wb') as f:
+            
+            state = {
+                'resources' : self.resources,
+                'inv' : self.inv,
+                'apiaries' : self.apiaries,
+                'to_render' : self.to_render
+            }
+            pickle.dump(state, f)
+            
+    def load(self, filename):
+        with open(filename+'.forestry', 'rb') as f:
+            saved = pickle.load(f)
+        self.resources = saved['resources']
+        self.inv = saved['inv']
+        self.apiaries = saved['apiaries']
+        self.to_render = saved['to_render']
