@@ -1,0 +1,50 @@
+Welcome to a demo of my little game about selective breeding!
+You are going to be a professional bee breeder
+  and your goal for this demo is to build an alveary.
+In order to do this you'll have to (surprisingly) breed
+  the bees you have and try to find the pairs of species that
+  result in a mutation after mating.
+When you are ready, type `help next` into the console and hit
+  `Enter` in order to proceed.
+===
+So, as you might have guessed, this game is in its
+  early stage of development so the way you interact with
+  it is via this console on the bottom. There are a lot of commands
+  and we are going to present using pages of this helper manual.
+You have already discovered your first command: `help`, it will be
+  your guide throughout this journey. Almost all commands in this game
+  have parameters which describe the action you want to take.
+Example: `help` command can take zero or one parameter in a form
+  of a string. `help` without any arguments will show you the list
+  of all the existing command but I suggest you not to look at it yet
+  as it might scare you :-)
+  `help next` and `help prev` will show next and previous
+  pages of this manual respectively, `help close` will close this manual,
+  `help manual` will open it back and most importantly
+  `help <command>` will show you the help on the <command> you provided.
+===
+Well, it's finally time to play.
+You start with 0 bees, so you need a way to collect them
+  in the first place. `forage` will help you.
+Also, you may change the order of things shown to you
+  with `show` and `unshow` commands.
+  You may also use `inv` and `apiary 0` commands to show only them
+Go ahead and type `help close` and `forage` and look at what you'll
+  have ended up with. When you need more commands, get back here using
+  `help manual` command!
+===
+Now you have bees, so you need a way to manipulate them.
+Try out `put`, `swap`, `throw`, `take` commands.
+If you need any help, use `help <command>`.
+===
+When you've colected some resources, you can `inspect` your bees.
+It will show their genotype which is much more informative than 
+  the phenotype which you see with your bare eyes.
+Also, try out `build` command, it's actually the way you win this
+  game. The `build alveary` is probably not available for you yet
+  as you have not collected more advanced bees yet. Probably.
+===
+I think you have gathered enough knowledge to play on your own, so
+  I wish you good luck on your bee-breeding journey.
+You might want to take a closer look at `save`, `load` and `exit`
+  commands so you don't lose progress.

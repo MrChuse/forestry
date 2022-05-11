@@ -633,6 +633,10 @@ class Game:
         self.exit_event.set()
         self.print('Exiting...')
 
+    def show_manual(self):
+        self.help_text = self.manual[self.current_manual_page]
+        self.help_text += f'\n{self.current_manual_page}/{len(self.manual)}'
+    
     def help(self, params):
         if len(params) == 0:
             l = []
@@ -647,15 +651,18 @@ class Game:
             
         if params[0] == 'prev':
             self.current_manual_page = max(self.current_manual_page - 1, 0)
+            self.show_manual()
         elif params[0] == 'next':
             self.current_manual_page = min(self.current_manual_page + 1, len(self.manual))
+            self.show_manual()
         elif params[0] == 'go':
             page = int(params[1])
             self.current_manual_page = min(len(self.manual), max(page, 0))
+            self.show_manual()
         elif params[0] == 'close':
             self.render_help.clear()
         elif params[0] == 'manual':
-            self.help_text = self.manual[self.current_manual_page]
+            self.show_manual()
             self.render_help.set()
         else:
             # try to find the command in list of commands
