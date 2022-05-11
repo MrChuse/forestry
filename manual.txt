@@ -10,7 +10,7 @@ When you are ready, type `help next` into the console and hit
 So, as you might have guessed, this game is in its
   early stage of development so the way you interact with
   it is via this console on the bottom. There are a lot of commands
-  and we are going to present using pages of this helper manual.
+  and we are going to introduce them using pages of this helper manual.
 You have already discovered your first command: `help`, it will be
   your guide throughout this journey. Almost all commands in this game
   have parameters which describe the action you want to take.
