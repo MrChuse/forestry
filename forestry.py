@@ -15,6 +15,7 @@ from collections import defaultdict
 import random
 from pprint import pprint
 import asyncio
+import threading
 import sys
 import time
 import textwrap
@@ -535,3 +536,121 @@ class Apiary:
                 else:
                     assert False, 'Should be unreachable'
 
+class Game:
+    def __init__(self):
+        self.exit_event = threading.Event()
+        self.render_event = threading.Event()
+        self.render_event.set()
+        
+        self.resources = Resources(honey=0)
+        self.inv = Inventory(100)
+        self.apiaries = [Apiary(self.resources.add_resources)]
+    
+        self.to_render = [self.resources, self.inv, self.apiaries[0]]
+        
+        self.inner_state_thread = threading.Thread(target=self.update_state)
+        self.inner_state_thread.start()
+        self.render_thread = threading.Thread(target=self.render)
+        self.render_thread.start()
+        
+    def execute_command(self, value):
+        command, *params = value.split()
+        if command in ['exit', 'q']: # tested
+            self.exit_event.set()
+            self.print('Exiting...')
+            self.console.layout.display = 'none'
+        elif command == 'save':
+            self.save(params[0])
+        elif command == 'load':
+            self.load(params[0])
+        elif command in ['inv', 'i']: # tested both
+            if len(params) == 0:
+                self.to_render = [self.resources, self.inv]
+            else:
+                slot = int(params[0])
+                # self.print(self.inv[slot], out=self.command_out, flush=True)
+                self.to_render = [self.resources, self.inv[slot]]
+        elif command in ['apiary', 'api', 'a']: # tested
+            try:
+                apiary = self.apiaries[int(params[0])]
+            except (ValueError, IndexError) as e:
+                self.print(e, out=self.command_out, flush=True)
+                print(e)
+            else:
+                self.to_render = [self.resources, apiary]
+        elif command in ['show', 's']: # probably tested
+            if params[0] in ['inv', 'i']:
+                if len(params) == 1:
+                    self.to_render.append(self.inv)
+                else:
+                    slot = int(params[1])
+                    self.to_render.append(self.inv[slot])
+            elif params[0] in ['apiary', 'api', 'a']:
+                apiary = self.apiaries[int(params[1])]
+                self.to_render.append(apiary)
+            elif params[0] in ['resources', 'r']:
+                self.to_render.append(self.resources)
+        elif command in ['unshow', 'uns', 'us', 'u']: # tested
+            self.to_render.pop()
+        elif command == 'put':
+            try:
+                where, *what = map(int, params)
+                for w in what:
+                    self.apiaries[where].put(self.inv.take(w))
+            except (IndexError, ValueError) as e:
+                self.print(e, out=self.command_out, flush=True)
+        elif command == 'reput':
+            try:
+                where, *what = map(int, params)
+                for w in what:
+                    self.apiaries[where].put(self.apiaries[where][w])
+            except (IndexError, ValueError) as e:
+                self.print(e, out=self.command_out, flush=True)
+        elif command == 'take':
+            try:
+                where, *what = map(int, params)
+                for w in what:
+                    self.inv.place_bees([self.apiaries[where][w]])
+            except (IndexError, ValueError) as e:
+                self.print(e, out=self.command_out, flush=True)
+        elif command == 'throw':
+            try:
+                for idx in map(int, params):
+                    self.inv.take(idx)
+            except ValueError as e:
+                self.print(e, out=self.command_out, flush=True)
+        elif command == 'swap':
+            self.inv.swap(*map(int, params))
+        elif command == 'forage': # tested
+            genes = Genes.sample()
+            self.inv.place_bees([Princess(genes), Drone(genes)])
+        elif command == 'inspect': # tested
+            try:
+                slot = self.inv[int(params[0])]
+                if not slot.is_empty() and not slot.slot.inspected:
+                    self.resources.remove_resources({'honey': 5})
+                    slot.slot.inspected = True
+            except (IndexError, ValueError) as e:
+                self.print(e, out=self.command_out, flush=True)
+        elif command == 'build':
+            try:
+                if params[0] in ['apiary', 'api', 'a']: # tested
+                    self.resources.remove_resources({'wood': 5, 'flowers': 5, 'honey': 10})
+                    self.apiaries.append(Apiary(self.resources.add_resources))
+                elif params[0] == 'alveary':
+                    self.resources.remove_resources({'royal gelly': 25, 'pollen cluster': 25, 'honey': 100})
+                    self.print('You won the demo!', out=self.command_out, flush=True)
+                    self.exit_event.set()
+            except (IndexError, ValueError) as e:
+                self.print(e, out=self.command_out, flush=True)
+        self.render_event.set()
+                
+    def update_state(self):
+        while True:
+            time.sleep(1)
+            if self.exit_event.is_set():
+                break
+            
+            for apiary in self.apiaries:
+                apiary.update()
+            self.render_event.set()
