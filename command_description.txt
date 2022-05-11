@@ -1,0 +1,139 @@
+help
+;;;
+Usage: help            Shows the list of all available commands
+       help next       Shows the next page of the manual
+       help prev       Shows the previous page of the manual
+       help go <page>  Turns to the page of manual you provided
+       help close      Closes the manual and returns back to the game
+       help manual     Opens the manual
+       help <command>  Shows the help on the command you provided
+;;;
+Shows help on various topics, use `help help` to show more info
+===
+exit
+;;;
+Properly closes the game. WARNING, this command doesn't save the game
+===
+save
+;;;
+Usage: save <name>
+Saves the game to the file with name you provided
+;;;
+Saves the game to file
+===
+load
+;;;
+Usage: load <name>
+Loads the game from the file with name you provided
+;;;
+Loads the game from file
+===
+inv
+;;;
+Usage: inv (or i) [<bee index>]
+Clears the rendering window
+If bee index was not provided, shows the inventory
+If bee index was provided and bee is inspected, shows its genotype,
+if bee index was provided not inspected, shows its phenotype
+;;;
+Shows just the inventory
+===
+apiary
+;;;
+Usage: apiary (or api or a) <apiary index>
+Clears the rendering window
+Shows the apiary with index = apiary index
+;;;
+Shows just the apiary with provided index
+===
+show
+;;;
+Usage: show (or s) inv (or i)
+       show (or s) apiary (or api or i) <apiary index>
+       show (or s) resources (or r)
+Adds the object you provided to the bottom of rendering window
+;;;
+Adds the object you provided to the rendering window
+===
+unshow
+;;;
+Removes the last object from the rendering window
+===
+put
+;;;
+Usage: put <apiary index> <bee index...>
+Puts bee with index = bee index into an apiary princess and drone slots
+You may provide several bee indexes to put
+Note that an apiary can only hold one princess and one drone at a time
+;;;
+Puts bee(s) into an apiary princess and drone slots
+===
+take
+;;;
+Usage: take <apiary index> <bee index...>
+Takes bee with index = bee index from an apiary's inventory
+  and puts it into your inventory
+You may provide several bee indexes to take
+;;;
+Takes bee(s) from an apiary's inventory
+===
+reput
+;;;
+Usage: reput <apiary index> <bee index...>
+Takes bee with index = bee index from an apiary's inventory
+  and puts it back into the same apiary
+You may provide several bee indexes to reput
+;;;
+Takes bee(s) from an apiary and puts in back
+===
+throw
+;;;
+Usage: throw <bee index...>
+Deletes the bee with index = bee index
+You may provide several bee indexes to throw
+;;;
+Deletes bee(s)
+===
+swap
+;;;
+Usage: swap <bee index 1> <bee index 2>
+Swaps bee with index 1 and bee with index 2
+Can swap empty slots in your inventory too
+;;;
+Swaps two bees (or bee and an empty slot, why not)
+===
+forage
+;;;
+Adds two basic purebred bees to your inventory
+Basic bees have no chance to be created by mutation and 
+  can only be found using forage. Every bee species can
+  be created from basic bees.
+Purebred means that the two alleles of each gene are
+  the same for all genes of the bee. The alleles may
+  vary from one species to another still, which provides
+  an opportunity to create better bees than basic ones.
+;;;
+Adds two basic purebred bees to your inventory.
+===
+inspect
+;;;
+Usage: inspect <bee index>
+Inspects the bee with index = bee index
+Allows to look at bee's genotype
+Costs 5 honey
+;;;
+Allows to look at bee's genotype
+===
+build
+;;;
+Usage: build (or b) apiary (or api or a)
+       build (or b) alveary
+Creates a new building you provided
+Building an apiary costs 10 honey, 5 flowers and 5 wood
+  and enables you to breed more bees simultaneously
+  Look at `show` to show a new apiary
+Building an alveary costs 100 honey, 25 royal jelly
+  and 25 pollen clusters
+  You win the game when you build the alveary
+;;;
+Builds an apiary or an alveary
