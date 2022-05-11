@@ -20,7 +20,7 @@ class NameForm extends React.Component {
   }
 
   async handleSubmit(event) {
-    console.log('Отправленное имя: ' + this.state.value);
+    console.log('Sent command: ' + this.state.value);
 	const response = await fetch(
 		this.props.url,
 		{
@@ -54,7 +54,7 @@ class FetchableText extends React.Component {
 		}
 	}
 	
-	async get_text() {
+	async update_text() {
 		fetch(this.props.url)
         .then(response => response.json())
         .then(data => this.setState({ value: data['text'] }));
@@ -62,7 +62,7 @@ class FetchableText extends React.Component {
 	
 	async componentDidMount() {
 		while (true) {
-			this.get_text();
+			this.update_text();
 			await sleep(this.props.sleep_time);
 		}
 	}
