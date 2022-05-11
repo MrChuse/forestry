@@ -15,7 +15,10 @@ You have already discovered your first command: `help`, it will be
   your guide throughout this journey. Almost all commands in this game
   have parameters which describe the action you want to take.
 Example: `help` command can take zero or one parameter in a form
-  of a string. `help without any arguments will show you the list of all the existing command but I suggest you not to look at it yet as it might scare you :-) `help next` and `help prev` will show next and previous
+  of a string. `help` without any arguments will show you the list
+  of all the existing command but I suggest you not to look at it yet
+  as it might scare you :-)
+  `help next` and `help prev` will show next and previous
   pages of this manual respectively, `help close` will close this manual,
   `help manual` will open it back and most importantly
   `help <command>` will show you the help on the <command> you provided.
