@@ -6,35 +6,6 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-class InputField extends React.Component {
-	constructor(props){
-		super(props);
-		this.state = {text: ''};
-		//this.handleNameChange = this.handleNameChange.bind(this);        
-		// this.afterSubmission = this.afterSubmission.bind(this);
-	}
-	handleInputChange(e){
-		console.log('in handle change');
-		this.setState({
-			text: e.target.value
-		});
-		console.log('in handle change 2');
-	}
-	async afterSubmission(event) {
-		event.preventDefault();
-		console.log('hello there')
-		
-	}
-	
-	render() {
-		return (
-			<form onSubmit={() => this.afterSubmission()}>
-			<input value={this.state.text} onChange={() => this.handleInputChange()}/>
-			</form>
-		);
-	}
-}
-
 class NameForm extends React.Component {
   constructor(props) {
     super(props);
