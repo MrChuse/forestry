@@ -17,7 +17,7 @@ You have already discovered your first command: `help`, it will be
 Example: `help` command can take zero or one parameter in a form
   of a string. `help` without any arguments will show you the list
   of all the existing command but I suggest you not to look at it yet
-  as it might scare you :-)
+  as it might scare you :)
   `help next` and `help prev` will show next and previous
   pages of this manual respectively, `help close` will close this manual,
   `help manual` will open it back and most importantly

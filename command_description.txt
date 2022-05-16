@@ -63,7 +63,7 @@ put
 ;;;
 Usage: put <apiary index> <bee index...>
 Puts bee with index = bee index into an apiary princess and drone slots
-You may provide several bee indexes to put
+You may provide several bee indices to put
 Note that an apiary can only hold one princess and one drone at a time
 ;;;
 Puts bee(s) into an apiary princess and drone slots
