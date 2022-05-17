@@ -501,7 +501,7 @@ class Inventory:
                     index += 1
                     continue
             else:
-                self.print('Beware that', bee, 'was thrown out...')
+                raise SlotOccupiedError('Tried to insert too many bees')
 
 
 class Apiary:
@@ -512,6 +512,9 @@ class Apiary:
         self.add_resources = add_resources
         super().__init__()
 
+    def __getitem__(self, key):
+        return self.inv.__getitem__(key)
+
     def __str__(self):
         res = ['------ APIARY ------']
         res.append('Princess: ' + self.princess.small_str())
@@ -519,10 +522,6 @@ class Apiary:
         inv_str = textwrap.indent(str(self.inv), '  ')
         res.append(inv_str)
         return '\n'.join(res)
-
-    def __getitem__(self, key):
-        res = self.inv.take(key)
-        return res
 
     def put_princess(self, bee):
         if not isinstance(bee, Princess) and not isinstance(bee, Queen):
@@ -542,8 +541,11 @@ class Apiary:
         elif isinstance(bee, Drone):
             self.put_drone(bee)
 
+    def take(self, index):
+        return self.inv.take(index)
+
     def try_breed(self):
-        if not self.princess.is_empty() and not self.drone.is_empty():
+        if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
             princess = self.princess.take()
             drone = self.drone.take()
             self.princess.put(princess.mate(drone))
@@ -736,23 +738,26 @@ class Game:
         elif params[0] in ['resources', 'r']:
             self.to_render.append(self.resources)
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError, ValueError, SlotOccupiedError)
     def put(self, params):
         where, *what = map(int, params)
         for w in what:
-            self.apiaries[where].put(self.inv.take(w))
+            self.apiaries[where].put(self.inv[w].slot)
+            self.inv.take(w)
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError, ValueError, SlotOccupiedError)
     def reput(self, params):
         where, *what = map(int, params)
         for w in what:
             self.apiaries[where].put(self.apiaries[where][w])
+            self.apiaries[where].take(w)
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError, ValueError, SlotOccupiedError)
     def take(self, params):
         where, *what = map(int, params)
         for w in what:
-            self.inv.place_bees([self.apiaries[where][w]])
+            self.inv.place_bees([self.apiaries[where][w].slot])
+            self.apiaries[where].take(w)
 
     @except_print(ValueError)
     def throw(self, params):
