@@ -680,15 +680,15 @@ class Game:
         if len(params) == 0:
             l = []
             for command in self.commands:
-                if command.small_desc == '':
+                if command.short_desc == '':
                     desc = command.desc
                 else:
-                    desc = command.small_desc
+                    desc = command.short_desc
                 l.append(command.names[0] + ': ' + desc)
             self.help_text = ''.join(l)
             self.render_help.set()
 
-        if params[0] == 'prev':
+        elif params[0] == 'prev':
             self.current_manual_page = max(self.current_manual_page - 1, 0)
             self.show_manual()
         elif params[0] == 'next':
