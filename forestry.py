@@ -505,10 +505,11 @@ class Inventory:
 
 
 class Apiary:
-    def __init__(self, add_resources):
+    def __init__(self, name, add_resources):
         self.inv = Inventory(7)
         self.princess = Slot()
         self.drone = Slot()
+        self.name = name
         self.add_resources = add_resources
         super().__init__()
 
@@ -516,7 +517,7 @@ class Apiary:
         return self.inv.__getitem__(key)
 
     def __str__(self):
-        res = ['------ APIARY ------']
+        res = [f'------ APIARY {self.name} ------']
         res.append('Princess: ' + self.princess.small_str())
         res.append('Drone: ' + self.drone.small_str())
         inv_str = textwrap.indent(str(self.inv), '  ')
@@ -585,7 +586,7 @@ class Game:
     def __init__(self):
         self.resources = Resources()
         self.inv = Inventory(100)
-        self.apiaries = [Apiary(self.resources.add_resources)]
+        self.apiaries = [Apiary('0', self.resources.add_resources)]
 
         self.to_render = [self.resources, self.inv, self.apiaries[0]]
 
@@ -812,7 +813,7 @@ class Game:
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
                 {'wood': 5, 'flowers': 5, 'honey': 10})
-            self.apiaries.append(Apiary(self.resources.add_resources))
+            self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
         elif params[0] == 'alveary':
             self.resources.remove_resources(
                 {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}
