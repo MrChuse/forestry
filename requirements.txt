@@ -1,6 +1,3 @@
 jupyterlab
-notebook
-numpy
-matplotlib
 ipywidgets
 aiohttp
