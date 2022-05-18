@@ -92,6 +92,10 @@ Can swap empty slots in your inventory too
 ;;;
 Swaps two bees (or bee and an empty slot, why not)
 ===
+sort
+;;;
+Sorts your inventory
+===
 forage
 ;;;
 Adds two basic purebred bees to your inventory

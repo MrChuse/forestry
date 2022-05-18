@@ -611,6 +611,7 @@ class Game:
             Command(['reput'], self.reput, *desc['reput']),
             Command(['throw'], self.throw, *desc['throw']),
             Command(['swap'], self.swap, *desc['swap']),
+            Command(['sort'], self.sort_inv, *desc['sort']),
             Command(['forage'], self.forage, *desc['forage']),
             Command(['inspect'], self.inspect, *desc['inspect']),
             Command(['build', 'b'], self.build, *desc['build']),
@@ -797,6 +798,9 @@ class Game:
     def swap(self, params):
         self.inv.swap(*map(int, params))
 
+    def sort_inv(self, params):
+        self.inv.place_bees([slot.take() for slot in self.inv if not slot.is_empty()])
+        
     def forage(self, params):  # tested
         genes = Genes.sample()
         self.inv.place_bees([Princess(genes), Drone(genes)])
