@@ -739,31 +739,57 @@ class Game:
             self.to_render.append(apiary)
         elif params[0] in ['resources', 'r']:
             self.to_render.append(self.resources)
-
+    
+    @staticmethod
+    def parse_ranges_numbers(params):
+        res = []
+        for w in params:
+            if '..' in w:
+                try:
+                    left, right = w.split('..')
+                except ValueError:
+                    raise ValueError(f'Range must have exactly 1 `..`')
+                left, right = int(left), int(right)
+                res.extend(list(range(left, right+1)))
+            else:
+                res.append(int(w))
+        return res
+    
+    @staticmethod
+    def where_what(params):
+        where, *what = params
+        where = int(where)
+        return where, Game.parse_ranges_numbers(what)
+            
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def put(self, params):
-        where, *what = map(int, params)
+        where, what = Game.where_what(params)
+        if len(what) > 2:
+            raise ValueError("Can't put more than two bees")
         for w in what:
             self.apiaries[where].put(self.inv[w].slot)
             self.inv.take(w)
 
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def reput(self, params):
-        where, *what = map(int, params)
+        where, what = Game.where_what(params)
+        if len(what) > 2:
+            raise ValueError("Can't reput more than two bees")
         for w in what:
-            self.apiaries[where].put(self.apiaries[where][w])
+            self.apiaries[where].put(self.apiaries[where][w].slot)
             self.apiaries[where].take(w)
 
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def take(self, params):
-        where, *what = map(int, params)
+        where, what = Game.where_what(params)
         for w in what:
             self.inv.place_bees([self.apiaries[where][w].slot])
             self.apiaries[where].take(w)
 
     @except_print(ValueError)
     def throw(self, params):
-        for idx in map(int, params):
+        what = Game.parse_ranges_numbers(params)
+        for idx in what:
             self.inv.take(idx)
 
     @except_print(ValueError)

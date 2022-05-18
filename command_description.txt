@@ -49,7 +49,8 @@ put
 ;;;
 Usage: put <apiary index> <bee index...>
 Puts bee with index = bee index into an apiary princess and drone slots
-You may provide several bee indices to put
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to put
 Note that an apiary can only hold one princess and one drone at a time
 ;;;
 Puts bee(s) into an apiary princess and drone slots
@@ -59,7 +60,8 @@ take
 Usage: take <apiary index> <bee index...>
 Takes bee with index = bee index from an apiary's inventory
   and puts it into your inventory
-You may provide several bee indexes to take
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to take
 ;;;
 Takes bee(s) from an apiary's inventory
 ===
@@ -68,7 +70,8 @@ reput
 Usage: reput <apiary index> <bee index...>
 Takes bee with index = bee index from an apiary's inventory
   and puts it back into the same apiary
-You may provide several bee indexes to reput
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to reput
 ;;;
 Takes bee(s) from an apiary and puts in back
 ===
@@ -76,7 +79,8 @@ throw
 ;;;
 Usage: throw <bee index...>
 Deletes the bee with index = bee index
-You may provide several bee indexes to throw
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to throw
 ;;;
 Deletes bee(s)
 ===
