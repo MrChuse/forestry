@@ -595,11 +595,10 @@ class Game:
         desc = Game.parse_command_description()
         self.commands = [
             Command(['exit', 'q'], self.exit, *desc['exit']),
+            Command(['manual'], lambda x: self.execute_command('help manual'), *desc['manual']),
             Command(['help', 'h'], self.help, *desc['help']),
             Command(['save'], self.save, *desc['save']),
             Command(['load'], self.load, *desc['load']),
-            Command(['inv', 'i'], self.inventory, *desc['inv']),
-            Command(['apiary', 'api', 'a'], self.apiary, *desc['apiary']),
             Command(['show', 's'], self.show, *desc['show']),
             Command(
                 ['unshow', 'uns', 'us', 'u'],
@@ -712,18 +711,6 @@ class Game:
                 if params[0] in command.names:
                     self.help_text = command.desc
                     self.render_help.set()
-
-    def inventory(self, params):  # tested both
-        if len(params) == 0:
-            self.to_render = [self.resources, self.inv]
-        else:
-            slot = int(params[0])
-            self.to_render = [self.resources, self.inv[slot]]
-
-    @except_print(IndexError, ValueError)
-    def apiary(self, params):  # tested
-        apiary = self.apiaries[int(params[0])]
-        self.to_render = [self.resources, apiary]
 
     def show(self, params):  # probably tested
         if params[0] in ['inv', 'i']:

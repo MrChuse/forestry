@@ -10,6 +10,10 @@ Usage: help            Shows the list of all available commands
 ;;;
 Shows help on various topics, use `help help` to show more info
 ===
+manual
+;;;
+Alias for `help manual`
+===
 exit
 ;;;
 Properly closes the game. WARNING, this command doesn't save the game
@@ -27,24 +31,6 @@ Usage: load <name>
 Loads the game from the file with name you provided
 ;;;
 Loads the game from file
-===
-inv
-;;;
-Usage: inv (or i) [<bee index>]
-Clears the rendering window
-If bee index was not provided, shows the inventory
-If bee index was provided and bee is inspected, shows its genotype,
-if bee index was provided not inspected, shows its phenotype
-;;;
-Shows just the inventory
-===
-apiary
-;;;
-Usage: apiary (or api or a) <apiary index>
-Clears the rendering window
-Shows the apiary with index = apiary index
-;;;
-Shows just the apiary with provided index
 ===
 show
 ;;;

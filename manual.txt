@@ -28,7 +28,6 @@ You start with 0 bees, so you need a way to collect them
   in the first place. `forage` will help you.
 Also, you may change the order of things shown to you
   with `show` and `unshow` commands.
-  You may also use `inv` and `apiary 0` commands to show only them
 Go ahead and type `help close` and `forage` and look at what you'll
   have ended up with. When you need more commands, get back here using
   `help manual` command!
