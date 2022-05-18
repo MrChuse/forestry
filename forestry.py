@@ -501,28 +501,28 @@ class Inventory:
                     index += 1
                     continue
             else:
-                self.print('Beware that', bee, 'was thrown out...')
+                raise SlotOccupiedError('Tried to insert too many bees')
 
 
 class Apiary:
-    def __init__(self, add_resources):
+    def __init__(self, name, add_resources):
         self.inv = Inventory(7)
         self.princess = Slot()
         self.drone = Slot()
+        self.name = name
         self.add_resources = add_resources
         super().__init__()
 
+    def __getitem__(self, key):
+        return self.inv.__getitem__(key)
+
     def __str__(self):
-        res = ['------ APIARY ------']
+        res = [f'------ APIARY {self.name} ------']
         res.append('Princess: ' + self.princess.small_str())
         res.append('Drone: ' + self.drone.small_str())
         inv_str = textwrap.indent(str(self.inv), '  ')
         res.append(inv_str)
         return '\n'.join(res)
-
-    def __getitem__(self, key):
-        res = self.inv.take(key)
-        return res
 
     def put_princess(self, bee):
         if not isinstance(bee, Princess) and not isinstance(bee, Queen):
@@ -542,8 +542,11 @@ class Apiary:
         elif isinstance(bee, Drone):
             self.put_drone(bee)
 
+    def take(self, index):
+        return self.inv.take(index)
+
     def try_breed(self):
-        if not self.princess.is_empty() and not self.drone.is_empty():
+        if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
             princess = self.princess.take()
             drone = self.drone.take()
             self.princess.put(princess.mate(drone))
@@ -583,7 +586,7 @@ class Game:
     def __init__(self):
         self.resources = Resources()
         self.inv = Inventory(100)
-        self.apiaries = [Apiary(self.resources.add_resources)]
+        self.apiaries = [Apiary('0', self.resources.add_resources)]
 
         self.to_render = [self.resources, self.inv, self.apiaries[0]]
 
@@ -593,11 +596,10 @@ class Game:
         desc = Game.parse_command_description()
         self.commands = [
             Command(['exit', 'q'], self.exit, *desc['exit']),
+            Command(['manual'], lambda x: self.execute_command('help manual'), *desc['manual']),
             Command(['help', 'h'], self.help, *desc['help']),
             Command(['save'], self.save, *desc['save']),
             Command(['load'], self.load, *desc['load']),
-            Command(['inv', 'i'], self.inventory, *desc['inv']),
-            Command(['apiary', 'api', 'a'], self.apiary, *desc['apiary']),
             Command(['show', 's'], self.show, *desc['show']),
             Command(
                 ['unshow', 'uns', 'us', 'u'],
@@ -609,6 +611,7 @@ class Game:
             Command(['reput'], self.reput, *desc['reput']),
             Command(['throw'], self.throw, *desc['throw']),
             Command(['swap'], self.swap, *desc['swap']),
+            Command(['sort'], self.sort_inv, *desc['sort']),
             Command(['forage'], self.forage, *desc['forage']),
             Command(['inspect'], self.inspect, *desc['inspect']),
             Command(['build', 'b'], self.build, *desc['build']),
@@ -657,6 +660,21 @@ class Game:
 
         return try_clause_decorator
 
+    def render_frame(self):
+        if self.render_event.is_set():
+            if self.render_help.is_set():
+                self.print(self.help_text, flush=True)
+            else:
+                if len(self.to_render) == 0:
+                    self.print(flush=True)
+                    self.render_event.clear()
+                    return
+                for thing in self.to_render[:-1]:
+                    self.print(thing)
+                    self.print()
+                self.print(self.to_render[-1], flush=True)
+            self.render_event.clear()
+    
     @except_print(KeyError)
     def get_command(self, command):
         return self.commands_actions[command]
@@ -679,15 +697,15 @@ class Game:
         if len(params) == 0:
             l = []
             for command in self.commands:
-                if command.small_desc == '':
+                if command.short_desc == '':
                     desc = command.desc
                 else:
-                    desc = command.small_desc
+                    desc = command.short_desc
                 l.append(command.names[0] + ': ' + desc)
             self.help_text = ''.join(l)
             self.render_help.set()
 
-        if params[0] == 'prev':
+        elif params[0] == 'prev':
             self.current_manual_page = max(self.current_manual_page - 1, 0)
             self.show_manual()
         elif params[0] == 'next':
@@ -711,18 +729,6 @@ class Game:
                     self.help_text = command.desc
                     self.render_help.set()
 
-    def inventory(self, params):  # tested both
-        if len(params) == 0:
-            self.to_render = [self.resources, self.inv]
-        else:
-            slot = int(params[0])
-            self.to_render = [self.resources, self.inv[slot]]
-
-    @except_print(IndexError, ValueError)
-    def apiary(self, params):  # tested
-        apiary = self.apiaries[int(params[0])]
-        self.to_render = [self.resources, apiary]
-
     def show(self, params):  # probably tested
         if params[0] in ['inv', 'i']:
             if len(params) == 1:
@@ -735,34 +741,66 @@ class Game:
             self.to_render.append(apiary)
         elif params[0] in ['resources', 'r']:
             self.to_render.append(self.resources)
-
-    @except_print(IndexError, ValueError)
+    
+    @staticmethod
+    def parse_ranges_numbers(params):
+        res = []
+        for w in params:
+            if '..' in w:
+                try:
+                    left, right = w.split('..')
+                except ValueError:
+                    raise ValueError(f'Range must have exactly 1 `..`')
+                left, right = int(left), int(right)
+                res.extend(list(range(left, right+1)))
+            else:
+                res.append(int(w))
+        return res
+    
+    @staticmethod
+    def where_what(params):
+        where, *what = params
+        where = int(where)
+        return where, Game.parse_ranges_numbers(what)
+            
+    @except_print(IndexError, ValueError, SlotOccupiedError)
     def put(self, params):
-        where, *what = map(int, params)
+        where, what = Game.where_what(params)
+        if len(what) > 2:
+            raise ValueError("Can't put more than two bees")
         for w in what:
-            self.apiaries[where].put(self.inv.take(w))
+            self.apiaries[where].put(self.inv[w].slot)
+            self.inv.take(w)
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError, ValueError, SlotOccupiedError)
     def reput(self, params):
-        where, *what = map(int, params)
+        where, what = Game.where_what(params)
+        if len(what) > 2:
+            raise ValueError("Can't reput more than two bees")
         for w in what:
-            self.apiaries[where].put(self.apiaries[where][w])
+            self.apiaries[where].put(self.apiaries[where][w].slot)
+            self.apiaries[where].take(w)
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError, ValueError, SlotOccupiedError)
     def take(self, params):
-        where, *what = map(int, params)
+        where, what = Game.where_what(params)
         for w in what:
-            self.inv.place_bees([self.apiaries[where][w]])
+            self.inv.place_bees([self.apiaries[where][w].slot])
+            self.apiaries[where].take(w)
 
     @except_print(ValueError)
     def throw(self, params):
-        for idx in map(int, params):
+        what = Game.parse_ranges_numbers(params)
+        for idx in what:
             self.inv.take(idx)
 
     @except_print(ValueError)
     def swap(self, params):
         self.inv.swap(*map(int, params))
 
+    def sort_inv(self, params):
+        self.inv.place_bees([slot.take() for slot in self.inv if not slot.is_empty()])
+        
     def forage(self, params):  # tested
         genes = Genes.sample()
         self.inv.place_bees([Princess(genes), Drone(genes)])
@@ -779,7 +817,7 @@ class Game:
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
                 {'wood': 5, 'flowers': 5, 'honey': 10})
-            self.apiaries.append(Apiary(self.resources.add_resources))
+            self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
         elif params[0] == 'alveary':
             self.resources.remove_resources(
                 {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}

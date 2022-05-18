@@ -10,6 +10,10 @@ Usage: help            Shows the list of all available commands
 ;;;
 Shows help on various topics, use `help help` to show more info
 ===
+manual
+;;;
+Alias for `help manual`
+===
 exit
 ;;;
 Properly closes the game. WARNING, this command doesn't save the game
@@ -28,24 +32,6 @@ Loads the game from the file with name you provided
 ;;;
 Loads the game from file
 ===
-inv
-;;;
-Usage: inv (or i) [<bee index>]
-Clears the rendering window
-If bee index was not provided, shows the inventory
-If bee index was provided and bee is inspected, shows its genotype,
-if bee index was provided not inspected, shows its phenotype
-;;;
-Shows just the inventory
-===
-apiary
-;;;
-Usage: apiary (or api or a) <apiary index>
-Clears the rendering window
-Shows the apiary with index = apiary index
-;;;
-Shows just the apiary with provided index
-===
 show
 ;;;
 Usage: show (or s) inv (or i)
@@ -63,7 +49,8 @@ put
 ;;;
 Usage: put <apiary index> <bee index...>
 Puts bee with index = bee index into an apiary princess and drone slots
-You may provide several bee indexes to put
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to put
 Note that an apiary can only hold one princess and one drone at a time
 ;;;
 Puts bee(s) into an apiary princess and drone slots
@@ -73,7 +60,8 @@ take
 Usage: take <apiary index> <bee index...>
 Takes bee with index = bee index from an apiary's inventory
   and puts it into your inventory
-You may provide several bee indexes to take
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to take
 ;;;
 Takes bee(s) from an apiary's inventory
 ===
@@ -82,7 +70,8 @@ reput
 Usage: reput <apiary index> <bee index...>
 Takes bee with index = bee index from an apiary's inventory
   and puts it back into the same apiary
-You may provide several bee indexes to reput
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to reput
 ;;;
 Takes bee(s) from an apiary and puts in back
 ===
@@ -90,7 +79,8 @@ throw
 ;;;
 Usage: throw <bee index...>
 Deletes the bee with index = bee index
-You may provide several bee indexes to throw
+bee index must be an integer or a range `N..M`
+You may provide several bee indices (or ranges) to throw
 ;;;
 Deletes bee(s)
 ===
@@ -101,6 +91,10 @@ Swaps bee with index 1 and bee with index 2
 Can swap empty slots in your inventory too
 ;;;
 Swaps two bees (or bee and an empty slot, why not)
+===
+sort
+;;;
+Sorts your inventory
 ===
 forage
 ;;;
