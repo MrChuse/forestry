@@ -39,18 +39,7 @@ class WebInterface(Game):
                 self.print(flush=True)
                 break
 
-            if len(self.to_render) == 0:
-                self.print(flush=True)
-                continue
-
-            if self.render_event.is_set():
-                if self.render_help.is_set():
-                    self.print(self.help_text, flush=True)
-                else:
-                    for thing in self.to_render[:-1]:
-                        self.print(thing)
-                    self.print(self.to_render[-1], flush=True)
-                    self.render_event.clear()
+            super().render_frame()
 
 
 async def game(request):

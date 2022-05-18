@@ -658,6 +658,21 @@ class Game:
 
         return try_clause_decorator
 
+    def render_frame(self):
+        if self.render_event.is_set():
+            if self.render_help.is_set():
+                self.print(self.help_text, flush=True)
+            else:
+                if len(self.to_render) == 0:
+                    self.print(flush=True)
+                    self.render_event.clear()
+                    return
+                for thing in self.to_render[:-1]:
+                    self.print(thing)
+                    self.print()
+                self.print(self.to_render[-1], flush=True)
+            self.render_event.clear()
+    
     @except_print(KeyError)
     def get_command(self, command):
         return self.commands_actions[command]
