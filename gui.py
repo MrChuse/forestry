@@ -2,17 +2,19 @@ import pygame
 import pygame_gui
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_button import UIButton
+from pygame_gui.elements.ui_panel import UIPanel 
 from forestry import Inventory, Game, Slot
 import time
 
 def check_slot_empty(s):
     return '' if s == 'Slot empty' else s
-    
+
 class InventoryWindow(UIWindow):
     def __init__(self, inv, button_hor, button_vert, rect, manager, *args, margin=5, **kwargs):
         self.button_hor = button_hor
         self.button_vert = button_vert
         self.margin = margin
+        self.cursor = None
         self.inv = inv
         self.manager = manager
         
@@ -20,7 +22,10 @@ class InventoryWindow(UIWindow):
         if len(inv) != button_hor * button_vert:
             raise ValueError(
                 'Inventory should have button_hor*button_vert number of slots')
-
+    
+    def set_cursor(self, c):
+        self.cursor = c
+    
     def on_close_window_button_pressed(self):
         pass
 
@@ -62,46 +67,51 @@ class InventoryWindow(UIWindow):
             for j, row in enumerate(self.buttons):
                 for i, b in enumerate(row):
                     if event.ui_element == b:
-                        index = i * self.button_hor + j
-                        bee = self.inv.take(index)
-                        b.set_text(check_slot_empty(self.inv[index].small_str()))
-                        print(bee, i, j)
-                        return True
+                        if self.cursor is not None:
+                            index = i * self.button_hor + j
+                            inv_bee = self.inv[index].take()
+                            cur_bee = self.cursor.slot.take()
+                            self.cursor.slot.put(inv_bee)
+                            self.inv[index].put(cur_bee)
+                            b.set_text(check_slot_empty(self.inv[index].small_str()))
+                            self.cursor.set_text_slot()
+                            print(inv_bee, i, j)
+                            return True
+                        else:
+                            raise RuntimeError('You must set cursor first')
         elif event.type == pygame.MOUSEMOTION:
             pass
         if not should_consume:
             return super().process_event(event)
 
+class Cursor(UIButton):
+    def __init__(self, *args, **kwargs):
+        self.slot = Slot()
+        super().__init__(*args, **kwargs)
+        #self.disable()
+        
+    def enable(self):
+        pass
+    
+    def process_event(self, event):
+        if event.type == pygame.MOUSEMOTION:
+            self.rect.topleft = event.pos
+        return super().process_event(event)
+        
+    def set_text_slot(self):
+        self.set_text(check_slot_empty(self.slot.small_str()))
+        self.rect.topleft = pygame.mouse.get_pos()
 
+class TransparentUIPanel(UIPanel):
+    def process_event(self, event):
+        return False
+        
 class GUI(Game):
     def render(self):
         pass
 
     def print(self, *args, **kwargs):
         print(*args, **kwargs)
-
-class MyWindow(UIWindow):
-    def __init__(self, *args, **kwargs):
-        self.manager = args[1]
-        super().__init__(*args, **kwargs)
-        
-    def place_buttons(self, size):
-        print(time.time())
-        try:
-            self.b
-        except AttributeError:
-            self.b = pygame_gui.elements.UIButton(pygame.Rect((350, 275), (100, 50)),
-                                             text='Say Hello',
-                                             manager=self.manager,
-                                             container=self)
-        else:
-            rect = pygame.Rect((0, 0), (50, 100))
-            print(self.b.relative_rect)
-            self.b.relative_rect = rect
-            self.b.rebuild()
-    def set_dimensions(self, size):
-        super().set_dimensions(size)
-        self.place_buttons(size)
         
 def main():
     try:
@@ -114,16 +124,19 @@ def main():
         background.fill(pygame.Color('#000000'))
 
         manager = pygame_gui.UIManager((800, 600))
+        cursor_manager = pygame_gui.UIManager((800, 600))
 
         game = GUI()
         for i in range(9):
             game.forage()
-        inv_window = InventoryWindow(game.inv, 10, 10, pygame.Rect(
-            0, 0, 800, 600), manager, 'Inventory', resizable=True)
-        # w = MyWindow(pygame.Rect((0, 0), (800, 600)), manager, resizable=True)
+        inv_window = InventoryWindow(game.inv, 10, 10,
+            pygame.Rect(0, 0, 800, 600), manager, 'Inventory', resizable=True)
+        cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
+        inv_window.set_cursor(cursor)
         
         clock = pygame.time.Clock()
         is_running = True
+        visual_debug = False
         while is_running:
             time_delta = clock.tick(60)/1000.0
             # state = game.get_state()
@@ -131,13 +144,19 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     is_running = False
-
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        visual_debug = not visual_debug
+                        manager.set_visual_debug_mode(visual_debug)
                 manager.process_events(event)
+                cursor_manager.process_events(event)
 
             manager.update(time_delta)
+            cursor_manager.update(time_delta)
 
             window_surface.blit(background, (0, 0))
             manager.draw_ui(window_surface)
+            cursor_manager.draw_ui(window_surface)
 
             pygame.display.update()
     finally:
