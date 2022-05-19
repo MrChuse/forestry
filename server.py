@@ -75,11 +75,14 @@ try:
     app = web.Application(middlewares=[cors_middleware])
     app.add_routes([
         web.get('/game', game),
-        web.static('/game', 'my-app/build'),
         web.get('/out', out),
         web.get('/command_out', command_out),
         web.post('/command', command)
     ])
+    try:
+        app.add_routes([web.static('/game', 'my-app/build')])
+    except ValueError:
+        print("The front wasn't built yet, so started only back")
     web.run_app(app, port=PORT)
 finally:
     web_interface.execute_command('q')

@@ -596,8 +596,8 @@ class Game:
         desc = Game.parse_command_description()
         self.commands = [
             Command(['exit', 'q'], self.exit, *desc['exit']),
-            Command(['manual'], lambda x: self.execute_command('help manual'), *desc['manual']),
             Command(['help', 'h'], self.help, *desc['help']),
+            Command(['manual'], lambda x: self.execute_command('help manual'), *desc['manual']),
             Command(['save'], self.save, *desc['save']),
             Command(['load'], self.load, *desc['load']),
             Command(['show', 's'], self.show, *desc['show']),
