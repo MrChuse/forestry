@@ -52,7 +52,7 @@ class CommandForm extends React.Component {
   
   prev_text(event){
     const new_ptr = Math.max(this.state.history_pointer - 1, 0);
-    if (new_ptr != 0 || this.state.history.length != 0){
+    if (new_ptr !== 0 || this.state.history.length !== 0){
         const new_value = this.state.history[new_ptr]
         this.setState({
             history_pointer: new_ptr,
@@ -63,7 +63,7 @@ class CommandForm extends React.Component {
   
   next_text(event){
       const new_ptr = Math.min(this.state.history_pointer + 1, this.state.history.length);
-      if (new_ptr == this.state.history.length){
+      if (new_ptr === this.state.history.length){
           this.setState({
               history_pointer: new_ptr,
               value: ''
@@ -80,11 +80,9 @@ class CommandForm extends React.Component {
   render() {
     return (
         <div className="console">
-            <form className="consoleForm" onSubmit={this.handleSubmit}>
-              
+            <form className="console" onSubmit={this.handleSubmit}>
                 <input type="text" autoFocus="autoFocus" value={this.state.value} onChange={this.handleChange} />
                 <input type="submit"/>
-              
             </form>
             <img className="arrowLeft" src={arrowLeftSolid} alt="Prev Command" onClick={this.prev_text}/>
             <img className="arrowRight" src={arrowRightSolid} alt="Prev Command" onClick={this.next_text}/>

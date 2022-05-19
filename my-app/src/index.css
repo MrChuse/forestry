@@ -22,11 +22,6 @@ li {
     height: 25px;
 }
 
-.consoleForm {
-    display: flex;
-    flex-direction: row;
-}
-
 .console > *{
     margin-right: 10px;
 }
