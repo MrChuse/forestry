@@ -16,11 +16,22 @@ li {
 	white-space: pre;
 	color: gray;
 }
+.console {
+    display: flex;
+    flex-direction: row;
+    height: 25px;
+}
 
-.board-row:after {
-  clear: both;
-  content: "";
-  display: table;
+.consoleForm {
+    display: flex;
+    flex-direction: row;
+}
+
+.console > *{
+    margin-right: 10px;
+}
+.arrowLeft, .arrowRight {
+    filter: invert(53%) sepia(1%) saturate(0%) hue-rotate(265deg) brightness(95%) contrast(85%);
 }
 
 .status {
