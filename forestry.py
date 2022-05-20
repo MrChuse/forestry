@@ -414,6 +414,7 @@ class Resources:
 
 
 class Slot:
+    empty_str = 'Slot empty'
     def __init__(self):
         self.slot = None
         super().__init__()
@@ -422,13 +423,13 @@ class Slot:
         if self.slot is not None:
             return str(self.slot)
         else:
-            return 'Slot empty'
+            return Slot.empty_str
 
     def small_str(self):
         if self.slot is not None:
             return self.slot.small_str()
         else:
-            return 'Slot empty'
+            return Slot.empty_str
 
     def put(self, bee):
         if self.slot is None:
@@ -440,6 +441,14 @@ class Slot:
         bee = self.slot
         self.slot = None
         return bee
+
+    def swap(self, other):
+
+        bee1 = self.take()
+        bee2 = other.take()
+        print(bee1, bee2)
+        self.put(bee2)
+        other.put(bee1)
 
     def is_empty(self):
         return self.slot is None
@@ -576,6 +585,17 @@ class Apiary:
                 else:
                     assert False, 'Should be unreachable'
 
+def except_print(*exceptions):
+    def try_clause_decorator(func):
+        def wrapper(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except exceptions as e:
+                self.print(e, out=self.command_out, flush=True)
+
+        return wrapper
+
+    return try_clause_decorator
 
 @dataclass
 class Command:
@@ -650,18 +670,6 @@ class Game:
             desc_list = [desc.split(';;;\n') for desc in raw_desc]
             desc = {desc[0][:-1]: desc[1:] for desc in desc_list}
         return desc
-
-    def except_print(*exceptions):
-        def try_clause_decorator(func):
-            def wrapper(self, *args, **kwargs):
-                try:
-                    return func(self, *args, **kwargs)
-                except exceptions as e:
-                    self.print(e, out=self.command_out, flush=True)
-
-            return wrapper
-
-        return try_clause_decorator
 
     def render_frame(self):
         if self.render_event.is_set():
