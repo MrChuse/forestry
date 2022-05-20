@@ -6,8 +6,9 @@ import pygame_gui
 from pygame_gui.elements.ui_window import UIWindow
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_panel import UIPanel
+from pygame_gui.elements.ui_text_box import UITextBox
 
-from forestry import Slot, Inventory, Apiary, Game
+from forestry import Resources, Slot, Inventory, Apiary, Game
 
 
 class UIWindowNoX(UIWindow):
@@ -98,10 +99,10 @@ class InventoryWindow(UIWindowNoX):
             return super().process_event(event)
 
 class ApiaryWindow(UIWindow):
+    initial_position = (0, 0)
     def __init__(self, apiary: Apiary, cursor: Cursor, manager, *args, **kwargs):
         self.apiary = apiary
         self.cursor = cursor
-        self.initial_position = (0, 0)
         self.size = (300, 400)
         super().__init__(pygame.Rect(self.initial_position, self.size), manager, *args, **kwargs)
 
@@ -164,11 +165,29 @@ class ApiaryWindow(UIWindow):
             self.cursor.set_text_slot()
         return super().process_event(event)
     
-    def update_apiary(self, apiary):
-        self.apiary = apiary
+    def update(self, time_delta):
         self.set_button_texts()
+        super().update(time_delta)
 
-        
+
+class ResourcePanel(UIPanel):
+    def __init__(self, resources: Resources, rect: pygame.Rect, starting_layer_height, manager, *args, **kwargs):
+        self.resources = resources
+        super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
+        r = pygame.Rect((0, 0), rect.size)
+        print(r)
+        self.text_box = UITextBox(str(self.resources), 
+            r,
+            manager,
+            self)
+
+    def update_text_box(self):
+        self.text_box.set_text(str(self.resources).replace('\n', '<br>'))
+
+    def update(self, time_delta):
+        self.update_text_box()
+        super().update(time_delta)
+
 class GUI(Game):
     def render(self):
         pass
@@ -196,17 +215,20 @@ def main():
         for i in range(9):
             game.forage()
         cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
-        inv_window = InventoryWindow(game.inv, 10, 10, cursor,
-            pygame.Rect((0, 0), window_size), manager, 'Inventory', resizable=True)
+        resource_panel_width = 210
+        resource_panel = ResourcePanel(game.resources, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
+        ApiaryWindow.initial_position = (resource_panel_width, 0)
         api_window = ApiaryWindow(game.apiaries[0], cursor,
             manager, "Apiary " + game.apiaries[0].name)
+        inv_window = InventoryWindow(game.inv, 10, 10, cursor,
+            pygame.Rect(api_window.rect.right, 0, window_size[0]-api_window.rect.right, window_size[1]),
+            manager, 'Inventory', resizable=True)
         clock = pygame.time.Clock()
         is_running = True
         visual_debug = False
         while is_running:
             time_delta = clock.tick(60)/1000.0
             state = game.get_state()
-            api_window.update_apiary(state['apiaries'][0])
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
