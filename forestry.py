@@ -338,7 +338,7 @@ class Princess(Bee):
     def mate(self, other: 'Drone') -> Queen:
         if not isinstance(other, Drone):
             raise TypeError('Princesses can only mate drones')
-        return Queen(self.genes, other.genes, 3)
+        return Queen(self.genes, other.genes)
 
 
 class Drone(Bee):
@@ -542,11 +542,17 @@ class Apiary:
         self.princess.put(bee)
         self.try_breed()
 
+    def take_princess(self):
+        return self.princess.take()
+
     def put_drone(self, bee):
         if not isinstance(bee, Drone):
             raise TypeError('Bee should be a Drone')
         self.drone.put(bee)
         self.try_breed()
+
+    def take_drone(self):
+        return self.drone.take()
 
     def put(self, bee):
         if isinstance(bee, Princess) or isinstance(bee, Queen):
@@ -555,7 +561,11 @@ class Apiary:
             self.put_drone(bee)
 
     def take(self, index):
-        return self.inv.take(index)
+        bee = self.inv.take(index)
+        if isinstance(self.princess.slot, Queen):
+            if self.princess.slot.remaining_lifespan == 0:
+                self.try_queen_die()
+        return bee
 
     def try_breed(self):
         if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
@@ -563,15 +573,18 @@ class Apiary:
             drone = self.drone.take()
             self.princess.put(princess.mate(drone))
 
+    def try_queen_die(self):
+        queen = self.princess.take()
+        bees = queen.die()
+        if len(bees) <= self.inv.empty_slots():
+            self.inv.place_bees(bees)
+        else:
+            self.princess.put(queen)
+
     def update(self):
         if isinstance(self.princess.slot, Queen):
             if self.princess.slot.remaining_lifespan == 0:
-                queen = self.princess.take()
-                bees = queen.die()
-                if len(bees) <= self.inv.empty_slots():
-                    self.inv.place_bees(bees)
-                else:
-                    self.princess.put(queen)
+                self.try_queen_die()
             else:
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
