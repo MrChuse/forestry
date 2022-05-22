@@ -260,7 +260,10 @@ class InventoryWindow(UIWindowNoX):
         for j, row in enumerate(self.buttons):
             for i, b in enumerate(row):
                 index = i * self.button_hor + j
-                b.set_text(self.inv[index].small_str())
+                text = self.inv[index].small_str()
+                b.set_text(text)
+                if text != '':
+                    b.tool_tip_text = text
         return super().update(time_delta)
 
 class UIRelativeStatusBar(UIStatusBar):
