@@ -25,14 +25,13 @@ class Cursor(UIButton):
     def enable(self):
         pass
     
-    def process_event(self, event):
-        if event.type == pygame.MOUSEMOTION:
-            self.rect.topleft = event.pos
-        return super().process_event(event)
-        
     def set_text_slot(self):
         self.set_text(self.slot.small_str())
         self.rect.topleft = pygame.mouse.get_pos()
+
+    def update(self, time_delta: float):
+        self.set_text_slot()
+        return super().update(time_delta)
 
 class InventoryWindow(UIWindowNoX):
     def __init__(self, inv, button_hor, button_vert,  cursor: Cursor, rect, manager, *args, margin=5, **kwargs):
@@ -41,9 +40,6 @@ class InventoryWindow(UIWindowNoX):
         self.margin = margin
         self.cursor = cursor
         self.inv = inv
-        self.manager = manager
-        
-        super().__init__(rect, manager, *args, **kwargs)
         if len(inv) != button_hor * button_vert:
             raise ValueError(
                 'Inventory should have button_hor*button_vert number of slots')
@@ -57,7 +53,7 @@ class InventoryWindow(UIWindowNoX):
                 self.buttons.append([])
                 for i in range(self.button_vert):
                     rect = pygame.Rect(0, 0, 100, 100)
-                    self.buttons[j].append(UIButton(rect, self.inv[i * self.button_hor + j].small_str(), self.manager, self,))
+                    self.buttons[j].append(UIButton(rect, self.inv[i * self.button_hor + j].small_str(), self.ui_manager, self,))
     
     def place_buttons(self, size):
         self.create_buttons_if_needed()
@@ -86,10 +82,15 @@ class InventoryWindow(UIWindowNoX):
                     if event.ui_element == b:
                         index = i * self.button_hor + j
                         self.cursor.slot.swap(self.inv[index])
-                        b.set_text(self.inv[index].small_str())
-                        self.cursor.set_text_slot()
                         return True
         return super().process_event(event)
+    
+    def update(self, time_delta: float):
+        for j, row in enumerate(self.buttons):
+            for i, b in enumerate(row):
+                index = i * self.button_hor + j
+                b.set_text(self.inv[index].small_str())
+        return super().update(time_delta)
 
 class UIRelativeStatusBar(UIStatusBar):
     def rebuild(self):
@@ -222,8 +223,6 @@ class ApiaryWindow(UIWindow):
                         self.cursor.slot.put(self.apiary.take(index))
                     else:
                         print('Cursor not empty')
-            self.set_button_texts()
-            self.cursor.set_text_slot()
         return super().process_event(event)
     
     def update(self, time_delta):
