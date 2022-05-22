@@ -44,6 +44,29 @@ class InventoryWindow(UIWindowNoX):
             raise ValueError(
                 'Inventory should have button_hor*button_vert number of slots')
         
+        self.title_bar_sort_button_width = 100
+        super().__init__(rect, manager, *args, **kwargs)
+        self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
+                                        self.title_bar_sort_button_width,
+                                        self.title_bar_height))
+    
+    def rebuild(self):
+        sort_rect = pygame.Rect((-self.title_bar_sort_button_width, 0),
+                                (self.title_bar_sort_button_width,
+                                self.title_bar_height))
+        self.sort_window_button = UIButton(relative_rect=sort_rect,
+                                            text='Sort',
+                                            manager=self.ui_manager,
+                                            container=self._window_root_container,
+                                            parent_element=self,
+                                            object_id='#close_button',
+                                            anchors={'top': 'top',
+                                                     'bottom': 'top',
+                                                     'left': 'right',
+                                                     'right': 'right'}
+                                            )
+        super().rebuild()
+        
     def create_buttons_if_needed(self):
         try:
             self.buttons
@@ -77,6 +100,8 @@ class InventoryWindow(UIWindowNoX):
     
     def process_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.sort_window_button:
+                self.inv.sort()
             for j, row in enumerate(self.buttons):
                 for i, b in enumerate(row):
                     if event.ui_element == b:
