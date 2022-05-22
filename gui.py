@@ -24,11 +24,11 @@ class Cursor(UIButton):
         
     def enable(self):
         pass
-    
+        
     def set_text_slot(self):
         self.set_text(self.slot.small_str())
         self.rect.topleft = pygame.mouse.get_pos()
-
+    
     def update(self, time_delta: float):
         self.set_text_slot()
         return super().update(time_delta)
@@ -43,7 +43,7 @@ class InventoryWindow(UIWindowNoX):
         if len(inv) != button_hor * button_vert:
             raise ValueError(
                 'Inventory should have button_hor*button_vert number of slots')
-        
+
         self.title_bar_sort_button_width = 100
         super().__init__(rect, manager, *args, **kwargs)
         self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
@@ -339,13 +339,22 @@ class ResourcePanel(UIPanel):
             r,
             manager,
             container=self)
-        self.build_dropdown = UINonChangingDropDownMenu(['Apiary', 'Alveary'], 'Build', pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
+        self.forage_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), 'Forage', manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
                 'left':'left',
                 'right':'right',
                 'top_target': self.text_box
+            }
+        )
+        self.build_dropdown = UINonChangingDropDownMenu(['Apiary', 'Alveary'], 'Build', pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
+            anchors={
+                'top':'top',
+                'bottom':'bottom',
+                'left':'left',
+                'right':'right',
+                'top_target': self.forage_button
             })
         inspect_panel = InspectPanel(game, cursor, pygame.Rect(0, 0, rect.size[0]-6, rect.bottom - self.build_dropdown.rect.bottom), starting_layer_height, manager, container=self,
             anchors={
@@ -370,6 +379,9 @@ class ResourcePanel(UIPanel):
                     apiary = self.game.build(event.text.lower())
                     if apiary is not None:
                         ApiaryWindow(apiary, self.cursor, self.manager)
+        elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.forage_button:
+                self.game.forage()
         return super().process_event(event)
 
 class GUI(Game):
@@ -377,8 +389,6 @@ class GUI(Game):
         self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
-        for i in range(9):
-            self.forage()
 
         cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
         resource_panel_width = 330
