@@ -292,7 +292,8 @@ class UINonChangingDropDownMenu(UIDropDownMenu):
         )
 
 class InspectPanel(UIPanel):
-    def __init__(self, cursor, rect, starting_layer_height, manager, *args, **kwargs):
+    def __init__(self, game: Game, cursor: Cursor, rect, starting_layer_height, manager, *args, **kwargs):
+        self.game = game
         self.cursor = cursor
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
         inspect_button_height = 60
@@ -318,7 +319,7 @@ class InspectPanel(UIPanel):
                 self.cursor.set_text_slot()
                 self.text_box.set_text(str(self.slot).replace('\n', '<br>'))
             elif event.ui_element == self.inspect_button:
-                self.slot.slot.inspect()
+                self.game.inspect_bee(self.slot.slot)
                 self.text_box.set_text(str(self.slot.slot).replace('\n', '<br>'))
         return super().process_event(event)
 
@@ -346,7 +347,7 @@ class ResourcePanel(UIPanel):
                 'right':'right',
                 'top_target': self.text_box
             })
-        inspect_panel = InspectPanel(cursor, pygame.Rect(0, 0, rect.size[0]-6, rect.bottom - self.build_dropdown.rect.bottom), starting_layer_height, manager, container=self,
+        inspect_panel = InspectPanel(game, cursor, pygame.Rect(0, 0, rect.size[0]-6, rect.bottom - self.build_dropdown.rect.bottom), starting_layer_height, manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
