@@ -4,7 +4,8 @@ import time
 import pygame
 import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
-                                 UITextBox, UIWindow)
+                                 UITextBox, UIWindow, UIDropDownMenu)
+from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 
 from forestry import Apiary, Game, Inventory, Queen, Resources, Slot
 
@@ -88,7 +89,7 @@ class InventoryWindow(UIWindowNoX):
                         b.set_text(self.inv[index].small_str())
                         self.cursor.set_text_slot()
                         return True
-            return super().process_event(event)
+        return super().process_event(event)
 
 class UIRelativeStatusBar(UIStatusBar):
     def rebuild(self):
@@ -190,11 +191,11 @@ class ApiaryWindow(UIWindow):
     
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == self.princess_button:
-                    if self.cursor.slot.is_empty():
-                        self.cursor.slot.put(self.apiary.take_princess())
-                    else:
-                        bee1 = self.apiary.take_princess()
+            if event.ui_element == self.princess_button:
+                if self.cursor.slot.is_empty():
+                    self.cursor.slot.put(self.apiary.take_princess())
+                else:
+                    bee1 = self.apiary.take_princess()
                     try:
                         self.apiary.put_princess(self.cursor.slot.slot)
                     except TypeError as e:
@@ -203,11 +204,11 @@ class ApiaryWindow(UIWindow):
                     else:
                         self.cursor.slot.take()
                         self.cursor.slot.put(bee1)
-                elif event.ui_element == self.drone_button:
-                    if self.cursor.slot.is_empty():
-                        self.cursor.slot.put(self.apiary.take_drone())
-                    else:
-                        bee1 = self.apiary.take_drone()
+            elif event.ui_element == self.drone_button:
+                if self.cursor.slot.is_empty():
+                    self.cursor.slot.put(self.apiary.take_drone())
+                else:
+                    bee1 = self.apiary.take_drone()
                     try:
                         self.apiary.put_drone(self.cursor.slot.slot)
                     except TypeError:
@@ -230,27 +231,100 @@ class ApiaryWindow(UIWindow):
         self.update_health_bar()
         super().update(time_delta)
 
+class UINonChangingExpandedDropDownState(UIExpandedDropDownState):
+    def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element in self.active_buttons:
+            self.should_transition = True
+
+        if (event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and
+                event.ui_element == self.options_selection_list):
+            self.should_transition = True
+
+            event_data = {'text': self.options_selection_list.get_single_selection(),
+                          'ui_element': self.drop_down_menu_ui,
+                          'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
+            pygame.event.post(pygame.event.Event(pygame_gui.UI_DROP_DOWN_MENU_CHANGED, event_data))
+
+        return False  # don't consume any events
+
+class UINonChangingDropDownMenu(UIDropDownMenu):
+    def __init__(self, options_list, starting_option: str, relative_rect: pygame.Rect, manager, container=None, parent_element=None, object_id=None, expansion_height_limit=None, anchors=None, visible: int = 1):
+        super().__init__(options_list, starting_option, relative_rect, manager, container, parent_element, object_id, expansion_height_limit, anchors, visible)
+        self.menu_states['expanded'] = UINonChangingExpandedDropDownState(
+            self,
+            self.options_list,
+            self.selected_option,
+            self.background_rect,
+            self.open_button_width,
+            self.expand_direction,
+            self.ui_manager,
+            self,
+            self.element_ids,
+            self.object_ids
+        )
+
+class InspectPanel(UIPanel):
+    def __init__(self, cursor, rect, starting_layer_height, manager, *args, **kwargs):
+        self.cursor = cursor
+        super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
+        inspect_button_height = 60
+        self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height, inspect_button_height), 'Inspect', manager, self)
+        bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
+        bee_button_rect.right = 0
+        self.bee_button = UIButton(bee_button_rect, '', manager, self,
+            anchors={
+                'top':'top',
+                'bottom':'bottom',
+                'left':'right',
+                'right':'right',
+            })
+        self.slot = Slot()
+        self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
+    
+    def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.bee_button:
+                print('swap')
+                self.cursor.slot.swap(self.slot)
+                self.bee_button.set_text(self.slot.small_str())
+                self.cursor.set_text_slot()
+                self.text_box.set_text(str(self.slot).replace('\n', '<br>'))
+            elif event.ui_element == self.inspect_button:
+                self.slot.slot.inspect()
+                self.text_box.set_text(str(self.slot.slot).replace('\n', '<br>'))
+        return super().process_event(event)
+
+
 
 class ResourcePanel(UIPanel):
-    def __init__(self, resources: Resources, rect: pygame.Rect, starting_layer_height, manager, *args, **kwargs):
-        self.resources = resources
+    def __init__(self, game: Game, cursor: Cursor, rect: pygame.Rect, starting_layer_height, manager, *args, **kwargs):
+        self.game = game
+        self.resources = game.resources
+        self.cursor = cursor
+        self.manager = manager
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
-        bottom_buttons_height = 20
+        bottom_buttons_height = 40
 
         r = pygame.Rect((0, 0), (rect.size[0]-6, rect.size[1]/2))
         self.text_box = UITextBox(str(self.resources), 
             r,
             manager,
             container=self)
-        build_button_rect = pygame.Rect(0, 0, rect.size[0], bottom_buttons_height)
-        # build_button_rect.top = -bottom_buttons_height
-        self.build_button = UIButton(build_button_rect, 'Build', manager, self,
+        self.build_dropdown = UINonChangingDropDownMenu(['Apiary', 'Alveary'], 'Build', pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
                 'left':'left',
                 'right':'right',
                 'top_target': self.text_box
+            })
+        inspect_panel = InspectPanel(cursor, pygame.Rect(0, 0, rect.size[0]-6, rect.bottom - self.build_dropdown.rect.bottom), starting_layer_height, manager, container=self,
+            anchors={
+                'top':'top',
+                'bottom':'bottom',
+                'left':'left',
+                'right':'right',
+                'top_target': self.build_dropdown
             })
 
     def update_text_box(self):
@@ -259,30 +333,52 @@ class ResourcePanel(UIPanel):
     def update(self, time_delta):
         self.update_text_box()
         super().update(time_delta)
+    
+    def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+            if event.ui_element == self.build_dropdown:
+                if event.text != 'Build':
+                    apiary = self.game.build(event.text.lower())
+                    if apiary is not None:
+                        ApiaryWindow(apiary, self.cursor, self.manager)
+        return super().process_event(event)
 
 class GUI(Game):
     def __init__(self, window_size, manager, cursor_manager):
-        
+        self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
         for i in range(9):
             self.forage()
 
         cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
-        resource_panel_width = 210
-        resource_panel = ResourcePanel(self.resources, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
+        resource_panel_width = 330
+        resource_panel = ResourcePanel(self, cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
         ApiaryWindow.initial_position = (resource_panel_width, 0)
-        api_window = ApiaryWindow(self.apiaries[0], cursor,
-            manager, "Apiary " + self.apiaries[0].name)
+        api_window = ApiaryWindow(self.apiaries[0], cursor, manager)
+        right_text_box_rect = pygame.Rect(0, 0, resource_panel_width, window_size[1])
+        right_text_box_rect.right = 0
+        self.right_text_box = UITextBox(' ------- Errors ------- <br>', right_text_box_rect, manager,
+            anchors={
+                'top':'top',
+                'bottom':'bottom',
+                'left':'right',
+                'right':'right',
+            })
         inv_window = InventoryWindow(self.inv, 10, 10, cursor,
-            pygame.Rect(api_window.rect.right, 0, window_size[0]-api_window.rect.right, window_size[1]),
+            pygame.Rect(api_window.rect.right, 0, self.right_text_box.rect.left-api_window.rect.right, window_size[1]),
             manager, 'Inventory', resizable=True)
 
     def render(self):
         pass
 
-    def print(self, *args, **kwargs):
-        print(*args, **kwargs)
+    def print(self, *strings, sep=' ', end='\n', flush=False, out=None):
+        print(*strings, sep=sep, end=end, flush=flush)
+
+        thing = sep.join(map(str, strings)) + end
+        if out is not None:
+            thing = "<font color='#ED9FA6'>" + thing + "</font>"
+        self.right_text_box.append_html_text(thing.replace('\n', '<br>'))
         
 def main():
     try:
@@ -300,7 +396,7 @@ def main():
         manager = pygame_gui.UIManager(window_size)
         cursor_manager = pygame_gui.UIManager(window_size)
 
-        
+        game = None
         game = GUI(window_size, manager, cursor_manager)
         clock = pygame.time.Clock()
         is_running = True
@@ -316,8 +412,11 @@ def main():
                     if event.key == pygame.K_SPACE:
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
-                manager.process_events(event)
-                cursor_manager.process_events(event)
+                try:
+                    manager.process_events(event)
+                    cursor_manager.process_events(event)
+                except Exception as e:
+                    game.print(e, out=1)
 
             manager.update(time_delta)
             cursor_manager.update(time_delta)
@@ -327,10 +426,9 @@ def main():
             cursor_manager.draw_ui(window_surface)
 
             pygame.display.update()
-    # except Exception as e:
-    #     print(type(e), e)
     finally:
-        game.exit()
+        if game is not None:
+            game.exit()
 
 
 if __name__ == '__main__':

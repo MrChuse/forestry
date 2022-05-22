@@ -443,10 +443,8 @@ class Slot:
         return bee
 
     def swap(self, other):
-
         bee1 = self.take()
         bee2 = other.take()
-        print(bee1, bee2)
         self.put(bee2)
         other.put(bee1)
 
@@ -832,9 +830,13 @@ class Game:
     @except_print(IndexError, ValueError)
     def inspect(self, *params):  # tested
         slot = self.inv[int(params[0])]
-        if not slot.is_empty() and not slot.slot.inspected:
+        if not slot.is_empty():
+            self.inspect_bee(slot.slot)
+
+    def inspect_bee(self, bee):
+        if not bee.inspected:
             self.resources.remove_resources({'honey': 5})
-            slot.slot.inspected = True
+            bee.inspected = True
 
     @except_print(IndexError, ValueError)
     def build(self, *params):
@@ -842,6 +844,7 @@ class Game:
             self.resources.remove_resources(
                 {'wood': 5, 'flowers': 5, 'honey': 10})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
+            return self.apiaries[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
                 {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}
