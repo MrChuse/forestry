@@ -79,8 +79,6 @@ class InventoryWindow(UIWindowNoX):
         super().set_dimensions(size)
     
     def process_event(self, event):
-        # print(event, time.time())
-        should_consume = False
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             for j, row in enumerate(self.buttons):
                 for i, b in enumerate(row):
@@ -89,11 +87,7 @@ class InventoryWindow(UIWindowNoX):
                         self.cursor.slot.swap(self.inv[index])
                         b.set_text(self.inv[index].small_str())
                         self.cursor.set_text_slot()
-                        print(self.cursor.slot, i, j)
                         return True
-        elif event.type == pygame.MOUSEMOTION:
-            pass
-        if not should_consume:
             return super().process_event(event)
 
 class UIRelativeStatusBar(UIStatusBar):
