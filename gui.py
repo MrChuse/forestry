@@ -240,6 +240,7 @@ class InventoryWindow(UIWindowNoX):
                 for window in self.game.apiary_windows:
                     window.kill()
                 self.inv = self.game.inv
+                self.game.resource_panel.resources = self.game.resources
                 self.game.update_apiary_list()
             elif event.ui_element == self.save_window_button:
                 self.game.save('save')
@@ -538,14 +539,14 @@ class GUI(Game):
         self.cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
         self.ui_manager = manager
         resource_panel_width = 330
-        resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
+        self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
         self.apiary_windows = []
         ApiaryWindow.initial_position = (resource_panel_width, 0)
         api_window = ApiaryWindow(self.apiaries[0], self.cursor, manager)
         self.apiary_windows.append(api_window)
         right_text_box_rect = pygame.Rect(0, 0, resource_panel_width, window_size[1])
         right_text_box_rect.right = 0
-        self.right_text_box = UITextBox(' ------- Errors ------- <br>', right_text_box_rect, manager,
+        self.right_text_box = UITextBox(' ------- Logs ------- <br>', right_text_box_rect, manager,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -614,6 +615,7 @@ def main():
             # state = game.get_state()
 
             for event in pygame.event.get():
+                print(event)
                 if event.type == pygame.QUIT:
                     is_running = False
                 elif event.type == pygame.KEYDOWN:
