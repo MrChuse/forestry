@@ -106,7 +106,11 @@ class InventoryWindow(UIWindowNoX):
                 for i, b in enumerate(row):
                     if event.ui_element == b:
                         index = i * self.button_hor + j
-                        self.cursor.slot.swap(self.inv[index])
+                        mods = pygame.key.get_mods()
+                        if mods & pygame.KMOD_LSHIFT:
+                            self.inv.take(index)
+                        else:
+                            self.cursor.slot.swap(self.inv[index])
                         return True
         return super().process_event(event)
     
