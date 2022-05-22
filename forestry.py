@@ -870,12 +870,12 @@ class Game:
             'to_render': self.to_render,
         }
             
-    def save(self, *params):
-        with open(params[0] + '.forestry', 'wb') as f:
+    def save(self, name):
+        with open(name + '.forestry', 'wb') as f:
             pickle.dump(self.get_state(), f)
 
-    def load(self, *params):
-        with open(params[0] + '.forestry', 'rb') as f:
+    def load(self, name):
+        with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
         self.resources = saved['resources']
         self.inv = saved['inv']

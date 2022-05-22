@@ -34,22 +34,22 @@ class Cursor(UIButton):
         return super().update(time_delta)
 
 class InventoryWindow(UIWindowNoX):
-    def __init__(self, inv, button_hor, button_vert,  cursor: Cursor, rect, manager, *args, margin=5, **kwargs):
+    def __init__(self, game: 'GUI', button_hor, button_vert,  cursor: Cursor, rect, manager, *args, margin=5, **kwargs):
+        self.game = game
         self.button_hor = button_hor
         self.button_vert = button_vert
         self.margin = margin
         self.cursor = cursor
-        self.inv = inv
-        if len(inv) != button_hor * button_vert:
+        self.inv = game.inv
+        if len(self.inv) != button_hor * button_vert:
             raise ValueError(
                 'Inventory should have button_hor*button_vert number of slots')
 
         self.title_bar_sort_button_width = 100
         self.sort_window_button = None
+        self.save_window_button = None
+        self.load_window_button = None
         super().__init__(rect, manager, *args, **kwargs)
-        self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
-                                        self.title_bar_sort_button_width,
-                                        self.title_bar_height))
     
     def rebuild(self):
         """
@@ -117,11 +117,11 @@ class InventoryWindow(UIWindowNoX):
 
             if self.title_bar is not None:
                 self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
-                                                self.title_bar_sort_button_width,
+                                                3 * self.title_bar_sort_button_width,
                                                 self.title_bar_height))
             else:
                 title_bar_width = (self._window_root_container.relative_rect.width -
-                                    self.title_bar_sort_button_width)
+                                    3 * self.title_bar_sort_button_width)
                 self.title_bar = UIButton(relative_rect=pygame.Rect(0, 0,
                                                                     title_bar_width,
                                                                     self.title_bar_height),
@@ -141,21 +141,62 @@ class InventoryWindow(UIWindowNoX):
                                                             self.title_bar_height))
                 self.sort_window_button.set_relative_position(sort_button_pos)
             else:
-                print('trying to create')
-                sort_rect = pygame.Rect((-self.title_bar_sort_button_width/2, 0),
-                                (self.title_bar_sort_button_width,
-                                self.title_bar_height))
-        self.sort_window_button = UIButton(relative_rect=sort_rect,
-                                            text='Sort',
-                                            manager=self.ui_manager,
-                                            container=self._window_root_container,
-                                            parent_element=self,
-                                            object_id='#close_button',
-                                            anchors={'top': 'top',
-                                                     'bottom': 'top',
-                                                     'left': 'right',
-                                                     'right': 'right'}
-                                            )
+                sort_rect = pygame.Rect((-self.title_bar_sort_button_width, 0),
+                                        (self.title_bar_sort_button_width,
+                                        self.title_bar_height))
+                self.sort_window_button = UIButton(relative_rect=sort_rect,
+                                                    text='Sort',
+                                                    manager=self.ui_manager,
+                                                    container=self._window_root_container,
+                                                    parent_element=self,
+                                                    object_id='#close_button',
+                                                    anchors={'top': 'top',
+                                                            'bottom': 'top',
+                                                            'left': 'right',
+                                                            'right': 'right'}
+                                                    )
+            if self.save_window_button is not None:
+                save_button_pos = (-self.title_bar_sort_button_width, 0)
+                self.save_window_button.set_dimensions((self.title_bar_sort_button_width,
+                                                            self.title_bar_height))
+                self.save_window_button.set_relative_position(save_button_pos)
+            else:
+                save_rect = pygame.Rect((-self.title_bar_sort_button_width, 0),
+                                        (self.title_bar_sort_button_width,
+                                        self.title_bar_height))
+                self.save_window_button = UIButton(relative_rect=save_rect,
+                                                    text='Save',
+                                                    manager=self.ui_manager,
+                                                    container=self._window_root_container,
+                                                    parent_element=self,
+                                                    object_id='#close_button',
+                                                    anchors={'top': 'top',
+                                                            'bottom': 'top',
+                                                            'left': 'right',
+                                                            'right': 'right',
+                                                            'right_target':self.sort_window_button}
+                                                    )
+            if self.load_window_button is not None:
+                load_button_pos = (-self.title_bar_sort_button_width, 0)
+                self.load_window_button.set_dimensions((self.title_bar_sort_button_width,
+                                                            self.title_bar_height))
+                self.load_window_button.set_relative_position(load_button_pos)
+            else:
+                load_rect = pygame.Rect((-self.title_bar_sort_button_width, 0),
+                                        (self.title_bar_sort_button_width,
+                                        self.title_bar_height))
+                self.load_window_button = UIButton(relative_rect=load_rect,
+                                                    text='Load',
+                                                    manager=self.ui_manager,
+                                                    container=self._window_root_container,
+                                                    parent_element=self,
+                                                    object_id='#close_button',
+                                                    anchors={'top': 'top',
+                                                            'bottom': 'top',
+                                                            'left': 'right',
+                                                            'right': 'right',
+                                                            'right_target':self.save_window_button}
+                                                    )
         super(UIWindow, self).rebuild()
         
     def create_buttons_if_needed(self):
@@ -193,6 +234,16 @@ class InventoryWindow(UIWindowNoX):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.sort_window_button:
                 self.inv.sort()
+            elif event.ui_element == self.load_window_button:
+                self.game.load('save')
+                self.game.print('Loaded save from disk')
+                for window in self.game.apiary_windows:
+                    window.kill()
+                self.inv = self.game.inv
+                self.game.update_apiary_list()
+            elif event.ui_element == self.save_window_button:
+                self.game.save('save')
+                self.game.print('Saved the game to the disk')
             for j, row in enumerate(self.buttons):
                 for i, b in enumerate(row):
                     if event.ui_element == b:
@@ -485,8 +536,10 @@ class GUI(Game):
         self.ui_manager = manager
         resource_panel_width = 330
         resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
+        self.apiary_windows = []
         ApiaryWindow.initial_position = (resource_panel_width, 0)
         api_window = ApiaryWindow(self.apiaries[0], self.cursor, manager)
+        self.apiary_windows.append(api_window)
         right_text_box_rect = pygame.Rect(0, 0, resource_panel_width, window_size[1])
         right_text_box_rect.right = 0
         self.right_text_box = UITextBox(' ------- Errors ------- <br>', right_text_box_rect, manager,
@@ -520,16 +573,17 @@ class GUI(Game):
         if out is not None:
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
         self.right_text_box.append_html_text(thing.replace('\n', '<br>'))
-        
+    
     def update_apiary_list(self):
         self.apiary_selection_list.set_item_list(['Apiary ' + a.name for a in self.apiaries])
 
     def process_event(self, event):
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION or event.type == pygame_gui.UI_SELECTION_LIST_DROPPED_SELECTION:
             if event.ui_element == self.apiary_selection_list:
-                print('trying to create an apiary')
                 index = int(event.text.split()[-1])
-                ApiaryWindow(self.apiaries[index], self.cursor, self.ui_manager)
+                self.apiary_windows.append(
+                    ApiaryWindow(self.apiaries[index], self.cursor, self.ui_manager)
+                )
 
 def main():
     try:
