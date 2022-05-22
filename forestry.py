@@ -338,7 +338,7 @@ class Princess(Bee):
     def mate(self, other: 'Drone') -> Queen:
         if not isinstance(other, Drone):
             raise TypeError('Princesses can only mate drones')
-        return Queen(self.genes, other.genes, 3)
+        return Queen(self.genes, other.genes)
 
 
 class Drone(Bee):
@@ -414,6 +414,7 @@ class Resources:
 
 
 class Slot:
+    empty_str = 'Slot empty'
     def __init__(self):
         self.slot = None
         super().__init__()
@@ -422,13 +423,13 @@ class Slot:
         if self.slot is not None:
             return str(self.slot)
         else:
-            return 'Slot empty'
+            return Slot.empty_str
 
     def small_str(self):
         if self.slot is not None:
             return self.slot.small_str()
         else:
-            return 'Slot empty'
+            return Slot.empty_str
 
     def put(self, bee):
         if self.slot is None:
@@ -440,6 +441,12 @@ class Slot:
         bee = self.slot
         self.slot = None
         return bee
+
+    def swap(self, other):
+        bee1 = self.take()
+        bee2 = other.take()
+        self.put(bee2)
+        other.put(bee1)
 
     def is_empty(self):
         return self.slot is None
@@ -457,6 +464,9 @@ class Inventory:
     def __getitem__(self, key):
         return self.storage[key]
 
+    def __len__(self):
+        return self.capacity
+    
     def __str__(self):
         res = ['------ INV ------']
 
@@ -502,6 +512,9 @@ class Inventory:
                     continue
             else:
                 raise SlotOccupiedError('Tried to insert too many bees')
+    
+    def sort(self):
+        self.place_bees([slot.take() for slot in self if not slot.is_empty()])
 
 
 class Apiary:
@@ -530,11 +543,17 @@ class Apiary:
         self.princess.put(bee)
         self.try_breed()
 
+    def take_princess(self):
+        return self.princess.take()
+
     def put_drone(self, bee):
         if not isinstance(bee, Drone):
             raise TypeError('Bee should be a Drone')
         self.drone.put(bee)
         self.try_breed()
+
+    def take_drone(self):
+        return self.drone.take()
 
     def put(self, bee):
         if isinstance(bee, Princess) or isinstance(bee, Queen):
@@ -543,7 +562,11 @@ class Apiary:
             self.put_drone(bee)
 
     def take(self, index):
-        return self.inv.take(index)
+        bee = self.inv.take(index)
+        if isinstance(self.princess.slot, Queen):
+            if self.princess.slot.remaining_lifespan == 0:
+                self.try_queen_die()
+        return bee
 
     def try_breed(self):
         if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
@@ -551,15 +574,18 @@ class Apiary:
             drone = self.drone.take()
             self.princess.put(princess.mate(drone))
 
+    def try_queen_die(self):
+        queen = self.princess.take()
+        bees = queen.die()
+        if len(bees) <= self.inv.empty_slots():
+            self.inv.place_bees(bees)
+        else:
+            self.princess.put(queen)
+
     def update(self):
         if isinstance(self.princess.slot, Queen):
             if self.princess.slot.remaining_lifespan == 0:
-                queen = self.princess.take()
-                bees = queen.die()
-                if len(bees) <= self.inv.empty_slots():
-                    self.inv.place_bees(bees)
-                else:
-                    self.princess.put(queen)
+                self.try_queen_die()
             else:
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
@@ -573,6 +599,17 @@ class Apiary:
                 else:
                     assert False, 'Should be unreachable'
 
+def except_print(*exceptions):
+    def try_clause_decorator(func):
+        def wrapper(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except exceptions as e:
+                self.print(e, out=self.command_out, flush=True)
+
+        return wrapper
+
+    return try_clause_decorator
 
 @dataclass
 class Command:
@@ -611,7 +648,7 @@ class Game:
             Command(['reput'], self.reput, *desc['reput']),
             Command(['throw'], self.throw, *desc['throw']),
             Command(['swap'], self.swap, *desc['swap']),
-            Command(['sort'], self.sort_inv, *desc['sort']),
+            Command(['sort'], self.inv.sort, *desc['sort']),
             Command(['forage'], self.forage, *desc['forage']),
             Command(['inspect'], self.inspect, *desc['inspect']),
             Command(['build', 'b'], self.build, *desc['build']),
@@ -648,18 +685,6 @@ class Game:
             desc = {desc[0][:-1]: desc[1:] for desc in desc_list}
         return desc
 
-    def except_print(*exceptions):
-        def try_clause_decorator(func):
-            def wrapper(self, *args, **kwargs):
-                try:
-                    return func(self, *args, **kwargs)
-                except exceptions as e:
-                    self.print(e, out=self.command_out, flush=True)
-
-            return wrapper
-
-        return try_clause_decorator
-
     def render_frame(self):
         if self.render_event.is_set():
             if self.render_help.is_set():
@@ -682,10 +707,10 @@ class Game:
     def execute_command(self, value):
         command, *params = value.split()
         f = self.get_command(command)
-        f(params)
+        f(*params)
         self.render_event.set()
 
-    def exit(self, params):  # tested
+    def exit(self):  # tested
         self.exit_event.set()
         self.print('Exiting...')
 
@@ -693,7 +718,7 @@ class Game:
         self.help_text = self.manual[self.current_manual_page]
         self.help_text += f'\n{self.current_manual_page}/{len(self.manual)}'
 
-    def help(self, params):
+    def help(self, *params):
         if len(params) == 0:
             l = []
             for command in self.commands:
@@ -729,7 +754,7 @@ class Game:
                     self.help_text = command.desc
                     self.render_help.set()
 
-    def show(self, params):  # probably tested
+    def show(self, *params):  # probably tested
         if params[0] in ['inv', 'i']:
             if len(params) == 1:
                 self.to_render.append(self.inv)
@@ -743,7 +768,7 @@ class Game:
             self.to_render.append(self.resources)
     
     @staticmethod
-    def parse_ranges_numbers(params):
+    def parse_ranges_numbers(*params):
         res = []
         for w in params:
             if '..' in w:
@@ -758,13 +783,13 @@ class Game:
         return res
     
     @staticmethod
-    def where_what(params):
+    def where_what(*params):
         where, *what = params
         where = int(where)
         return where, Game.parse_ranges_numbers(what)
             
     @except_print(IndexError, ValueError, SlotOccupiedError)
-    def put(self, params):
+    def put(self, *params):
         where, what = Game.where_what(params)
         if len(what) > 2:
             raise ValueError("Can't put more than two bees")
@@ -773,7 +798,7 @@ class Game:
             self.inv.take(w)
 
     @except_print(IndexError, ValueError, SlotOccupiedError)
-    def reput(self, params):
+    def reput(self, *params):
         where, what = Game.where_what(params)
         if len(what) > 2:
             raise ValueError("Can't reput more than two bees")
@@ -782,42 +807,44 @@ class Game:
             self.apiaries[where].take(w)
 
     @except_print(IndexError, ValueError, SlotOccupiedError)
-    def take(self, params):
+    def take(self, *params):
         where, what = Game.where_what(params)
         for w in what:
             self.inv.place_bees([self.apiaries[where][w].slot])
             self.apiaries[where].take(w)
 
     @except_print(ValueError)
-    def throw(self, params):
+    def throw(self, *params):
         what = Game.parse_ranges_numbers(params)
         for idx in what:
             self.inv.take(idx)
 
     @except_print(ValueError)
-    def swap(self, params):
+    def swap(self, *params):
         self.inv.swap(*map(int, params))
-
-    def sort_inv(self, params):
-        self.inv.place_bees([slot.take() for slot in self.inv if not slot.is_empty()])
         
-    def forage(self, params):  # tested
+    def forage(self):  # tested
         genes = Genes.sample()
         self.inv.place_bees([Princess(genes), Drone(genes)])
 
     @except_print(IndexError, ValueError)
-    def inspect(self, params):  # tested
+    def inspect(self, *params):  # tested
         slot = self.inv[int(params[0])]
-        if not slot.is_empty() and not slot.slot.inspected:
+        if not slot.is_empty():
+            self.inspect_bee(slot.slot)
+
+    def inspect_bee(self, bee):
+        if not bee.inspected:
             self.resources.remove_resources({'honey': 5})
-            slot.slot.inspected = True
+            bee.inspected = True
 
     @except_print(IndexError, ValueError)
-    def build(self, params):
+    def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
                 {'wood': 5, 'flowers': 5, 'honey': 10})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
+            return self.apiaries[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
                 {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}
@@ -835,19 +862,20 @@ class Game:
                 apiary.update()
             self.render_event.set()
 
-    def save(self, params):
-        with open(params[0] + '.forestry', 'wb') as f:
+    def get_state(self):
+        return {
+            'resources': self.resources,
+            'inv': self.inv,
+            'apiaries': self.apiaries,
+            'to_render': self.to_render,
+        }
+            
+    def save(self, name):
+        with open(name + '.forestry', 'wb') as f:
+            pickle.dump(self.get_state(), f)
 
-            state = {
-                'resources': self.resources,
-                'inv': self.inv,
-                'apiaries': self.apiaries,
-                'to_render': self.to_render,
-            }
-            pickle.dump(state, f)
-
-    def load(self, params):
-        with open(params[0] + '.forestry', 'rb') as f:
+    def load(self, name):
+        with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
         self.resources = saved['resources']
         self.inv = saved['inv']
