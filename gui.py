@@ -138,7 +138,7 @@ class ApiaryWindow(UIWindow):
         self.apiary = apiary
         self.cursor = cursor
         self.size = (300, 400)
-        super().__init__(pygame.Rect(self.initial_position, self.size), manager, *args, **kwargs)
+        super().__init__(pygame.Rect(self.initial_position, self.size), manager, "Apiary " + apiary.name, *args, **kwargs)
 
         self.button_size = (60, 60)
         self.top_margin2 = 15
@@ -180,6 +180,7 @@ class ApiaryWindow(UIWindow):
         self.drone_button.set_text(self.apiary.drone.small_str())
         for b, slot in zip(self.buttons, self.apiary.inv):
             b.set_text(slot.small_str())
+    
     def update_health_bar(self):
         bee = self.apiary.princess.slot
         if isinstance(bee, Queen):
@@ -189,27 +190,31 @@ class ApiaryWindow(UIWindow):
     
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            try:
                 if event.ui_element == self.princess_button:
                     if self.cursor.slot.is_empty():
                         self.cursor.slot.put(self.apiary.take_princess())
                     else:
-                        print('princess')
                         bee1 = self.apiary.take_princess()
+                    try:
                         self.apiary.put_princess(self.cursor.slot.slot)
+                    except TypeError as e:
+                        self.apiary.put_princess(bee1)
+                        raise e
+                    else:
                         self.cursor.slot.take()
                         self.cursor.slot.put(bee1)
                 elif event.ui_element == self.drone_button:
                     if self.cursor.slot.is_empty():
                         self.cursor.slot.put(self.apiary.take_drone())
                     else:
-                        print('drone')
                         bee1 = self.apiary.take_drone()
+                    try:
                         self.apiary.put_drone(self.cursor.slot.slot)
+                    except TypeError:
+                        self.apiary.put_drone(bee1)
+                    else:
                         self.cursor.slot.take()
                         self.cursor.slot.put(bee1)
-            except TypeError as e:
-                print(e)
             for index, b in enumerate(self.buttons):
                 if event.ui_element == b:
                     if self.cursor.slot.is_empty():
