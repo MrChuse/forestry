@@ -4,7 +4,7 @@ import time
 import pygame
 import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
-                                 UITextBox, UIWindow, UIDropDownMenu)
+                                 UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
 from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 
 from forestry import Apiary, Game, Inventory, Queen, Resources, Slot
@@ -421,7 +421,6 @@ class ResourcePanel(UIPanel):
         self.game = game
         self.resources = game.resources
         self.cursor = cursor
-        self.manager = manager
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
         bottom_buttons_height = 40
 
@@ -469,7 +468,8 @@ class ResourcePanel(UIPanel):
                 if event.text != 'Build':
                     apiary = self.game.build(event.text.lower())
                     if apiary is not None:
-                        ApiaryWindow(apiary, self.cursor, self.manager)
+                        ApiaryWindow(apiary, self.cursor, self.ui_manager)
+                    self.game.update_apiary_list()
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:
                 self.game.forage()
@@ -481,11 +481,12 @@ class GUI(Game):
         super().__init__()
         Slot.empty_str = ''
 
-        cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
+        self.cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
+        self.ui_manager = manager
         resource_panel_width = 330
-        resource_panel = ResourcePanel(self, cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
+        resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
         ApiaryWindow.initial_position = (resource_panel_width, 0)
-        api_window = ApiaryWindow(self.apiaries[0], cursor, manager)
+        api_window = ApiaryWindow(self.apiaries[0], self.cursor, manager)
         right_text_box_rect = pygame.Rect(0, 0, resource_panel_width, window_size[1])
         right_text_box_rect.right = 0
         self.right_text_box = UITextBox(' ------- Errors ------- <br>', right_text_box_rect, manager,
@@ -495,8 +496,18 @@ class GUI(Game):
                 'left':'right',
                 'right':'right',
             })
-        inv_window = InventoryWindow(self.inv, 10, 10, cursor,
-            pygame.Rect(api_window.rect.right, 0, self.right_text_box.rect.left-api_window.rect.right, window_size[1]),
+        apiary_selection_list_rect = pygame.Rect(0, 0, 100, window_size[1])
+        apiary_selection_list_rect.right = 0
+        self.apiary_selection_list = UISelectionList(apiary_selection_list_rect, ['Apiary ' + a.name for a in self.apiaries], manager,
+            anchors={
+                'top':'top',
+                'bottom':'bottom',
+                'left':'right',
+                'right':'right',
+                'right_target': self.right_text_box
+            })
+        inv_window = InventoryWindow(self, 10, 10, self.cursor,
+            pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
             manager, 'Inventory', resizable=True)
 
     def render(self):
@@ -510,6 +521,16 @@ class GUI(Game):
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
         self.right_text_box.append_html_text(thing.replace('\n', '<br>'))
         
+    def update_apiary_list(self):
+        self.apiary_selection_list.set_item_list(['Apiary ' + a.name for a in self.apiaries])
+
+    def process_event(self, event):
+        if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION or event.type == pygame_gui.UI_SELECTION_LIST_DROPPED_SELECTION:
+            if event.ui_element == self.apiary_selection_list:
+                print('trying to create an apiary')
+                index = int(event.text.split()[-1])
+                ApiaryWindow(self.apiaries[index], self.cursor, self.ui_manager)
+
 def main():
     try:
         pygame.init()
@@ -543,6 +564,7 @@ def main():
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
                 try:
+                    game.process_event(event)
                     manager.process_events(event)
                     cursor_manager.process_events(event)
                 except Exception as e:
