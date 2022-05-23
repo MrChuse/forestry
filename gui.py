@@ -615,7 +615,6 @@ def main():
             # state = game.get_state()
 
             for event in pygame.event.get():
-                print(event)
                 if event.type == pygame.QUIT:
                     is_running = False
                 elif event.type == pygame.KEYDOWN:

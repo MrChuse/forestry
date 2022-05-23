@@ -1,15 +1,11 @@
-import pickle
-import threading
-import time
-
 from aiohttp import web
 
-from forestry import *
+from console_game import ConsoleGame
 
 PORT = 8081
 
 
-class WebInterface(Game):
+class WebInterface(ConsoleGame):
     def __init__(self):
         self.out = {'text': ''}
         self.command_out = {'text': ''}
