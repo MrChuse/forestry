@@ -4,3 +4,4 @@ black
 isort
 blue
 autopep8
+pyinstaller
