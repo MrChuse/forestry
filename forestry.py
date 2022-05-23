@@ -567,6 +567,14 @@ class Apiary:
             if self.princess.slot.remaining_lifespan == 0:
                 self.try_queen_die()
         return bee
+    
+    def take_several(self, indices):
+        res = []
+        for i in indices:
+            if not self.inv[i].is_empty():
+                res.append(self.inv[i].take())
+        self.try_queen_die()
+        return res
 
     def try_breed(self):
         if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
@@ -669,9 +677,8 @@ class Game:
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def take(self, *params):
         where, what = Game.where_what(*params)
-        for w in what:
-            self.inv.place_bees([self.apiaries[where][w].slot])
-            self.apiaries[where].take(w)
+        bees = self.apiaries[where].take_several(what)
+        self.inv.place_bees(bees)
 
     @except_print(ValueError)
     def throw(self, *params):
