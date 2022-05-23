@@ -582,7 +582,7 @@ class GUI(Game):
         self.apiary_selection_list.set_item_list(['Apiary ' + a.name for a in self.apiaries])
 
     def process_event(self, event):
-        if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION or event.type == pygame_gui.UI_SELECTION_LIST_DROPPED_SELECTION:
+        if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             if event.ui_element == self.apiary_selection_list:
                 index = int(event.text.split()[-1])
                 self.apiary_windows.append(
