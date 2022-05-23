@@ -720,7 +720,11 @@ class Game:
 
             for apiary in self.apiaries:
                 apiary.update()
-            self.render_event.set()
+            
+            self.state_updated()
+
+    def state_updated(self):
+        pass
 
     def get_state(self):
         return {

@@ -74,6 +74,9 @@ class ConsoleGame(Game):
                 self.print(self.to_render[-1], flush=True)
             self.render_event.clear()
 
+    def state_updated(self):
+        self.render_event.set()
+
     @staticmethod
     def parse_manual():
         with open('manual.txt') as f:
