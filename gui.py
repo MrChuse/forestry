@@ -567,6 +567,25 @@ class GUI(Game):
             pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
             manager, 'Inventory', resizable=True)
 
+        r = pygame.Rect(0,0,window_size[0]/2, window_size[1]/2)
+        r.center = (window_size[0]/2, window_size[1]/2)
+        help_window = UIWindow(r, manager)
+        help_text = UITextBox(
+            '''Welcome to a demo of my little game about selective breeding!
+You are going to be a professional bee breeder and your goal for this demo is to build an alveary.
+In order to do this you'll have to (surprisingly) breed the bees you have and try to find the pairs of species that result in a mutation after mating.
+
+You start with 0 bees, so you need a way to collect them in the first place. `Forage` button on the left will help you.
+You can put the bees into the apiary, just click the bee and click one of the two top slots in the apiary window.
+
+Bees have genes, and you only see their phenotype at first; to discover their genotype you should place the bee into the inspection slot on the left and hit `Inspect` button
+You can build new apiaries using `Build` button on the left. When you build an alveary, you win the game!
+
+Also, you can change the size of the inventory window (if you have lower resolution, you may not see the bees' species and sex)
+On the right side you can see logs which show when something went wrong and some other information'''.replace('\n', '<br>'),
+                pygame.Rect(0,0, r.width-32, r.height-59), manager, container=help_window
+        )
+
     def render(self):
         pass
 
