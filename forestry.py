@@ -583,18 +583,17 @@ class Apiary:
             self.princess.put(princess.mate(drone))
 
     def try_queen_die(self):
-        queen = self.princess.take()
-        bees = queen.die()
-        if len(bees) <= self.inv.empty_slots():
+        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() >= self.princess.slot.genes.fertility[0]:
+            queen = self.princess.take()
+            bees = queen.die()
             self.inv.place_bees(bees)
-        else:
-            self.princess.put(queen)
+            return True
+        return False
 
     def update(self):
         if isinstance(self.princess.slot, Queen):
-            if self.princess.slot.remaining_lifespan == 0:
-                self.try_queen_die()
-            else:
+            queen_died = self.try_queen_die()
+            if not queen_died:
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
                 if res is not None:
