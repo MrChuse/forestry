@@ -27,6 +27,7 @@ class Cursor(UIButton):
         pass
         
     def set_text_slot(self):
+        print(self.slot)
         self.set_text(self.slot.small_str())
         self.rect.topleft = pygame.mouse.get_pos()
     
@@ -252,7 +253,7 @@ class InventoryWindow(UIWindowNoX):
                         index = i * self.button_hor + j
                         mods = pygame.key.get_mods()
                         if mods & pygame.KMOD_LSHIFT:
-                            self.inv.take(index)
+                            self.inv.take_all(index)
                         else:
                             self.cursor.slot.swap(self.inv[index])
                         return True
@@ -549,6 +550,7 @@ class GUI(Game):
         self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
+        Slot.str_amount = lambda x: ''
 
         self.cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
         self.ui_manager = manager
