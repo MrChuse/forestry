@@ -38,8 +38,6 @@ class UIButtonSlot(UIButton):
         bee = self.slot.slot
         obj_id = get_object_id_from_bee(bee)
         prev_obj_id = self.most_specific_combined_id.split('.')[-1]
-        if bee is not None:
-            print(obj_id, prev_obj_id)
         if obj_id != prev_obj_id:
             pos = self.relative_rect.topleft
             size = self.rect.size
@@ -57,7 +55,9 @@ class Cursor(UIButtonSlot):
         super().__init__(Slot(), *args, **kwargs)
     
     def update(self, time_delta: float):
-        self.rect.topleft = pygame.mouse.get_pos()
+        pos = pygame.mouse.get_pos()
+        self.relative_rect.topleft = pos
+        self.rect.topleft = pos
         return super().update(time_delta)
 
 class InventoryWindow(UIWindowNoX):
@@ -335,7 +335,7 @@ class ApiaryWindow(UIWindow):
         self.size = (300, 420)
         super().__init__(pygame.Rect(self.initial_position, self.size), manager, "Apiary " + apiary.name, *args, **kwargs)
 
-        self.button_size = (60, 60)
+        self.button_size = (64, 64)
         self.top_margin2 = 15
         self.side_margin2 = 63
         self.princess_button = UIButtonSlot(self.apiary.princess, pygame.Rect((self.side_margin2, self.top_margin2), self.button_size),
@@ -421,7 +421,7 @@ class ApiaryWindow(UIWindow):
                     if self.cursor.slot.is_empty():
                         self.cursor.slot.put(self.apiary.take(index))
                     else:
-                        print('Cursor not empty')
+                        self.game.print('Cursor not empty', out=1)
         return super().process_event(event)
     
     def update(self, time_delta):
@@ -465,7 +465,7 @@ class InspectPanel(UIPanel):
         self.game = game
         self.cursor = cursor
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
-        inspect_button_height = 60
+        inspect_button_height = 64
         self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height, inspect_button_height), 'Inspect', manager, self)
         bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
         bee_button_rect.right = 0
@@ -482,7 +482,6 @@ class InspectPanel(UIPanel):
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.bee_button:
-                print('swap')
                 self.cursor.slot.swap(self.slot)
                 self.text_box.set_text(str(self.slot).replace('\n', '<br>'))
             elif event.ui_element == self.inspect_button:
