@@ -517,6 +517,22 @@ class Inventory:
         self.place_bees([slot.take() for slot in self if not slot.is_empty()])
 
 
+def except_print(*exceptions):
+    def try_clause_decorator(func):
+        def wrapper(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except exceptions as e:
+                try:
+                    self.print(e, out=self.command_out, flush=True)
+                except AttributeError:
+                    print(e)
+
+        return wrapper
+
+    return try_clause_decorator
+
+
 class Apiary:
     def __init__(self, name, add_resources):
         self.inv = Inventory(7)
@@ -583,17 +599,18 @@ class Apiary:
             self.princess.put(princess.mate(drone))
 
     def try_queen_die(self):
-        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() >= self.princess.slot.genes.fertility[0]:
+        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() > self.princess.slot.genes.fertility[0]:
             queen = self.princess.take()
             bees = queen.die()
             self.inv.place_bees(bees)
             return True
         return False
 
+    @except_print(Exception)
     def update(self):
         if isinstance(self.princess.slot, Queen):
             queen_died = self.try_queen_die()
-            if not queen_died:
+            if not queen_died and self.princess.slot.remaining_lifespan > 0:
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
                 if res is not None:
@@ -605,18 +622,6 @@ class Apiary:
                     self.add_resources(resources_to_add)
                 else:
                     assert False, 'Should be unreachable'
-
-def except_print(*exceptions):
-    def try_clause_decorator(func):
-        def wrapper(self, *args, **kwargs):
-            try:
-                return func(self, *args, **kwargs)
-            except exceptions as e:
-                self.print(e, out=self.command_out, flush=True)
-
-        return wrapper
-
-    return try_clause_decorator
 
 
 class Game:
