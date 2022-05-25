@@ -264,11 +264,6 @@ class InventoryWindow(UIWindowNoX):
             elif event.ui_element == self.load_window_button:
                 self.game.load('save')
                 self.game.print('Loaded save from disk')
-                for window in self.game.apiary_windows:
-                    window.kill()
-                self.inv = self.game.inv
-                self.game.resource_panel.resources = self.game.resources
-                self.game.update_apiary_list()
             elif event.ui_element == self.save_window_button:
                 self.game.save('save')
                 self.game.print('Saved the game to the disk')
@@ -339,7 +334,7 @@ class ApiaryWindow(UIWindow):
         self.top_margin2 = 15
         self.side_margin2 = 63
         self.princess_button = UIButtonSlot(self.apiary.princess, pygame.Rect((self.side_margin2, self.top_margin2), self.button_size),
-            self.apiary.princess.small_str(), manager, self)
+            '', manager, self)
         drone_rect = pygame.Rect((0, 0), self.button_size)
         drone_rect.topright = (-self.side_margin2, self.top_margin2)
         self.drone_button = UIButtonSlot(self.apiary.drone, drone_rect,
@@ -469,8 +464,7 @@ class InspectPanel(UIPanel):
         self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height, inspect_button_height), 'Inspect', manager, self)
         bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
         bee_button_rect.right = 0
-        self.slot = Slot()
-        self.bee_button = UIButtonSlot(self.slot, bee_button_rect, '', manager, self,
+        self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -482,12 +476,14 @@ class InspectPanel(UIPanel):
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.bee_button:
-                self.cursor.slot.swap(self.slot)
-                self.text_box.set_text(str(self.slot).replace('\n', '<br>'))
+                self.cursor.slot.swap(self.bee_button.slot)
             elif event.ui_element == self.inspect_button:
-                self.game.inspect_bee(self.slot.slot)
-                self.text_box.set_text(str(self.slot.slot).replace('\n', '<br>'))
+                self.game.inspect_bee(self.bee_button.slot.slot)
         return super().process_event(event)
+    
+    def update(self, time_delta: float):
+        self.text_box.set_text(str(self.bee_button.slot).replace('\n', '<br>'))
+        return super().update(time_delta)
 
 
 
@@ -521,7 +517,7 @@ class ResourcePanel(UIPanel):
                 'right':'right',
                 'top_target': self.forage_button
             })
-        inspect_panel = InspectPanel(game, cursor, pygame.Rect(0, 0, rect.size[0]-6, rect.bottom - self.build_dropdown.rect.bottom), starting_layer_height, manager, container=self,
+        self.inspect_panel = InspectPanel(game, cursor, pygame.Rect(0, 0, rect.size[0]-6, rect.bottom - self.build_dropdown.rect.bottom), starting_layer_height, manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -583,7 +579,7 @@ class GUI(Game):
                 'right':'right',
                 'right_target': self.right_text_box
             })
-        inv_window = InventoryWindow(self, 10, 10, self.cursor,
+        self.inv_window = InventoryWindow(self, 10, 10, self.cursor,
             pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
             manager, 'Inventory', resizable=True)
 
@@ -631,6 +627,27 @@ You can load your saved progress. Only one save slot is available (you can manip
                 self.apiary_windows.append(
                     ApiaryWindow(self, self.apiaries[index], self.cursor, self.ui_manager)
                 )
+    
+    def get_state(self):
+        state = super().get_state()
+        state['cursor_slot'] = self.cursor.slot
+        state['inspect_slot'] = self.resource_panel.inspect_panel.bee_button.slot
+        return state
+
+    def load(self, name):
+        saved = super().load(name)
+        for window in self.apiary_windows:
+            window.kill()
+        self.inv_window.inv = self.inv
+        for i, row in enumerate(self.inv_window.buttons):
+            for j, b in enumerate(row):
+                slot = self.inv[j * len(row) + i]
+                b.slot = slot
+        self.resource_panel.resources = self.resources
+        self.update_apiary_list()
+        self.cursor.slot = saved['cursor_slot']
+        self.resource_panel.inspect_panel.bee_button.slot = saved['inspect_slot']
+        return saved
 
 def main():
     try:
