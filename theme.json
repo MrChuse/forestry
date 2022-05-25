@@ -1,0 +1,212 @@
+{
+  "#FOREST_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\FOREST_Princess.png"
+      }
+    }
+  },
+  "#FOREST_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\FOREST_Drone.png"
+      }
+    }
+  },
+  "#FOREST_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\FOREST_Queen.png"
+      }
+    }
+  },
+  "#MEADOWS_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\MEADOWS_Princess.png"
+      }
+    }
+  },
+  "#MEADOWS_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\MEADOWS_Drone.png"
+      }
+    }
+  },
+  "#MEADOWS_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\MEADOWS_Queen.png"
+      }
+    }
+  },
+  "#COMMON_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\COMMON_Princess.png"
+      }
+    }
+  },
+  "#COMMON_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\COMMON_Drone.png"
+      }
+    }
+  },
+  "#COMMON_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\COMMON_Queen.png"
+      }
+    }
+  },
+  "#CULTIVATED_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\CULTIVATED_Princess.png"
+      }
+    }
+  },
+  "#CULTIVATED_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\CULTIVATED_Drone.png"
+      }
+    }
+  },
+  "#CULTIVATED_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\CULTIVATED_Queen.png"
+      }
+    }
+  },
+  "#NOBLE_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\NOBLE_Princess.png"
+      }
+    }
+  },
+  "#NOBLE_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\NOBLE_Drone.png"
+      }
+    }
+  },
+  "#NOBLE_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\NOBLE_Queen.png"
+      }
+    }
+  },
+  "#MAJESTIC_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\MAJESTIC_Princess.png"
+      }
+    }
+  },
+  "#MAJESTIC_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\MAJESTIC_Drone.png"
+      }
+    }
+  },
+  "#MAJESTIC_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\MAJESTIC_Queen.png"
+      }
+    }
+  },
+  "#IMPERIAL_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\IMPERIAL_Princess.png"
+      }
+    }
+  },
+  "#IMPERIAL_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\IMPERIAL_Drone.png"
+      }
+    }
+  },
+  "#IMPERIAL_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\IMPERIAL_Queen.png"
+      }
+    }
+  },
+  "#DILIGENT_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\DILIGENT_Princess.png"
+      }
+    }
+  },
+  "#DILIGENT_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\DILIGENT_Drone.png"
+      }
+    }
+  },
+  "#DILIGENT_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\DILIGENT_Queen.png"
+      }
+    }
+  },
+  "#UNWEARY_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\UNWEARY_Princess.png"
+      }
+    }
+  },
+  "#UNWEARY_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\UNWEARY_Drone.png"
+      }
+    }
+  },
+  "#UNWEARY_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\UNWEARY_Queen.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Princess": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\INDUSTRIOUS_Princess.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Drone": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\INDUSTRIOUS_Drone.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Queen": {
+    "images": {
+      "normal_image": {
+        "path": "assets\\INDUSTRIOUS_Queen.png"
+      }
+    }
+  }
+}

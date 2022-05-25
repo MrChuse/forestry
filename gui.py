@@ -1,6 +1,7 @@
 import math
 import time
 import os.path
+from typing import List, Union
 
 import pygame
 import pygame_gui
@@ -8,7 +9,7 @@ from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
                                  UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
 from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 
-from forestry import Apiary, Game, Inventory, Queen, Resources, Slot
+from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot
 
 
 class UIWindowNoX(UIWindow):
@@ -18,20 +19,45 @@ class UIWindowNoX(UIWindow):
         self.title_bar_close_button_width = 0
         self.rebuild()
 
-class Cursor(UIButton):
-    def __init__(self, *args, **kwargs):
-        self.slot = Slot()
+def get_object_id_from_bee(bee: Bee):
+    typ = {
+        Princess: 'Princess',
+        Drone: 'Drone',
+        Queen: 'Queen'
+    }
+    return f'#{bee.genes.species[0]}_{typ[type(bee)]}' if bee is not None else '#EMPTY'
+
+class UIButtonSlot(UIButton):
+    def __init__(self, slot: Slot, *args, **kwargs):
+        self.slot = slot
+        self.args = args
+        self.kwargs = kwargs
         super().__init__(*args, **kwargs)
-        
-    def enable(self):
-        pass
-        
-    def set_text_slot(self):
-        self.set_text(self.slot.small_str())
-        self.rect.topleft = pygame.mouse.get_pos()
     
     def update(self, time_delta: float):
-        self.set_text_slot()
+        bee = self.slot.slot
+        obj_id = get_object_id_from_bee(bee)
+        prev_obj_id = self.most_specific_combined_id.split('.')[-1]
+        if bee is not None:
+            print(obj_id, prev_obj_id)
+        if obj_id != prev_obj_id:
+            pos = self.relative_rect.topleft
+            size = self.rect.size
+            self.kill()
+            text = self.slot.small_str()
+            text = text if text != '' else None
+            self.args = (pygame.Rect(pos, size),) + self.args[1:]
+            self.kwargs['object_id'] = obj_id
+            self.kwargs['tool_tip_text'] = text
+            super().__init__(*self.args, **self.kwargs)
+        return super().update(time_delta)
+
+class Cursor(UIButtonSlot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(Slot(), *args, **kwargs)
+    
+    def update(self, time_delta: float):
+        self.rect.topleft = pygame.mouse.get_pos()
         return super().update(time_delta)
 
 class InventoryWindow(UIWindowNoX):
@@ -50,6 +76,7 @@ class InventoryWindow(UIWindowNoX):
         self.sort_window_button = None
         self.save_window_button = None
         self.load_window_button = None
+        self.buttons : Union[List[List[UIButtonSlot]], None] = None
         super().__init__(rect, manager, *args, **kwargs)
     
     def rebuild(self):
@@ -199,20 +226,8 @@ class InventoryWindow(UIWindowNoX):
                                                             'right_target':self.save_window_button}
                                                     )
         super(UIWindow, self).rebuild()
-        
-    def create_buttons_if_needed(self):
-        try:
-            self.buttons
-        except AttributeError:
-            self.buttons = []
-            for j in range(self.button_hor):
-                self.buttons.append([])
-                for i in range(self.button_vert):
-                    rect = pygame.Rect(0, 0, 100, 100)
-                    self.buttons[j].append(UIButton(rect, self.inv[i * self.button_hor + j].small_str(), self.ui_manager, self,))
-    
+
     def place_buttons(self, size):
-        self.create_buttons_if_needed()
         hor_margin_size = (self.button_hor + 1) * self.margin
         vert_margin_size = (self.button_vert + 1) * self.margin
         remaining_width = size[0] - hor_margin_size - 32  # why 32 & 64!?
@@ -220,12 +235,23 @@ class InventoryWindow(UIWindowNoX):
         hor_size = remaining_width / self.button_hor
         vert_size = remaining_height / self.button_vert
         bsize = (hor_size, vert_size)
-        for i, row in enumerate(self.buttons):
-            for j, b in enumerate(row):
-                pos = (self.margin + i * (hor_size + self.margin), self.margin + j * (vert_size + self.margin))
-                b.relative_rect.topleft = pos
-                b.rect.size = bsize
-                b.rebuild()
+
+        if self.buttons is None:
+            self.buttons = []
+            for i in range(self.button_hor):
+                self.buttons.append([])
+                for j in range(self.button_vert):
+                    pos = (self.margin + i * (hor_size + self.margin), self.margin + j * (vert_size + self.margin))
+                    rect = pygame.Rect(pos, bsize)
+                    slot = self.inv[j * self.button_hor + i]
+                    self.buttons[i].append(UIButtonSlot(slot, rect, '', self.ui_manager, self))
+        else:
+            for i, row in enumerate(self.buttons):
+                for j, b in enumerate(row):
+                    pos = (self.margin + i * (hor_size + self.margin), self.margin + j * (vert_size + self.margin))
+                    b.relative_rect.topleft = pos
+                    b.rect.size = bsize
+                    b.rebuild()
     
     def set_dimensions(self, size):
         self.place_buttons(size)
@@ -257,16 +283,6 @@ class InventoryWindow(UIWindowNoX):
                             self.cursor.slot.swap(self.inv[index])
                         return True
         return super().process_event(event)
-    
-    def update(self, time_delta: float):
-        for j, row in enumerate(self.buttons):
-            for i, b in enumerate(row):
-                index = i * self.button_hor + j
-                text = self.inv[index].small_str()
-                b.set_text(text)
-                if text != '':
-                    b.tool_tip_text = text
-        return super().update(time_delta)
 
 class UIRelativeStatusBar(UIStatusBar):
     def rebuild(self):
@@ -322,11 +338,11 @@ class ApiaryWindow(UIWindow):
         self.button_size = (60, 60)
         self.top_margin2 = 15
         self.side_margin2 = 63
-        self.princess_button = UIButton(pygame.Rect((self.side_margin2, self.top_margin2), self.button_size),
+        self.princess_button = UIButtonSlot(self.apiary.princess, pygame.Rect((self.side_margin2, self.top_margin2), self.button_size),
             self.apiary.princess.small_str(), manager, self)
         drone_rect = pygame.Rect((0, 0), self.button_size)
         drone_rect.topright = (-self.side_margin2, self.top_margin2)
-        self.drone_button = UIButton(drone_rect,
+        self.drone_button = UIButtonSlot(self.apiary.drone, drone_rect,
                                      text='', manager=manager,
                                      container=self,
                                      anchors={'left': 'right',
@@ -343,7 +359,7 @@ class ApiaryWindow(UIWindow):
         radius = self.margin3 + self.button_size[0]
         center_rect = pygame.Rect((0, 0), self.button_size)
         center_rect.center = (self.size[0]/2 - 32/2, self.size[1]/2 + 15) # 30
-        self.buttons = [UIButton(center_rect, '', manager, self)]
+        self.buttons = [UIButtonSlot(self.apiary.inv[0], center_rect, '', manager, self)]
         for i in range(6):
             angle = 2 * math.pi / 6 * i
             dx = radius * math.cos(angle)
@@ -352,7 +368,7 @@ class ApiaryWindow(UIWindow):
             rect = center_rect.copy()
             rect.x += dx
             rect.y += dy
-            self.buttons.append(UIButton(rect, '', manager, self))
+            self.buttons.append(UIButtonSlot(self.apiary.inv[i+1], rect, '', manager, self))
         take_all_button_rect = pygame.Rect(0, 0, self.size[0] - self.side_margin2 * 2, 30)
         take_all_button_rect.centerx = rect.centerx - 40 # no clue why 40
         self.take_all_button = UIButton(take_all_button_rect, 'Take all', manager, self,
@@ -363,12 +379,6 @@ class ApiaryWindow(UIWindow):
                 'bottom': 'bottom',
                 'top_target': self.buttons[3]
             })
-    
-    def set_button_texts(self):
-        self.princess_button.set_text(self.apiary.princess.small_str())
-        self.drone_button.set_text(self.apiary.drone.small_str())
-        for b, slot in zip(self.buttons, self.apiary.inv):
-            b.set_text(slot.small_str())
     
     def update_health_bar(self):
         bee = self.apiary.princess.slot
@@ -415,7 +425,6 @@ class ApiaryWindow(UIWindow):
         return super().process_event(event)
     
     def update(self, time_delta):
-        self.set_button_texts()
         self.update_health_bar()
         super().update(time_delta)
 
@@ -460,14 +469,14 @@ class InspectPanel(UIPanel):
         self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height, inspect_button_height), 'Inspect', manager, self)
         bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
         bee_button_rect.right = 0
-        self.bee_button = UIButton(bee_button_rect, '', manager, self,
+        self.slot = Slot()
+        self.bee_button = UIButtonSlot(self.slot, bee_button_rect, '', manager, self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
                 'left':'right',
                 'right':'right',
             })
-        self.slot = Slot()
         self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
     
     def process_event(self, event: pygame.event.Event) -> bool:
@@ -475,8 +484,6 @@ class InspectPanel(UIPanel):
             if event.ui_element == self.bee_button:
                 print('swap')
                 self.cursor.slot.swap(self.slot)
-                self.bee_button.set_text(self.slot.small_str())
-                self.cursor.set_text_slot()
                 self.text_box.set_text(str(self.slot).replace('\n', '<br>'))
             elif event.ui_element == self.inspect_button:
                 self.game.inspect_bee(self.slot.slot)
@@ -550,7 +557,7 @@ class GUI(Game):
         super().__init__()
         Slot.empty_str = ''
 
-        self.cursor = Cursor(pygame.Rect(0, 0, -1, -1), '', cursor_manager)
+        self.cursor = Cursor(pygame.Rect(0, 0, 64, 64), '', cursor_manager)
         self.ui_manager = manager
         resource_panel_width = 330
         self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
@@ -639,8 +646,8 @@ def main():
         background = pygame.Surface(window_size)
         background.fill(pygame.Color('#000000'))
 
-        manager = pygame_gui.UIManager(window_size)
-        cursor_manager = pygame_gui.UIManager(window_size)
+        manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False)
+        cursor_manager = pygame_gui.UIManager(window_size, 'theme.json')
 
         game = None
         game = GUI(window_size, manager, cursor_manager)
@@ -659,7 +666,8 @@ def main():
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
                 try:
-                    game.process_event(event)
+                    if game is not None:
+                        game.process_event(event)
                     manager.process_events(event)
                     cursor_manager.process_events(event)
                 except Exception as e:

@@ -131,3 +131,7 @@ dmypy.json
 
 # Forestry saves
 *.forestry
+
+# helper files
+duplicate_pngs.py
+theme.py
