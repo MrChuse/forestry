@@ -65,7 +65,7 @@ class BeeLifespan(Enum):
     SHORTEST = 2
 
 
-class BeeSpeed(Enum):
+class BeeSpeed(float, Enum):
     def __str__(self):
         return local[self].upper() if dominant[self] else local[self].lower()
 
@@ -534,6 +534,7 @@ def except_print(*exceptions):
 
 
 class Apiary:
+    production_modifier = 1
     def __init__(self, name, add_resources):
         self.inv = Inventory(7)
         self.princess = Slot()
@@ -617,7 +618,9 @@ class Apiary:
                     resources_to_add = dict()
                     for res_name in res:
                         amt, prob = res[res_name]
-                        if random.random() < prob:
+                        probability = (self.princess.slot.genes.speed[0]) * (self.production_modifier) * (prob)
+                        # print(self.princess.slot.genes.speed[0], prob, probability)
+                        if random.random() < probability:
                             resources_to_add[res_name] = amt
                     self.add_resources(resources_to_add)
                 else:
@@ -626,7 +629,7 @@ class Apiary:
 
 class Game:
     def __init__(self):
-        self.resources = Resources()
+        self.resources = Resources(honey=0)
         self.inv = Inventory(100)
         self.apiaries = [Apiary('0', self.resources.add_resources)]
             
