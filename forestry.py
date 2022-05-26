@@ -709,19 +709,19 @@ class Game:
 
     def inspect_bee(self, bee):
         if not bee.inspected:
-            self.resources.remove_resources({'honey': 5})
+            self.resources.remove_resources({'honey': 3})
             bee.inspected = True
 
     @except_print(IndexError, ValueError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
-                {'wood': 5, 'flowers': 5, 'honey': 10})
+                {'honey': 10, 'wood': 5, 'flowers': 5})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
             return self.apiaries[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
-                {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}
+                {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
             )
             self.print('You won the demo!', out=self.command_out, flush=True)
             self.exit_event.set()
