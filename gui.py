@@ -25,7 +25,7 @@ def get_object_id_from_bee(bee: Bee):
         Drone: 'Drone',
         Queen: 'Queen'
     }
-    return f'#{bee.genes.species[0]}_{typ[type(bee)]}' if bee is not None else '#EMPTY'
+    return f'#{bee.genes.species[0].name.upper()}_{typ[type(bee)]}' if bee is not None else '#EMPTY'
 
 class UIButtonSlot(UIButton):
     def __init__(self, slot: Slot, *args, **kwargs):
