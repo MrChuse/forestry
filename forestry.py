@@ -65,7 +65,7 @@ class BeeLifespan(Enum):
     SHORTEST = 2
 
 
-class BeeSpeed(Enum):
+class BeeSpeed(float, Enum):
     def __str__(self):
         return local[self].upper() if dominant[self] else local[self].lower()
 
@@ -517,7 +517,24 @@ class Inventory:
         self.place_bees([slot.take() for slot in self if not slot.is_empty()])
 
 
+def except_print(*exceptions):
+    def try_clause_decorator(func):
+        def wrapper(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except exceptions as e:
+                try:
+                    self.print(e, out=self.command_out, flush=True)
+                except AttributeError:
+                    print(e)
+
+        return wrapper
+
+    return try_clause_decorator
+
+
 class Apiary:
+    production_modifier = 1
     def __init__(self, name, add_resources):
         self.inv = Inventory(7)
         self.princess = Slot()
@@ -567,6 +584,14 @@ class Apiary:
             if self.princess.slot.remaining_lifespan == 0:
                 self.try_queen_die()
         return bee
+    
+    def take_several(self, indices):
+        res = []
+        for i in indices:
+            if not self.inv[i].is_empty():
+                res.append(self.inv[i].take())
+        self.try_queen_die()
+        return res
 
     def try_breed(self):
         if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
@@ -575,46 +600,36 @@ class Apiary:
             self.princess.put(princess.mate(drone))
 
     def try_queen_die(self):
-        queen = self.princess.take()
-        bees = queen.die()
-        if len(bees) <= self.inv.empty_slots():
+        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() > self.princess.slot.genes.fertility[0]:
+            queen = self.princess.take()
+            bees = queen.die()
             self.inv.place_bees(bees)
-        else:
-            self.princess.put(queen)
+            return True
+        return False
 
+    @except_print(Exception)
     def update(self):
         if isinstance(self.princess.slot, Queen):
-            if self.princess.slot.remaining_lifespan == 0:
-                self.try_queen_die()
-            else:
+            queen_died = self.try_queen_die()
+            if not queen_died and self.princess.slot.remaining_lifespan > 0:
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
                 if res is not None:
                     resources_to_add = dict()
                     for res_name in res:
                         amt, prob = res[res_name]
-                        if random.random() < prob:
+                        probability = (self.princess.slot.genes.speed[0]) * (self.production_modifier) * (prob)
+                        # print(self.princess.slot.genes.speed[0], prob, probability)
+                        if random.random() < probability:
                             resources_to_add[res_name] = amt
                     self.add_resources(resources_to_add)
                 else:
                     assert False, 'Should be unreachable'
 
-def except_print(*exceptions):
-    def try_clause_decorator(func):
-        def wrapper(self, *args, **kwargs):
-            try:
-                return func(self, *args, **kwargs)
-            except exceptions as e:
-                self.print(e, out=self.command_out, flush=True)
-
-        return wrapper
-
-    return try_clause_decorator
-
 
 class Game:
     def __init__(self):
-        self.resources = Resources()
+        self.resources = Resources(honey=0)
         self.inv = Inventory(100)
         self.apiaries = [Apiary('0', self.resources.add_resources)]
             
@@ -669,9 +684,8 @@ class Game:
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def take(self, *params):
         where, what = Game.where_what(*params)
-        for w in what:
-            self.inv.place_bees([self.apiaries[where][w].slot])
-            self.apiaries[where].take(w)
+        bees = self.apiaries[where].take_several(what)
+        self.inv.place_bees(bees)
 
     @except_print(ValueError)
     def throw(self, *params):
@@ -695,19 +709,19 @@ class Game:
 
     def inspect_bee(self, bee):
         if not bee.inspected:
-            self.resources.remove_resources({'honey': 5})
+            self.resources.remove_resources({'honey': 3})
             bee.inspected = True
 
     @except_print(IndexError, ValueError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
-                {'wood': 5, 'flowers': 5, 'honey': 10})
+                {'honey': 10, 'wood': 5, 'flowers': 5})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
             return self.apiaries[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
-                {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}
+                {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
             )
             self.print('You won the demo!', out=self.command_out, flush=True)
             self.exit_event.set()
