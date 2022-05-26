@@ -8,13 +8,13 @@ In order to do this you'll have to (surprisingly) breed the bees you have and tr
 ```
 python -m venv venv
 venv\Scripts\activate
-pip install -r requirements.txt
-python server.py
+pip install -r requirements-pygame.txt
+python gui.py
 ```
 ### Linux (not tested but should work, it's python)
 ```
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-python server.py
+pip install -r requirements-pygame.txt
+python gui.py
 ```
