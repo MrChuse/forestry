@@ -305,10 +305,13 @@ class Bee:
         return hash(self.genes)
 
     def __eq__(self, other):
-        return self.genes == other.genes
+        return type(self) == type(other) and self.genes == other.genes and self.inspected == other.inspected
 
     def small_str(self):
-        return local[self.genes.species[0]] + ' ' + local[type(self)]
+        if not self.inspected or self.genes.species[0] == self.genes.species[1]:
+            return local[self.genes.species[0]] + ' ' + local[type(self)]
+        else:
+            return local[self.genes.species[0]] + '-' + local[self.genes.species[1]] + ' Hybrid'
 
     def inspect(self):
         self.inspected = True
@@ -418,46 +421,64 @@ class Slot:
     empty_str = 'Slot empty'
     def __init__(self):
         self.slot = None
+        self.amount = 0
         super().__init__()
 
     def __str__(self):
         if self.slot is not None:
-            return str(self.slot)
+            return str(self.slot) + self.str_amount()
         else:
             return Slot.empty_str
 
     def small_str(self):
         if self.slot is not None:
-            return self.slot.small_str()
+            return self.slot.small_str() + self.str_amount()
         else:
             return Slot.empty_str
 
-    def put(self, bee):
+    def str_amount(self):
+        return f'({self.amount})' if self.amount > 1 else ''
+        
+    def put(self, bee, amount=1):
+        if self.slot == bee:
+            self.amount += amount
+            return
         if self.slot is None:
             self.slot = bee
+            self.amount = amount
         else:
             raise SlotOccupiedError('The slot is not empty')
 
     def take(self):
         bee = self.slot
-        self.slot = None
+        self.amount -= 1
+        if self.amount <= 0:
+            self.slot = None
+            self.amount = 0
         return bee
 
-    def swap(self, other):
-        bee1 = self.take()
-        bee2 = other.take()
-        self.put(bee2)
-        other.put(bee1)
+    def take_all(self):
+        bee = self.slot
+        self.slot = None
+        amt = self.amount
+        self.amount = 0
+        return bee, amt
+
+    def swap(self, other: 'Slot'):
+        bee1 = self.take_all()
+        bee2 = other.take_all()
+        self.put(*bee2)
+        other.put(*bee1)
 
     def is_empty(self):
         return self.slot is None
 
 
 class Inventory:
-    def __init__(self, capacity=None):
+    def __init__(self, capacity=None, name=''):
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
-        super().__init__()
+        self.name = name
 
     def __setitem__(self, key, value):
         self.storage[key].put(value)
@@ -484,6 +505,9 @@ class Inventory:
     def take(self, index):
         bee = self.storage[index].take()
         return bee
+    
+    def take_all(self, index):
+        return self.storage[index].take_all()
 
     def empty_slots(self):
         return sum([el.is_empty() for el in self.storage])
@@ -498,12 +522,13 @@ class Inventory:
         drone = self.storage[i2].take()
         self.storage[i1].put(princess.mate(drone))
 
-    def place_bees(self, offspring, parent_index=None):
-        if parent_index is not None:
-            self.storage[parent_index].take()
-        index = 0
-        for bee in offspring:
+    def place_bees(self, offspring):
+        for bee in offspring: # try to put into occupied slots first
+            index = 0
             while index < self.capacity:
+                if self.storage[index].is_empty():
+                    index += 1
+                    continue
                 try:
                     self.storage[index].put(bee)
                     index += 1
@@ -512,10 +537,25 @@ class Inventory:
                     index += 1
                     continue
             else:
-                raise SlotOccupiedError('Tried to insert too many bees')
+                index = 0
+                while index < self.capacity:
+                    try:
+                        self.storage[index].put(bee)
+                        index += 1
+                        break
+                    except SlotOccupiedError:
+                        index += 1
+                        continue
+                else:
+                    raise SlotOccupiedError('Tried to insert too many bees')
     
     def sort(self):
-        self.place_bees([slot.take() for slot in self if not slot.is_empty()])
+        r = []
+        for slot in self:
+            if not slot.is_empty():
+                bee, amt = slot.take_all()
+                r.extend([bee]*amt)
+        self.place_bees(r)
 
 
 def except_print(*exceptions):
@@ -555,50 +595,53 @@ class Apiary:
         res.append(inv_str)
         return '\n'.join(res)
 
-    def put_princess(self, bee):
+    def put_princess(self, bee, amount=1):
         if not isinstance(bee, Princess) and not isinstance(bee, Queen):
             raise TypeError('Bee should be a Princess or a Queen')
-        self.princess.put(bee)
+        self.princess.put(bee, amount)
         self.try_breed()
 
     def take_princess(self):
-        return self.princess.take()
+        return self.princess.take_all()
 
-    def put_drone(self, bee):
+    def put_drone(self, bee, amount=1):
         if not isinstance(bee, Drone):
             raise TypeError('Bee should be a Drone')
-        self.drone.put(bee)
+        self.drone.put(bee, amount)
         self.try_breed()
 
     def take_drone(self):
-        return self.drone.take()
+        return self.drone.take_all()
 
-    def put(self, bee):
+    def put(self, bee, amount=1):
         if isinstance(bee, Princess) or isinstance(bee, Queen):
-            self.put_princess(bee)
+            self.put_princess(bee, amount)
         elif isinstance(bee, Drone):
-            self.put_drone(bee)
+            self.put_drone(bee, amount)
 
     def take(self, index):
-        bee = self.inv.take(index)
+        bee, amount = self.inv.take_all(index)
         if isinstance(self.princess.slot, Queen):
             if self.princess.slot.remaining_lifespan == 0:
                 self.try_queen_die()
-        return bee
+        return bee, amount
     
     def take_several(self, indices):
         res = []
         for i in indices:
             if not self.inv[i].is_empty():
-                res.append(self.inv[i].take())
+                res.append(self.inv[i].take_all())
         self.try_queen_die()
         return res
 
     def try_breed(self):
         if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
-            princess = self.princess.take()
-            drone = self.drone.take()
-            self.princess.put(princess.mate(drone))
+            if self.princess.amount == 1:
+                princess = self.princess.take()
+                drone = self.drone.take()
+                self.princess.put(princess.mate(drone))
+            else:
+                raise ValueError('Can mate only when 1 Princess in slot')
 
     def try_queen_die(self):
         if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() > self.princess.slot.genes.fertility[0]:
@@ -631,7 +674,9 @@ class Apiary:
 class Game:
     def __init__(self):
         self.resources = Resources(honey=0)
-        self.inv = Inventory(100)
+        self.inventories = []
+        self.inv = Inventory(49, '0')
+        self.inventories.append(self.inv)
         self.apiaries = [Apiary('0', self.resources.add_resources)]
             
         self.exit_event = threading.Event()
@@ -698,9 +743,10 @@ class Game:
     def swap(self, *params):
         self.inv.swap(*map(int, params))
         
-    def forage(self):  # tested
+    @staticmethod
+    def forage(inventory):
         genes = Genes.sample()
-        self.inv.place_bees([Princess(genes), Drone(genes)])
+        inventory.place_bees([Princess(genes), Drone(genes)])
 
     @except_print(IndexError, ValueError)
     def inspect(self, *params):  # tested
@@ -709,7 +755,7 @@ class Game:
             self.inspect_bee(slot.slot)
 
     def inspect_bee(self, bee):
-        if not bee.inspected:
+        if bee is not None and not bee.inspected:
             self.resources.remove_resources({'honey': 1})
             bee.inspected = True
 
@@ -720,6 +766,11 @@ class Game:
                 {'honey': 10, 'wood': 5, 'flowers': 5})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
             return self.apiaries[-1]
+        elif params[0] in ['inventory', 'inv', 'i']:
+            self.resources.remove_resources(
+                {'wood': 5, 'flowers': 5})
+            self.inventories.append(Inventory(49, str(len(self.inventories))))
+            return self.inventories[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
                 {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
@@ -744,7 +795,7 @@ class Game:
     def get_state(self):
         return {
             'resources': self.resources,
-            'inv': self.inv,
+            'inventories': self.inventories,
             'apiaries': self.apiaries
         }
             
@@ -756,6 +807,6 @@ class Game:
         with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
         self.resources = saved['resources']
-        self.inv = saved['inv']
+        self.inventories = saved['inventories']
         self.apiaries = saved['apiaries']
         return saved
