@@ -472,10 +472,10 @@ class Slot:
 
 
 class Inventory:
-    def __init__(self, capacity=None):
+    def __init__(self, capacity=None, name=''):
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
-        super().__init__()
+        self.name = name
 
     def __setitem__(self, key, value):
         self.storage[key].put(value)
@@ -671,7 +671,9 @@ class Apiary:
 class Game:
     def __init__(self):
         self.resources = Resources(honey=0)
-        self.inv = Inventory(100)
+        self.inventories = []
+        self.inv = Inventory(49, '0')
+        self.inventories.append(self.inv)
         self.apiaries = [Apiary('0', self.resources.add_resources)]
             
         self.exit_event = threading.Event()
@@ -738,9 +740,10 @@ class Game:
     def swap(self, *params):
         self.inv.swap(*map(int, params))
         
-    def forage(self):  # tested
+    @staticmethod
+    def forage(inventory):
         genes = Genes.sample()
-        self.inv.place_bees([Princess(genes), Drone(genes)])
+        inventory.place_bees([Princess(genes), Drone(genes)])
 
     @except_print(IndexError, ValueError)
     def inspect(self, *params):  # tested
@@ -760,6 +763,11 @@ class Game:
                 {'honey': 10, 'wood': 5, 'flowers': 5})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
             return self.apiaries[-1]
+        elif params[0] in ['inventory', 'inv', 'i']:
+            self.resources.remove_resources(
+                {'wood': 5, 'flowers': 5})
+            self.inventories.append(Inventory(49, str(len(self.inventories))))
+            return self.inventories[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
                 {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
@@ -784,7 +792,7 @@ class Game:
     def get_state(self):
         return {
             'resources': self.resources,
-            'inv': self.inv,
+            'inventories': self.inventories,
             'apiaries': self.apiaries
         }
             
@@ -796,6 +804,6 @@ class Game:
         with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
         self.resources = saved['resources']
-        self.inv = saved['inv']
+        self.inventories = saved['inventories']
         self.apiaries = saved['apiaries']
         return saved
