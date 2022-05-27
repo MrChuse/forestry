@@ -308,7 +308,10 @@ class Bee:
         return type(self) == type(other) and self.genes == other.genes and self.inspected == other.inspected
 
     def small_str(self):
-        return local[self.genes.species[0]] + ' ' + local[type(self)]
+        if not self.inspected or self.genes.species[0] == self.genes.species[1]:
+            return local[self.genes.species[0]] + ' ' + local[type(self)]
+        else:
+            return local[self.genes.species[0]] + '-' + local[self.genes.species[1]] + ' Hybrid'
 
     def inspect(self):
         self.inspected = True
@@ -752,7 +755,7 @@ class Game:
             self.inspect_bee(slot.slot)
 
     def inspect_bee(self, bee):
-        if not bee.inspected:
+        if bee is not None and not bee.inspected:
             self.resources.remove_resources({'honey': 1})
             bee.inspected = True
 
