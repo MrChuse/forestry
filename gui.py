@@ -613,7 +613,7 @@ class GUI(Game):
         self.esc_menu = UISelectionList(esc_menu_rect, ['Mendelian Inheritance', 'Load', 'Save', 'Exit'], cursor_manager, visible=False, starting_height=30)
         
         if not os.path.exists('save.forestry'):
-            self.help_window(window_size)
+            self.help_window()
 
     def help_window(self):
         r = pygame.Rect(0, 0, self.window_size[0]/2, self.window_size[1]/2)
