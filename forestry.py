@@ -792,7 +792,7 @@ class Game:
     def get_state(self):
         return {
             'resources': self.resources,
-            'inv': self.inv,
+            'inventories': self.inventories,
             'apiaries': self.apiaries
         }
             
@@ -804,6 +804,6 @@ class Game:
         with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
         self.resources = saved['resources']
-        self.inv = saved['inv']
+        self.inventories = saved['inventories']
         self.apiaries = saved['apiaries']
         return saved

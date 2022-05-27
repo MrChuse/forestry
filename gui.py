@@ -338,13 +338,12 @@ class UIRelativeStatusBar(UIStatusBar):
                 self.redraw()
 
 class ApiaryWindow(UIWindow):
-    initial_position = (0, 0)
-    def __init__(self, game: 'GUI', apiary: Apiary, cursor: Cursor, manager, *args, **kwargs):
+    def __init__(self, game: 'GUI', apiary: Apiary, cursor: Cursor, relative_rect: pygame.Rect, manager, *args, **kwargs):
         self.game = game
         self.apiary = apiary
         self.cursor = cursor
-        self.size = (300, 420)
-        super().__init__(pygame.Rect(self.initial_position, self.size), manager, "Apiary " + apiary.name, *args, **kwargs)
+        self.size = relative_rect.size
+        super().__init__(relative_rect, manager, "Apiary " + apiary.name, *args, **kwargs)
 
         self.button_size = (64, 64)
         self.top_margin2 = 15
@@ -552,7 +551,7 @@ class ResourcePanel(UIPanel):
                 if event.text != 'Build':
                     building = self.game.build(event.text.lower())
                     if isinstance(building, Apiary):
-                        ApiaryWindow(self.game, building, self.cursor, self.ui_manager)
+                        ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
                         self.game.update_windows_list()
                     elif isinstance(building, Inventory):
                         InventoryWindow(building, 7, 7, self.cursor, 
@@ -578,8 +577,7 @@ class GUI(Game):
         self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
         self.apiary_windows = []
         self.inventory_windows = []
-        ApiaryWindow.initial_position = (resource_panel_width, 0)
-        api_window = ApiaryWindow(self, self.apiaries[0], self.cursor, manager)
+        api_window = ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((resource_panel_width, 0), (300, 420)), manager)
         self.apiary_windows.append(api_window)
         right_text_box_rect = pygame.Rect(0, 0, resource_panel_width, window_size[1])
         right_text_box_rect.right = 0
@@ -604,6 +602,7 @@ class GUI(Game):
         self.inv_window = InventoryWindow(self.inv, 7, 7, self.cursor,
             pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
             manager, resizable=True)
+        self.inventory_windows.append(self.inv_window)
         self.most_recent_inventory = self.inv
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
@@ -645,7 +644,7 @@ class GUI(Game):
                 if event.text.startswith('Apiary'):
                     index = int(event.text.split()[-1])
                     self.apiary_windows.append(
-                        ApiaryWindow(self, self.apiaries[index], self.cursor, self.ui_manager)
+                        ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
                     )
                 else:
                     index = int(event.text.split()[-1])
@@ -665,7 +664,7 @@ class GUI(Game):
                     self.print('Saved the game to the disk')
                 elif event.text == 'Mendelian Inheritance':
                     self.mendel_window()
-                    self.esc_menu.hide()
+                self.esc_menu.hide()
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if isinstance(event.ui_element, InventoryWindow):
                 self.most_recent_inventory = event.ui_element.inv
@@ -680,21 +679,32 @@ class GUI(Game):
         state = super().get_state()
         state['cursor_slot'] = self.cursor.slot
         state['inspect_slot'] = self.resource_panel.inspect_panel.bee_button.slot
+        api_win = []
+        for window in self.apiary_windows:
+            api_win.append((window.apiary, window.relative_rect))
+        state['apiary_windows'] = api_win
+        inv_win = []
+        for window in self.inventory_windows:
+            inv_win.append((window.inv, window.relative_rect))
+        state['inventory_windows'] = inv_win
         return state
 
     def load(self, name):
         saved = super().load(name)
         for window in self.apiary_windows:
             window.kill()
-        self.inv_window.inv = self.inv
+        for window in self.inventory_windows:
+            window.kill()
         for i, row in enumerate(self.inv_window.buttons):
             for j, b in enumerate(row):
                 slot = self.inv[j * len(row) + i]
                 b.slot = slot
         self.resource_panel.resources = self.resources
-        self.update_apiary_list()
+        self.update_windows_list()
         self.cursor.slot = saved['cursor_slot']
         self.resource_panel.inspect_panel.bee_button.slot = saved['inspect_slot']
+        self.inventory_windows = [InventoryWindow(inv, 7, 7, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
+        self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in saved['apiary_windows']]
         return saved
 
 def main():
