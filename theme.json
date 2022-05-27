@@ -1,0 +1,252 @@
+{
+  "#QueenBee": {
+    "colours": {
+      "normal_bg": "#4C5052,#C7BF65,90"
+    }
+  },
+  "#PrincessBee": {
+    "colours": {
+      "normal_bg": "#4C5052,#8A939E,90"
+    }
+  },
+  "#FOREST_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/FOREST_Princess.png"
+      }
+    }
+  },
+  "#FOREST_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/FOREST_Drone.png"
+      }
+    }
+  },
+  "#FOREST_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/FOREST_Queen.png"
+      }
+    }
+  },
+  "#MEADOWS_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/MEADOWS_Princess.png"
+      }
+    }
+  },
+  "#MEADOWS_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/MEADOWS_Drone.png"
+      }
+    }
+  },
+  "#MEADOWS_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/MEADOWS_Queen.png"
+      }
+    }
+  },
+  "#COMMON_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/COMMON_Princess.png"
+      }
+    }
+  },
+  "#COMMON_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/COMMON_Drone.png"
+      }
+    }
+  },
+  "#COMMON_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/COMMON_Queen.png"
+      }
+    }
+  },
+  "#CULTIVATED_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/CULTIVATED_Princess.png"
+      }
+    }
+  },
+  "#CULTIVATED_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/CULTIVATED_Drone.png"
+      }
+    }
+  },
+  "#CULTIVATED_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/CULTIVATED_Queen.png"
+      }
+    }
+  },
+  "#NOBLE_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/NOBLE_Princess.png"
+      }
+    }
+  },
+  "#NOBLE_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/NOBLE_Drone.png"
+      }
+    }
+  },
+  "#NOBLE_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/NOBLE_Queen.png"
+      }
+    }
+  },
+  "#MAJESTIC_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/MAJESTIC_Princess.png"
+      }
+    }
+  },
+  "#MAJESTIC_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/MAJESTIC_Drone.png"
+      }
+    }
+  },
+  "#MAJESTIC_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/MAJESTIC_Queen.png"
+      }
+    }
+  },
+  "#IMPERIAL_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/IMPERIAL_Princess.png"
+      }
+    }
+  },
+  "#IMPERIAL_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/IMPERIAL_Drone.png"
+      }
+    }
+  },
+  "#IMPERIAL_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/IMPERIAL_Queen.png"
+      }
+    }
+  },
+  "#DILIGENT_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/DILIGENT_Princess.png"
+      }
+    }
+  },
+  "#DILIGENT_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/DILIGENT_Drone.png"
+      }
+    }
+  },
+  "#DILIGENT_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/DILIGENT_Queen.png"
+      }
+    }
+  },
+  "#UNWEARY_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/UNWEARY_Princess.png"
+      }
+    }
+  },
+  "#UNWEARY_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/UNWEARY_Drone.png"
+      }
+    }
+  },
+  "#UNWEARY_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/UNWEARY_Queen.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Princess": {
+    "prototype": "#PrincessBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/INDUSTRIOUS_Princess.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Drone": {
+    "prototype": "#DroneBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/INDUSTRIOUS_Drone.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Queen": {
+    "prototype": "#QueenBee",
+    "images": {
+      "normal_image": {
+        "path": "assets/INDUSTRIOUS_Queen.png"
+      }
+    }
+  }
+}

@@ -65,7 +65,7 @@ class BeeLifespan(Enum):
     SHORTEST = 2
 
 
-class BeeSpeed(Enum):
+class BeeSpeed(float, Enum):
     def __str__(self):
         return local[self].upper() if dominant[self] else local[self].lower()
 
@@ -404,11 +404,12 @@ class Resources:
             self.res[k] += resources[k]
 
     def remove_resources(self, resources):
+        s = ''
         for k in resources:
             if self.res[k] - resources[k] < 0:
-                raise ValueError(
-                    f'Not enough {k}: you have {self.res[k]} but you need {resources[k]}'
-                )
+                s += f'Not enough {k}: you have {self.res[k]} but you need {resources[k]}\n'
+        if s != '':
+            raise ValueError(s)
         for k in resources:
             self.res[k] -= resources[k]
 
@@ -555,7 +556,10 @@ def except_print(*exceptions):
             try:
                 return func(self, *args, **kwargs)
             except exceptions as e:
-                self.print(e, out=self.command_out, flush=True)
+                try:
+                    self.print(e, out=self.command_out, flush=True)
+                except AttributeError:
+                    print(e)
 
         return wrapper
 
@@ -563,6 +567,7 @@ def except_print(*exceptions):
 
 
 class Apiary:
+    production_modifier = 1/3
     def __init__(self, name, add_resources):
         self.inv = Inventory(7)
         self.princess = Slot()
@@ -631,7 +636,7 @@ class Apiary:
                 raise ValueError('Can mate only when 1 Princess in slot')
 
     def try_queen_die(self):
-        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() >= self.princess.slot.genes.fertility[0]:
+        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() > self.princess.slot.genes.fertility[0]:
             queen = self.princess.take()
             bees = queen.die()
             self.inv.place_bees(bees)
@@ -649,7 +654,9 @@ class Apiary:
                     resources_to_add = dict()
                     for res_name in res:
                         amt, prob = res[res_name]
-                        if random.random() < prob:
+                        probability = (self.princess.slot.genes.speed[0]) * (self.production_modifier) * (prob)
+                        # print(self.princess.slot.genes.speed[0], prob, probability)
+                        if random.random() < probability:
                             resources_to_add[res_name] = amt
                     self.add_resources(resources_to_add)
                 else:
@@ -658,7 +665,7 @@ class Apiary:
 
 class Game:
     def __init__(self):
-        self.resources = Resources()
+        self.resources = Resources(honey=0)
         self.inv = Inventory(100)
         self.apiaries = [Apiary('0', self.resources.add_resources)]
             
@@ -738,19 +745,19 @@ class Game:
 
     def inspect_bee(self, bee):
         if not bee.inspected:
-            self.resources.remove_resources({'honey': 5})
+            self.resources.remove_resources({'honey': 1})
             bee.inspected = True
 
     @except_print(IndexError, ValueError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
-                {'wood': 5, 'flowers': 5, 'honey': 10})
+                {'honey': 10, 'wood': 5, 'flowers': 5})
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
             return self.apiaries[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
-                {'royal gelly': 25, 'pollen cluster': 25, 'honey': 100}
+                {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
             )
             self.print('You won the demo!', out=self.command_out, flush=True)
             self.exit_event.set()
