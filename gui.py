@@ -396,7 +396,11 @@ class ApiaryWindow(UIWindow):
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.take_all_button:
-                self.game.take(self.apiary.name, '0..6')
+                r = []
+                for b in self.buttons:
+                    bee, amt = b.slot.take_all()
+                    r.extend([bee]*amt)
+                self.game.most_recent_inventory.place_bees(r)
             elif event.ui_element == self.princess_button:
                 if self.cursor.slot.is_empty():
                     self.cursor.slot.put(*self.apiary.take_princess()) # just take it from apiary
