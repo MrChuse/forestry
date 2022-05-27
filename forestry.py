@@ -442,7 +442,7 @@ class Slot:
             return
         if self.slot is None:
             self.slot = bee
-            self.amount = 1
+            self.amount = amount
         else:
             raise SlotOccupiedError('The slot is not empty')
 
@@ -547,7 +547,12 @@ class Inventory:
                     raise SlotOccupiedError('Tried to insert too many bees')
     
     def sort(self):
-        self.place_bees([slot.take() for slot in self if not slot.is_empty()])
+        r = []
+        for slot in self:
+            if not slot.is_empty():
+                bee, amt = slot.take_all()
+                r.extend([bee]*amt)
+        self.place_bees(r)
 
 
 def except_print(*exceptions):
@@ -628,7 +633,7 @@ class Apiary:
 
     def try_breed(self):
         if isinstance(self.princess.slot, Princess) and isinstance(self.drone.slot, Drone):
-            if self.princess.slot.amount == 1:
+            if self.princess.amount == 1:
                 princess = self.princess.take()
                 drone = self.drone.take()
                 self.princess.put(princess.mate(drone))
