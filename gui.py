@@ -59,9 +59,9 @@ class Cursor(UIButtonSlot):
         self.relative_rect.topleft = pos
         self.rect.topleft = pos
         if self.slot.is_empty():
-            self.rect.size = (-1, -1)
+            self.hide()
         else:
-            self.rect.size = (64, 64)
+            self.show()
         return super().update(time_delta)
 
 class InventoryWindow(UIWindowNoX):

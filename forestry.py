@@ -404,11 +404,12 @@ class Resources:
             self.res[k] += resources[k]
 
     def remove_resources(self, resources):
+        s = ''
         for k in resources:
             if self.res[k] - resources[k] < 0:
-                raise ValueError(
-                    f'Not enough {k}: you have {self.res[k]} but you need {resources[k]}'
-                )
+                s += f'Not enough {k}: you have {self.res[k]} but you need {resources[k]}\n'
+        if s != '':
+            raise ValueError(s)
         for k in resources:
             self.res[k] -= resources[k]
 
@@ -534,7 +535,7 @@ def except_print(*exceptions):
 
 
 class Apiary:
-    production_modifier = 1
+    production_modifier = 1/3
     def __init__(self, name, add_resources):
         self.inv = Inventory(7)
         self.princess = Slot()
@@ -709,7 +710,7 @@ class Game:
 
     def inspect_bee(self, bee):
         if not bee.inspected:
-            self.resources.remove_resources({'honey': 3})
+            self.resources.remove_resources({'honey': 1})
             bee.inspected = True
 
     @except_print(IndexError, ValueError)
