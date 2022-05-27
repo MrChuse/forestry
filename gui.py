@@ -271,9 +271,13 @@ class InventoryWindow(UIWindow):
             for i, row in enumerate(self.buttons):
                 for j, b in enumerate(row):
                     pos = (self.margin + i * (hor_size + self.margin), self.margin + j * (vert_size + self.margin))
-                    b.relative_rect.topleft = pos
-                    b.rect.size = bsize
-                    b.rebuild()
+                    b.set_relative_position(pos)
+                    b.set_dimensions(bsize)
+                    text_box_size = b.text_box.rect.size
+                    bottomright = b.relative_rect.bottomright
+                    pos = (bottomright[0] - text_box_size[0], bottomright[1] - text_box_size[1])
+                    b.text_box.set_relative_position(pos)
+                    
     
     def set_dimensions(self, size):
         self.place_buttons(size)
