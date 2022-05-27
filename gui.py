@@ -9,8 +9,10 @@ from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
                                  UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
 from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 from pygame_gui.core import ObjectID
+from pygame_gui.windows import UIMessageWindow
 
 from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot
+from helper_texts import helper_text, mendel_text
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -54,7 +56,7 @@ class UIButtonSlot(UIButton):
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
-        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=20, object_id=ObjectID(class_id='@Centered'))
+        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'))
         self.text_box.hide()
         self.saved_amount = 0
         # self.text_box.process_event = lambda event: False
@@ -115,8 +117,6 @@ class InventoryWindow(UIWindowNoX):
 
         self.title_bar_sort_button_width = 100
         self.sort_window_button = None
-        self.save_window_button = None
-        self.load_window_button = None
         self.buttons : Union[List[List[UIButtonSlot]], None] = None
         super().__init__(rect, manager, *args, **kwargs)
     
@@ -186,11 +186,11 @@ class InventoryWindow(UIWindowNoX):
 
             if self.title_bar is not None:
                 self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
-                                                3 * self.title_bar_sort_button_width,
+                                                self.title_bar_sort_button_width,
                                                 self.title_bar_height))
             else:
                 title_bar_width = (self._window_root_container.relative_rect.width -
-                                    3 * self.title_bar_sort_button_width)
+                                    self.title_bar_sort_button_width)
                 self.title_bar = UIButton(relative_rect=pygame.Rect(0, 0,
                                                                     title_bar_width,
                                                                     self.title_bar_height),
@@ -223,48 +223,6 @@ class InventoryWindow(UIWindowNoX):
                                                             'bottom': 'top',
                                                             'left': 'right',
                                                             'right': 'right'}
-                                                    )
-            if self.save_window_button is not None:
-                save_button_pos = (-self.title_bar_sort_button_width, 0)
-                self.save_window_button.set_dimensions((self.title_bar_sort_button_width,
-                                                            self.title_bar_height))
-                self.save_window_button.set_relative_position(save_button_pos)
-            else:
-                save_rect = pygame.Rect((-self.title_bar_sort_button_width, 0),
-                                        (self.title_bar_sort_button_width,
-                                        self.title_bar_height))
-                self.save_window_button = UIButton(relative_rect=save_rect,
-                                                    text='Save',
-                                                    manager=self.ui_manager,
-                                                    container=self._window_root_container,
-                                                    parent_element=self,
-                                                    object_id='#close_button',
-                                                    anchors={'top': 'top',
-                                                            'bottom': 'top',
-                                                            'left': 'right',
-                                                            'right': 'right',
-                                                            'right_target':self.sort_window_button}
-                                                    )
-            if self.load_window_button is not None:
-                load_button_pos = (-self.title_bar_sort_button_width, 0)
-                self.load_window_button.set_dimensions((self.title_bar_sort_button_width,
-                                                            self.title_bar_height))
-                self.load_window_button.set_relative_position(load_button_pos)
-            else:
-                load_rect = pygame.Rect((-self.title_bar_sort_button_width, 0),
-                                        (self.title_bar_sort_button_width,
-                                        self.title_bar_height))
-                self.load_window_button = UIButton(relative_rect=load_rect,
-                                                    text='Load',
-                                                    manager=self.ui_manager,
-                                                    container=self._window_root_container,
-                                                    parent_element=self,
-                                                    object_id='#close_button',
-                                                    anchors={'top': 'top',
-                                                            'bottom': 'top',
-                                                            'left': 'right',
-                                                            'right': 'right',
-                                                            'right_target':self.save_window_button}
                                                     )
         super(UIWindow, self).rebuild()
 
@@ -302,12 +260,6 @@ class InventoryWindow(UIWindowNoX):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.sort_window_button:
                 self.inv.sort()
-            elif event.ui_element == self.load_window_button:
-                self.game.load('save')
-                self.game.print('Loaded save from disk')
-            elif event.ui_element == self.save_window_button:
-                self.game.save('save')
-                self.game.print('Saved the game to the disk')
             for j, row in enumerate(self.buttons):
                 for i, b in enumerate(row):
                     if event.ui_element == b:
@@ -439,6 +391,7 @@ class ApiaryWindow(UIWindow):
                         self.apiary.put_princess(*bee2)
             elif event.ui_element == self.drone_button:
                 process_cursor_slot_interaction(event, self.cursor, self.drone_button.slot)
+                self.apiary.try_breed()
             for index, b in enumerate(self.buttons):
                 if event.ui_element == b:
                     if self.cursor.slot.is_empty():
@@ -582,6 +535,7 @@ class GUI(Game):
         Slot.str_amount = lambda x: ''
 
         self.cursor = Cursor(pygame.Rect(0, 0, 64, 64), '', cursor_manager)
+        self.window_size = window_size
         self.ui_manager = manager
         resource_panel_width = 330
         self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
@@ -611,29 +565,23 @@ class GUI(Game):
         self.inv_window = InventoryWindow(self, 10, 10, self.cursor,
             pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
             manager, 'Inventory', resizable=True)
-
-        r = pygame.Rect(0,0,window_size[0]/2, window_size[1]/2)
-        r.center = (window_size[0]/2, window_size[1]/2)
+        
+        esc_menu_rect = pygame.Rect(0, 0, 200, 500)
+        esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
+        self.esc_menu = UISelectionList(esc_menu_rect, ['Mendelian Inheritance', 'Load', 'Save', 'Exit'], cursor_manager, visible=False, starting_height=30)
+        
         if not os.path.exists('save.forestry'):
-            help_window = UIWindow(r, manager)
-            help_text = UITextBox(
-                '''Welcome to a demo of my little game about selective breeding!
-You are going to be a professional bee breeder and your goal for this demo is to build an alveary.
-In order to do this you'll have to (surprisingly) breed the bees you have and try to find the pairs of species that result in a mutation after mating.
+            self.help_window(window_size)
 
-You start with 0 bees, so you need a way to collect them in the first place. `Forage` button on the left will help you.
-You can put the bees into the apiary, just click the bee and click one of the two top slots in the apiary window.
+    def help_window(self):
+        r = pygame.Rect(0, 0, self.window_size[0]/2, self.window_size[1]/2)
+        r.center = (self.window_size[0]/2, self.window_size[1]/2)
+        return UIMessageWindow(r, helper_text, self.ui_manager)
 
-Bees have genes, and you only see their phenotype at first; to discover their genotype you should place the bee into the inspection slot on the left and hit `Inspect` button
-You can build new apiaries using `Build` button on the left. When you build an alveary, you win the game!
-
-Also, you can change the size of the inventory window (if you have lower resolution, you may not see the bees' species and sex)
-On the right side you can see logs which show when something went wrong and some other information
-
-Don't forget to save your progress using `Save` button located at the top of your inventory.
-You can load your saved progress. Only one save slot is available (you can manipulate save.forestry file however)'''.replace('\n', '<br>'),
-                pygame.Rect(0,0, r.width-32, r.height-59), manager, container=help_window
-            )
+    def mendel_window(self):
+        r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
+        r.center = (self.window_size[0]/2, self.window_size[1]/2)
+        return UIMessageWindow(r, mendel_text, self.ui_manager)
 
     def render(self):
         pass
@@ -656,6 +604,24 @@ You can load your saved progress. Only one save slot is available (you can manip
                 self.apiary_windows.append(
                     ApiaryWindow(self, self.apiaries[index], self.cursor, self.ui_manager)
                 )
+            elif event.ui_element == self.esc_menu:
+                if event.text == 'Exit':
+                    pygame.event.post(pygame.event.Event(pygame.QUIT))
+                elif event.text == 'Load':
+                    self.load('save')
+                    self.print('Loaded save from disk')
+                elif event.text == 'Save':
+                    self.save('save')
+                    self.print('Saved the game to the disk')
+                elif event.text == 'Mendelian Inheritance':
+                    self.mendel_window()
+                    self.esc_menu.hide()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                if self.esc_menu.visible:
+                    self.esc_menu.hide()
+                else:
+                    self.esc_menu.show()
     
     def get_state(self):
         state = super().get_state()
@@ -713,8 +679,9 @@ def main():
                 try:
                     if game is not None:
                         game.process_event(event)
-                    manager.process_events(event)
-                    cursor_manager.process_events(event)
+                    consumed = cursor_manager.process_events(event)
+                    if not consumed:
+                        manager.process_events(event)
                 except Exception as e:
                     game.print(e, out=1)
 
