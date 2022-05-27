@@ -8,8 +8,25 @@ import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
                                  UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
 from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
+from pygame_gui.core import ObjectID
 
 from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot
+
+def process_cursor_slot_interaction(event, cursor, slot):
+    if event.mouse_button == pygame.BUTTON_LEFT:
+        if cursor.slot.slot == slot.slot:
+            slot.put(*cursor.slot.take_all()) # stack
+        else:
+            cursor.slot.swap(slot) # swap                 
+    elif event.mouse_button == pygame.BUTTON_RIGHT:
+        if cursor.slot.is_empty():
+            bee, amt = slot.take_all() # take half 
+            cursor.slot.put(bee, amt//2)
+            slot.put(bee, amt-amt//2)
+        else:
+            slot.put(cursor.slot.slot) # put one
+            cursor.slot.take()
+
 
 
 class UIWindowNoX(UIWindow):
@@ -32,7 +49,15 @@ class UIButtonSlot(UIButton):
         self.slot = slot
         self.args = args
         self.kwargs = kwargs
+        self.kwargs['generate_click_events_from'] = [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT]
         super().__init__(*args, **kwargs)
+        r = pygame.Rect(0,0,0,0)
+        r.size = 34, 30
+        r.bottomright = self.relative_rect.bottomright
+        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=20, object_id=ObjectID(class_id='@Centered'))
+        self.text_box.hide()
+        self.saved_amount = 0
+        # self.text_box.process_event = lambda event: False
     
     def update(self, time_delta: float):
         bee = self.slot.slot
@@ -48,6 +73,14 @@ class UIButtonSlot(UIButton):
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
             super().__init__(*self.args, **self.kwargs)
+        if self.slot.amount != self.saved_amount:
+            if self.slot.amount < 2:
+                self.text_box.hide()
+                self.saved_amount = 0
+            else:
+                self.text_box.set_text(str(self.slot.amount))
+                self.saved_amount = self.slot.amount
+                self.text_box.show()
         return super().update(time_delta)
 
 class Cursor(UIButtonSlot):
@@ -58,6 +91,10 @@ class Cursor(UIButtonSlot):
         pos = pygame.mouse.get_pos()
         self.relative_rect.topleft = pos
         self.rect.topleft = pos
+
+        self.text_box.rect.size = 30, 30
+        self.text_box.rect.bottomright = self.rect.bottomright
+
         if self.slot.is_empty():
             self.hide()
         else:
@@ -277,9 +314,9 @@ class InventoryWindow(UIWindowNoX):
                         index = i * self.button_hor + j
                         mods = pygame.key.get_mods()
                         if mods & pygame.KMOD_LSHIFT:
-                            self.inv.take(index)
+                            self.inv.take_all(index)
                         else:
-                            self.cursor.slot.swap(self.inv[index])
+                            process_cursor_slot_interaction(event, self.cursor, self.inv[index])
                         return True
         return super().process_event(event)
 
@@ -339,15 +376,10 @@ class ApiaryWindow(UIWindow):
         self.side_margin2 = 63
         self.princess_button = UIButtonSlot(self.apiary.princess, pygame.Rect((self.side_margin2, self.top_margin2), self.button_size),
             '', manager, self)
-        drone_rect = pygame.Rect((0, 0), self.button_size)
-        drone_rect.topright = (-self.side_margin2, self.top_margin2)
+        drone_rect = pygame.Rect((self.size[0] - self.button_size[0] - self.side_margin2 - 32, self.top_margin2), self.button_size)
         self.drone_button = UIButtonSlot(self.apiary.drone, drone_rect,
                                      text='', manager=manager,
-                                     container=self,
-                                     anchors={'left': 'right',
-                                              'right': 'right',
-                                              'top': 'top',
-                                              'bottom': 'top'})
+                                     container=self)
 
         queen_health_rect = pygame.Rect(0, self.princess_button.relative_rect.bottom + 14, self.size[0] - self.side_margin2 * 2, 10)
         queen_health_rect.centerx = self.size[0] / 2 - 16
@@ -392,33 +424,25 @@ class ApiaryWindow(UIWindow):
                 self.game.take(self.apiary.name, '0..6')
             elif event.ui_element == self.princess_button:
                 if self.cursor.slot.is_empty():
-                    self.cursor.slot.put(self.apiary.take_princess())
+                    self.cursor.slot.put(*self.apiary.take_princess()) # just take it from apiary
                 else:
-                    bee1 = self.apiary.take_princess()
-                    try:
-                        self.apiary.put_princess(self.cursor.slot.slot)
-                    except TypeError as e:
-                        self.apiary.put_princess(bee1)
-                        raise e
+                    # cursor not empty
+                    if self.apiary.princess.is_empty():
+                        bee = self.cursor.slot.take()
+                        self.apiary.put_princess(bee)
                     else:
-                        self.cursor.slot.take()
-                        self.cursor.slot.put(bee1)
+                        if self.cursor.slot.amount > 1:
+                            raise ValueError("Can't put more than 1 princess into apiary")
+                        bee1 = self.apiary.take_princess()
+                        bee2 = self.cursor.slot.take_all()
+                        self.cursor.slot.put(*bee1)
+                        self.apiary.put_princess(*bee2)
             elif event.ui_element == self.drone_button:
-                if self.cursor.slot.is_empty():
-                    self.cursor.slot.put(self.apiary.take_drone())
-                else:
-                    bee1 = self.apiary.take_drone()
-                    try:
-                        self.apiary.put_drone(self.cursor.slot.slot)
-                    except TypeError:
-                        self.apiary.put_drone(bee1)
-                    else:
-                        self.cursor.slot.take()
-                        self.cursor.slot.put(bee1)
+                process_cursor_slot_interaction(event, self.cursor, self.drone_button.slot)
             for index, b in enumerate(self.buttons):
                 if event.ui_element == b:
                     if self.cursor.slot.is_empty():
-                        self.cursor.slot.put(self.apiary.take(index))
+                        self.cursor.slot.put(*self.apiary.take(index))
                     else:
                         self.game.print('Cursor not empty', out=1)
         return super().process_event(event)
@@ -555,6 +579,7 @@ class GUI(Game):
         self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
+        Slot.str_amount = lambda x: ''
 
         self.cursor = Cursor(pygame.Rect(0, 0, 64, 64), '', cursor_manager)
         self.ui_manager = manager
