@@ -440,14 +440,15 @@ class Slot:
         return f'({self.amount})' if self.amount > 1 else ''
         
     def put(self, bee, amount=1):
-        if self.slot == bee:
-            self.amount += amount
-            return
-        if self.slot is None:
-            self.slot = bee
-            self.amount = amount
-        else:
-            raise SlotOccupiedError('The slot is not empty')
+        if amount > 0:
+            if self.slot == bee:
+                self.amount += amount
+                return
+            if self.slot is None:
+                self.slot = bee
+                self.amount = amount
+            else:
+                raise SlotOccupiedError('The slot is not empty')
 
     def take(self):
         bee = self.slot
@@ -522,15 +523,43 @@ class Inventory:
         drone = self.storage[i2].take()
         self.storage[i1].put(princess.mate(drone))
 
-    def place_bees(self, offspring):
-        for bee in offspring: # try to put into occupied slots first
+    def check_enough_space(self, list_things: Union[List[Bee], List[Slot]]):
+        not_in_storage = 0
+        for thing in list_things:
             index = 0
+            if isinstance(thing, Slot):
+                bee = thing.slot
+            else:
+                bee = thing
+            while index < self.capacity:
+                if self.storage[index].is_empty():
+                    index += 1
+                    continue
+                if self.storage[index].slot == bee:
+                    break
+                else:
+                    index += 1
+            else:
+                not_in_storage += 1
+        return not_in_storage <= self.empty_slots()
+                
+
+    def place_bees(self, list_things: Union[List[Bee], List[Slot]]):
+        if not self.check_enough_space(list_things):
+            raise SlotOccupiedError('Tried to insert too many bees')
+        for thing in list_things: # try to put into occupied slots first
+            index = 0
+            if isinstance(thing, Slot):
+                bee, amt = thing.take_all()
+            elif isinstance(thing, Bee):
+                bee = thing
+                amt = 1
             while index < self.capacity:
                 if self.storage[index].is_empty():
                     index += 1
                     continue
                 try:
-                    self.storage[index].put(bee)
+                    self.storage[index].put(bee, amt)
                     index += 1
                     break
                 except SlotOccupiedError:
@@ -540,21 +569,18 @@ class Inventory:
                 index = 0
                 while index < self.capacity:
                     try:
-                        self.storage[index].put(bee)
+                        self.storage[index].put(bee, amt)
                         index += 1
                         break
                     except SlotOccupiedError:
                         index += 1
                         continue
-                else:
-                    raise SlotOccupiedError('Tried to insert too many bees')
     
     def sort(self):
         r = []
         for slot in self:
             if not slot.is_empty():
-                bee, amt = slot.take_all()
-                r.extend([bee]*amt)
+                r.append(slot)
         self.place_bees(r)
 
 
