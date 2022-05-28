@@ -206,7 +206,7 @@ products = {
     bs.CULTIVATED: {'honey': (1, 1)},
     bs.NOBLE: {'honey': (1, 0.25), 'gold': (1, 0.1)},
     bs.MAJESTIC: {'honey': (1, 0.25), 'gold': (1, 0.15)},
-    bs.IMPERIAL: {'honey': (1, 0.25), 'gold': (1, 0.1), 'royal gelly': (1, 0.1)},
+    bs.IMPERIAL: {'honey': (1, 0.25), 'gold': (1, 0.1), 'royal jelly': (1, 0.1)},
     bs.DILIGENT: {'honey': (1, 0.25), 'string': (1, 0.1)},
     bs.UNWEARY: {'honey': (1, 0.25), 'string': (1, 0.15)},
     bs.INDUSTRIOUS: {'honey': (1, 0.25), 'string': (1, 0.1), 'pollen cluster': (1, 0.1), },
@@ -789,7 +789,7 @@ class Game:
             self.resources.remove_resources({'honey': 1})
             bee.inspected = True
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
@@ -803,10 +803,9 @@ class Game:
             return self.inventories[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
-                {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
+                {'honey': 100, 'royal jelly': 25, 'pollen cluster': 25}
             )
             self.print('You won the demo!', out=self.command_out, flush=True)
-            self.exit_event.set()
 
     def update_state(self):
         while True:
