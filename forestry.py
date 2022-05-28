@@ -440,14 +440,15 @@ class Slot:
         return f'({self.amount})' if self.amount > 1 else ''
         
     def put(self, bee, amount=1):
-        if self.slot == bee:
-            self.amount += amount
-            return
-        if self.slot is None:
-            self.slot = bee
-            self.amount = amount
-        else:
-            raise SlotOccupiedError('The slot is not empty')
+        if amount > 0:
+            if self.slot == bee:
+                self.amount += amount
+                return
+            if self.slot is None:
+                self.slot = bee
+                self.amount = amount
+            else:
+                raise SlotOccupiedError('The slot is not empty')
 
     def take(self):
         bee = self.slot
