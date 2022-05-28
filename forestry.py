@@ -43,7 +43,7 @@ class BeeSpecies(Enum):
 
 class BeeFertility(IntEnum):
     def __str__(self):
-        return local[self] + 'D' if dominant[self] else local[self] + 'p'
+        return local[self]
 
     TWO = 2
     THREE = 3
@@ -297,6 +297,7 @@ class Bee:
             return '\n'.join(res)
         res.append(local[type(self)])
         genes = vars(self.genes)
+        res.append('Trait: active, inactive')
         for key in genes:
             res.append(f'  {key} : {genes[key][0]}, {genes[key][1]}')
         return '\n'.join(res)
