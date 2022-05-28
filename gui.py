@@ -83,6 +83,8 @@ class UIButtonSlot(UIButton):
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
             self.__init__(self.slot, *self.args, **self.kwargs)
+        if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
+            self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
             if self.slot.amount < 2:
                 self.text_box.hide()
@@ -527,17 +529,13 @@ class InspectPanel(UIPanel):
             return
         res = []
         if not bee.inspected:
-            self.game.print('not inspected')
             res.append(bee.small_str())
         else:
-            self.game.print('inspected')
             res.append(local[type(bee)])
-            self.game.print('inspected')
             genes = vars(bee.genes)
             res.append('Trait: active, inactive')
             for key in genes:
                 res.append(f'  {key} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{genes[key][0]}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{genes[key][1]}</font>')
-            self.game.print(res)
         self.text_box.set_text('<br>'.join(res))
 
     def process_event(self, event: pygame.event.Event) -> bool:
