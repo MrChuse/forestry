@@ -43,7 +43,7 @@ class BeeSpecies(Enum):
 
 class BeeFertility(IntEnum):
     def __str__(self):
-        return local[self] + 'D' if dominant[self] else local[self] + 'p'
+        return local[self]
 
     TWO = 2
     THREE = 3
@@ -188,6 +188,8 @@ mutations = {
     (bs.CULTIVATED, bs.COMMON): ([bs.NOBLE, bs.DILIGENT], [0.1, 0.1]),
     (bs.CULTIVATED, bs.NOBLE): ([bs.MAJESTIC], [0.08]),
     (bs.MAJESTIC, bs.NOBLE): ([bs.IMPERIAL], [0.08]),
+    (bs.CULTIVATED, bs.DILIGENT): ([bs.UNWEARY], [0.08]),
+    (bs.UNWEARY, bs.DILIGENT): ([bs.INDUSTRIOUS], [0.08]),
 }
 # appends None with weight that sums up to 1 in order to use random.choices later
 for k in mutations:
@@ -204,7 +206,7 @@ products = {
     bs.CULTIVATED: {'honey': (1, 1)},
     bs.NOBLE: {'honey': (1, 0.25), 'gold': (1, 0.1)},
     bs.MAJESTIC: {'honey': (1, 0.25), 'gold': (1, 0.15)},
-    bs.IMPERIAL: {'honey': (1, 0.25), 'gold': (1, 0.1), 'royal gelly': (1, 0.1)},
+    bs.IMPERIAL: {'honey': (1, 0.25), 'gold': (1, 0.1), 'royal jelly': (1, 0.1)},
     bs.DILIGENT: {'honey': (1, 0.25), 'string': (1, 0.1)},
     bs.UNWEARY: {'honey': (1, 0.25), 'string': (1, 0.15)},
     bs.INDUSTRIOUS: {'honey': (1, 0.25), 'string': (1, 0.1), 'pollen cluster': (1, 0.1), },
@@ -297,6 +299,7 @@ class Bee:
             return '\n'.join(res)
         res.append(local[type(self)])
         genes = vars(self.genes)
+        res.append('Trait: active, inactive')
         for key in genes:
             res.append(f'  {key} : {genes[key][0]}, {genes[key][1]}')
         return '\n'.join(res)
@@ -670,10 +673,11 @@ class Apiary:
                 raise ValueError('Can mate only when 1 Princess in slot')
 
     def try_queen_die(self):
-        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() > self.princess.slot.genes.fertility[0]:
-            queen = self.princess.take()
+        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
+            queen = self.princess.slot
             bees = queen.die()
             self.inv.place_bees(bees)
+            self.princess.take()
             return True
         return False
 
@@ -785,7 +789,7 @@ class Game:
             self.resources.remove_resources({'honey': 1})
             bee.inspected = True
 
-    @except_print(IndexError, ValueError)
+    @except_print(IndexError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
@@ -799,10 +803,9 @@ class Game:
             return self.inventories[-1]
         elif params[0] == 'alveary':
             self.resources.remove_resources(
-                {'honey': 100, 'royal gelly': 25, 'pollen cluster': 25}
+                {'honey': 100, 'royal jelly': 25, 'pollen cluster': 25}
             )
             self.print('You won the demo!', out=self.command_out, flush=True)
-            self.exit_event.set()
 
     def update_state(self):
         while True:

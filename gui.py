@@ -11,7 +11,7 @@ from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow
 
-from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot
+from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant
 from helper_texts import helper_text, mendel_text
 
 def process_cursor_slot_interaction(event, cursor, slot):
@@ -74,7 +74,6 @@ class UIButtonSlot(UIButton):
         obj_id = self.get_object_id_from_bee(bee)
         prev_obj_id = self.most_specific_combined_id.split('.')[-1]
         if obj_id != prev_obj_id:
-            print(self.most_specific_combined_id)
             pos = self.relative_rect.topleft
             size = self.rect.size
             self.kill()
@@ -84,6 +83,8 @@ class UIButtonSlot(UIButton):
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
             self.__init__(self.slot, *self.args, **self.kwargs)
+        if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
+            self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
             if self.slot.amount < 2:
                 self.text_box.hide()
@@ -521,17 +522,32 @@ class InspectPanel(UIPanel):
         self.bee_button.empty_object_id = '#DroneEmpty'
         self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
     
+    def process_inspect(self):
+        bee = self.bee_button.slot.slot
+        if bee is None:
+            self.text_box.set_text('')
+            return
+        res = []
+        if not bee.inspected:
+            res.append(bee.small_str())
+        else:
+            res.append(local[type(bee)])
+            genes = vars(bee.genes)
+            res.append('Trait: active, inactive')
+            for key in genes:
+                res.append(f'  {key} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{genes[key][0]}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{genes[key][1]}</font>')
+        self.text_box.set_text('<br>'.join(res))
+
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.bee_button:
                 self.cursor.slot.swap(self.bee_button.slot)
+                self.process_inspect()
             elif event.ui_element == self.inspect_button:
                 self.game.inspect_bee(self.bee_button.slot.slot)
+                self.process_inspect()
+                self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
         return super().process_event(event)
-    
-    def update(self, time_delta: float):
-        self.text_box.set_text(str(self.bee_button.slot).replace('\n', '<br>'))
-        return super().update(time_delta)
 
 
 
@@ -594,6 +610,9 @@ class ResourcePanel(UIPanel):
                         pygame.Rect(0, 0, self.game.apiary_selection_list.rect.left, self.game.window_size[1]),
                         self.ui_manager, resizable=True)
                         self.game.update_windows_list()
+                    else: #if isinstance(building, Alveary):
+                        win_window = UIMessageWindow(pygame.Rect((0,0), self.game.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
+                        win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:
                 self.game.forage(self.game.most_recent_inventory)
