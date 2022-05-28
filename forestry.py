@@ -188,6 +188,8 @@ mutations = {
     (bs.CULTIVATED, bs.COMMON): ([bs.NOBLE, bs.DILIGENT], [0.1, 0.1]),
     (bs.CULTIVATED, bs.NOBLE): ([bs.MAJESTIC], [0.08]),
     (bs.MAJESTIC, bs.NOBLE): ([bs.IMPERIAL], [0.08]),
+    (bs.CULTIVATED, bs.DILIGENT): ([bs.UNWEARY], [0.08]),
+    (bs.UNWEARY, bs.DILIGENT): ([bs.INDUSTRIOUS], [0.08]),
 }
 # appends None with weight that sums up to 1 in order to use random.choices later
 for k in mutations:
@@ -671,10 +673,11 @@ class Apiary:
                 raise ValueError('Can mate only when 1 Princess in slot')
 
     def try_queen_die(self):
-        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0 and self.inv.empty_slots() > self.princess.slot.genes.fertility[0]:
-            queen = self.princess.take()
+        if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
+            queen = self.princess.slot
             bees = queen.die()
             self.inv.place_bees(bees)
+            self.princess.take()
             return True
         return False
 
