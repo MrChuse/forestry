@@ -1,0 +1,85 @@
+local: en
+genes_alleles:
+  # Each allele is NAME, value, dominance
+
+  BeeSpecies:
+    - [FOREST, 1, True]
+    - [MEADOWS, 2, True]
+    - [COMMON, 3, True]
+    - [CULTIVATED, 4, True]
+    - [NOBLE, 5, False]
+    - [MAJESTIC, 6, True]
+    - [IMPERIAL, 7, False]
+    - [DILIGENT, 8, False]
+    - [UNWEARY, 9, True]
+    - [INDUSTRIOUS, 10, False]
+    
+  BeeFertility:
+    - [ONE, 1, True]
+    - [TWO, 2, False]
+    - [THREE, 3, False]
+    - [FOUR, 4, False]
+
+  BeeLifespan:
+    - [LONGEST, 14, False]
+    - [LONGER, 12, False]
+    - [LONG, 10, False]
+    - [ELONGATED, 9, False]
+    - [NORMAL, 8, False]
+    - [SHORTENED, 7, False]
+    - [SHORT, 6, True]
+    - [SHORTER, 4, True]
+    - [SHORTEST, 2, False]
+
+  BeeSpeed:
+    - [FASTEST, 1.7, False]
+    - [FASTER, 1.4, False]
+    - [FAST, 1.2, False]
+    - [NORMAL, 1.0, False]
+    - [SLOW, 0.8, False]
+    - [SLOWER, 0.6, True]
+    - [SLOWEST, 0.3, True]
+
+mutations:
+  BeeSpecies:
+    - [FOREST, MEADOWS, COMMON, 0.15]
+    - [FOREST, COMMON, CULTIVATED, 0.12]
+    - [COMMON, MEADOWS, CULTIVATED, 0.12]
+    - [CULTIVATED, COMMON, NOBLE, 0.1]
+    - [CULTIVATED, NOBLE, MAJESTIC, 0.08]
+    - [CULTIVATED, COMMON, DILIGENT, 0.1]
+    - [MAJESTIC, NOBLE, IMPERIAL, 0.08]
+    - [CULTIVATED, DILIGENT, UNWEARY, 0.08]
+    - [UNWEARY, DILIGENT, INDUSTRIOUS, 0.08]
+
+products:
+  FOREST:
+    honey: [1, 0.5]
+    wood: [1, 0.5]
+  MEADOWS:
+    honey: [1, 0.5]
+    flowers: [1, 0.5]
+  COMMON:
+    honey: [1, 0.75]
+  CULTIVATED:
+    honey: [1, 1]
+  NOBLE:
+    honey: [1, 0.25]
+    gold: [1, 0.1]
+  MAJESTIC:
+    honey: [1, 0.25]
+    gold: [1, 0.15]
+  IMPERIAL:
+    honey: [1, 0.25]
+    gold: [1, 0.1]
+    royal jelly: [1, 0.1]
+  DILIGENT:
+    honey: [1, 0.25]
+    string: [1, 0.1]
+  UNWEARY:
+    honey: [1, 0.25]
+    string: [1, 0.15]
+  INDUSTRIOUS:
+    honey: [1, 0.25]
+    string: [1, 0.1]
+    pollen cluster: [1, 0.1]

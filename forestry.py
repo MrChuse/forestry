@@ -15,105 +15,16 @@ from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
+from config import BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed, dominant, mutations, products
 
 
 def weighted_if(weight, out1, out2):
     return out1 if random.random() < weight else out2
 
-
-class BeeSpecies(Enum):
-    def __str__(self):
-        return local[self].upper() if dominant[self] else local[self].lower()
-
-    FOREST = auto()
-    MEADOWS = auto()
-    COMMON = auto()
-    CULTIVATED = auto()
-    NOBLE = auto()
-    MAJESTIC = auto()
-    IMPERIAL = auto()
-    DILIGENT = auto()
-    UNWEARY = auto()
-    INDUSTRIOUS = auto()
-    # COMMON     = auto()
-    # COMMON     = auto()
-    # COMMON     = auto()
-    # COMMON     = auto()
-
-
-class BeeFertility(IntEnum):
-    def __str__(self):
-        return local[self]
-
-    TWO = 2
-    THREE = 3
-    FOUR = 4
-
-
-class BeeLifespan(Enum):
-    def __str__(self):
-        return local[self].upper() if dominant[self] else local[self].lower()
-
-    LONGEST = 14
-    LONGER = 12
-    LONG = 10
-    ELONGATED = 9
-    NORMAL = 8
-    SHORTENED = 7
-    SHORT = 6
-    SHORTER = 4
-    SHORTEST = 2
-
-
-class BeeSpeed(float, Enum):
-    def __str__(self):
-        return local[self].upper() if dominant[self] else local[self].lower()
-
-    FASTEST = 1.7
-    FASTER = 1.4
-    FAST = 1.2
-    NORMAL = 1
-    SLOW = 0.8
-    SLOWER = 0.6
-    SLOWEST = 0.3
-
-
 bs = BeeSpecies
 bf = BeeFertility
 bl = BeeLifespan
 bS = BeeSpeed
-
-dominant = {
-    bs.FOREST: True,  # known
-    bs.MEADOWS: True,  # known
-    bs.COMMON: True,  # known
-    bs.CULTIVATED: True,  # known
-    bs.NOBLE: False,  # known
-    bs.MAJESTIC: True,  # known
-    bs.IMPERIAL: False,  # known
-    bs.DILIGENT: False,  # known
-    bs.UNWEARY: True,  # known
-    bs.INDUSTRIOUS: False,  # known
-    bf(2): True,  # known
-    bf(3): False,  # known
-    bf(4): False,  # known
-    bl.LONGEST: False,
-    bl.LONGER: False,
-    bl.LONG: False,
-    bl.ELONGATED: False,
-    bl.NORMAL: False,
-    bl.SHORTENED: False,
-    bl.SHORT: True,  # known
-    bl.SHORTER: True,  # known
-    bl.SHORTEST: False,
-    bS.FASTEST: False,
-    bS.FASTER: False,
-    bS.FAST: False,
-    bS.NORMAL: False,
-    bS.SLOW: False,
-    bS.SLOWER: True,  # known
-    bS.SLOWEST: True,  # known
-}
 
 default_genes = {
     bs.FOREST: {
@@ -180,38 +91,6 @@ default_genes = {
 
 
 basic_species = [bs.FOREST, bs.MEADOWS]
-
-mutations = {
-    (bs.FOREST, bs.MEADOWS): ([bs.COMMON], [0.15]),
-    (bs.FOREST, bs.COMMON): ([bs.CULTIVATED], [0.12]),
-    (bs.COMMON, bs.MEADOWS): ([bs.CULTIVATED], [0.12]),
-    (bs.CULTIVATED, bs.COMMON): ([bs.NOBLE, bs.DILIGENT], [0.1, 0.1]),
-    (bs.CULTIVATED, bs.NOBLE): ([bs.MAJESTIC], [0.08]),
-    (bs.MAJESTIC, bs.NOBLE): ([bs.IMPERIAL], [0.08]),
-    (bs.CULTIVATED, bs.DILIGENT): ([bs.UNWEARY], [0.08]),
-    (bs.UNWEARY, bs.DILIGENT): ([bs.INDUSTRIOUS], [0.08]),
-}
-# appends None with weight that sums up to 1 in order to use random.choices later
-for k in mutations:
-    mutations[k][0].append(None)
-    mutations[k][1].append(1 - sum(mutations[k][1]))
-# updates the mutations with reversed keys in order for mutations to happen when
-# princess has the second allele and the drone the first one.
-mutations.update({(key[1], key[0]): mutations[key] for key in mutations})
-
-products = {
-    bs.FOREST: {'honey': (1, 0.5), 'wood': (1, 0.5)},
-    bs.MEADOWS: {'honey': (1, 0.5), 'flowers': (1, 0.5)},
-    bs.COMMON: {'honey': (1, 0.75)},
-    bs.CULTIVATED: {'honey': (1, 1)},
-    bs.NOBLE: {'honey': (1, 0.25), 'gold': (1, 0.1)},
-    bs.MAJESTIC: {'honey': (1, 0.25), 'gold': (1, 0.15)},
-    bs.IMPERIAL: {'honey': (1, 0.25), 'gold': (1, 0.1), 'royal jelly': (1, 0.1)},
-    bs.DILIGENT: {'honey': (1, 0.25), 'string': (1, 0.1)},
-    bs.UNWEARY: {'honey': (1, 0.25), 'string': (1, 0.15)},
-    bs.INDUSTRIOUS: {'honey': (1, 0.25), 'string': (1, 0.1), 'pollen cluster': (1, 0.1), },
-}
-
 
 class SlotOccupiedError(RuntimeError):
     pass
