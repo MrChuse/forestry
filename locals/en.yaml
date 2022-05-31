@@ -1,0 +1,54 @@
+bee_genders:
+  Princess: [Princess, 0]
+  Drone: [Drone, 0]
+  Queen: [Queen, 0]
+genes:
+  trait: "Trait : active, inactive"
+  species: species
+  fertility: fertility
+  lifespan: lifespan
+  speed: speed
+buildings:
+  Forage: Forage # left side bar button
+  Build: Build # left side bar button
+  Inventory: Inventory
+  Sort: Sort # sort button
+  Apiary: Apiary
+  Take: Take all # take all button
+  Alveary: Alveary
+  Inspect: Inspect # left side bar button
+genes_alleles:
+  BeeSpecies:
+    FOREST: [FOREST]
+    MEADOWS: [MEADOWS]
+    COMMON: [COMMON]
+    CULTIVATED: [CULTIVATED]
+    MAJESTIC: [MAJESTIC]
+    NOBLE: [NOBLE]
+    IMPERIAL: [IMPERIAL]
+    DILIGENT: [DILIGENT]
+    UNWEARY: [UNWEARY]
+    INDUSTRIOUS: [INDUSTRIOUS]
+  BeeFertility:
+    ONE: ['1']
+    TWO: ['2']
+    THREE: ['3']
+    FOUR: ['4']
+  BeeLifespan:
+    LONGEST: [Longest]
+    LONGER: [Longer]
+    LONG: [Long]
+    ELONGATED: [Elongated]
+    NORMAL: [Normal]
+    SHORTENED: [Shortened]
+    SHORT: [Short]
+    SHORTER: [Shorter]
+    SHORTEST: [Shortest]
+  BeeSpeed:
+    FASTEST: [FASTEST]
+    FASTER: [FASTER]
+    FAST: [FAST]
+    NORMAL: [NORMAL]
+    SLOW: [SLOW]
+    SLOWER: [SLOWER]
+    SLOWEST: [SLOWEST]

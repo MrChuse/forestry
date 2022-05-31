@@ -1,0 +1,54 @@
+bee_genders:
+  Princess: [Принцесса, 1]
+  Drone: [Трутень, 0]
+  Queen: [Королева, 1]
+genes:
+  trait: "Характеристика : активная, неактивная"
+  species: вид
+  fertility: потомство
+  lifespan: длина жизни
+  speed: скорость
+buildings:
+  Forage: Собирать пчел
+  Build: Построить
+  Inventory: Инвентарь
+  Sort: Сортировать
+  Apiary: Пасека
+  Take: Взять все
+  Alveary: Алвеарий
+  Inspect: Исследовать
+genes_alleles:
+  BeeSpecies:
+    FOREST: [ЛЕСНОЙ, ЛЕСНАЯ]
+    MEADOWS: [ЛУГОВОЙ, ЛУГОВАЯ]
+    COMMON: [ОБЫЧНЫЙ, ОБЫЧНАЯ]
+    CULTIVATED: [КУЛЬТИВИРОВАННЫЙ, КУЛЬТИВИРОВАННАЯ]
+    NOBLE: [БЛАГОРОДНЫЙ, БЛАГОРОДНАЯ]
+    MAJESTIC: [ВЕЛИЧЕСТВЕННЫЙ, ВЕЛИЧЕСТВЕННАЯ]
+    IMPERIAL: [ИМПЕРСКИЙ, ИМПЕРСКАЯ]
+    DILIGENT: [ТРУДОЛИБИВЫЙ, ТРУДОЛЮБИВАЯ]
+    UNWEARY: [ВЫНОСЛИВЫЙ, ВЫНОСЛИВАЯ]
+    INDUSTRIOUS: [ИНДУСТРИАЛЬНЫЙ, ИНДУСТРИАЛЬНАЯ]
+  BeeFertility:
+    ONE: ['1']
+    TWO: ['2']
+    THREE: ['3']
+    FOUR: ['4']
+  BeeLifespan:
+    LONGEST: [Длиннейшая]
+    LONGER: [Длиннее]
+    LONG: [Длинная]
+    ELONGATED: [Удлиненная]
+    NORMAL: [Нормальная]
+    SHORTENED: [Укороченная]
+    SHORT: [Короткая]
+    SHORTER: [Короче]
+    SHORTEST: [Кратчайшая]
+  BeeSpeed:
+    FASTEST: [Быстрейшая]
+    FASTER: [Быстрее]
+    FAST: [Быстрая]
+    NORMAL: [Нормальная]
+    SLOW: [Медленная]
+    SLOWER: [Медленнее]
+    SLOWEST: [Медленнейшая]

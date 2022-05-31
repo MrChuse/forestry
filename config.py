@@ -1,12 +1,11 @@
 from enum import Enum
 import yaml
 
-from forestry import local, dominant
+# from forestry import local, dominant
 
 class LocalEnum(Enum):
-    # def __str__(self):
-    #     return local[self].upper() if dominant[self] else local[self].lower()
-    pass
+    def __str__(self):
+        return local[self].upper() if dominant[self] else local[self].lower()
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
@@ -58,3 +57,21 @@ for allele_name, prod_dict in products_config.items():
     for prod_name, (amt, prob) in prod_dict.items():
         products[BeeSpecies[allele_name]][prod_name] = (amt, prob)
 
+# local
+filename = f'./locals/{config["local"]}.yaml'
+import codecs
+with codecs.open(filename, "r", "utf_8_sig" ) as f:
+    local_conf = yaml.safe_load(f)
+
+local = {}
+straight = ['genes', 'bee_genders', 'buildings']
+for thing in straight:
+    local = {**local, **local_conf[thing]}
+for gene_name, gene_local in local_conf['genes'].items():
+    local[gene_name] = gene_local
+for bee_gender, (gender_local, species_local_index) in local_conf['bee_genders'].items():
+    local[bee_gender] = (gender_local, species_local_index)
+for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
+    for allele_name, allele_local in dict_of_alleles.items():
+        local[genes_enums[gene_name][allele_name]] = allele_local
+print(local)

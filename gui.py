@@ -151,7 +151,7 @@ class InventoryWindow(UIWindow):
         self.sort_window_button = None
         self.buttons : Union[List[List[UIButtonSlot]], None] = None
 
-        kwargs['window_display_title'] = 'Inventory ' + inv.name
+        kwargs['window_display_title'] = local['Inventory'] + ' ' + inv.name
         kwargs['resizable'] = True
         super().__init__(rect, manager, *args, **kwargs)
     
@@ -269,7 +269,7 @@ class InventoryWindow(UIWindow):
                                         (self.title_bar_sort_button_width,
                                         self.title_bar_height))
                 self.sort_window_button = UIButton(relative_rect=sort_rect,
-                                                    text='Sort',
+                                                    text=local['Sort'],
                                                     manager=self.ui_manager,
                                                     container=self._window_root_container,
                                                     parent_element=self,
@@ -376,7 +376,7 @@ class ApiaryWindow(UIWindow):
         self.apiary = apiary
         self.cursor = cursor
         self.size = relative_rect.size
-        super().__init__(relative_rect, manager, "Apiary " + apiary.name, *args, **kwargs)
+        super().__init__(relative_rect, manager, local['Apiary'] + ' ' + apiary.name, *args, **kwargs)
 
         self.button_size = (64, 64)
         self.top_margin2 = 15
@@ -411,7 +411,7 @@ class ApiaryWindow(UIWindow):
             self.buttons.append(UIButtonSlot(self.apiary.inv[i+1], rect, '', manager, self))
         take_all_button_rect = pygame.Rect(0, 0, self.size[0] - self.side_margin2 * 2, 30)
         take_all_button_rect.centerx = rect.centerx - 40 # no clue why 40
-        self.take_all_button = UIButton(take_all_button_rect, 'Take all', manager, self,
+        self.take_all_button = UIButton(take_all_button_rect, local['Take'], manager, self,
             anchors={
                 'left': 'left',
                 'right': 'right',
@@ -515,7 +515,7 @@ class InspectPanel(UIPanel):
         self.cursor = cursor
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
         inspect_button_height = 64
-        self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height - 6, inspect_button_height), 'Inspect', manager, self)
+        self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height - 6, inspect_button_height), local['Inspect'], manager, self)
         bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
         bee_button_rect.right = rect.right - 6
         self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,)
@@ -531,11 +531,12 @@ class InspectPanel(UIPanel):
         if not bee.inspected:
             res.append(bee.small_str())
         else:
-            res.append(local[type(bee)])
-            genes = vars(bee.genes)
-            res.append('Trait: active, inactive')
-            for key in genes:
-                res.append(f'  {key} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{genes[key][0]}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{genes[key][1]}</font>')
+            res.append(str(bee).replace('\n', '<br>'))
+            # res.append(local[type(bee)])
+            # genes = vars(bee.genes)
+            # res.append('Trait: active, inactive')
+            # for key in genes:
+            #     res.append(f'  {key} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{genes[key][0]}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{genes[key][1]}</font>')
         self.text_box.set_text('<br>'.join(res))
 
     def process_event(self, event: pygame.event.Event) -> bool:
@@ -564,7 +565,7 @@ class ResourcePanel(UIPanel):
             r,
             manager,
             container=self)
-        self.forage_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), 'Forage', manager, container=self,
+        self.forage_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), local['Forage'], manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -573,7 +574,7 @@ class ResourcePanel(UIPanel):
                 'top_target': self.text_box
             }
         )
-        self.build_dropdown = UINonChangingDropDownMenu(['Inventory', 'Apiary', 'Alveary'], 'Build', pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
+        self.build_dropdown = UINonChangingDropDownMenu([local['Inventory'], local['Apiary'], local['Alveary']], local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -689,14 +690,14 @@ class GUI(Game):
     
     def update_windows_list(self):
         self.apiary_selection_list.set_item_list(
-            ['Inventory ' + i.name for i in self.inventories] +\
-            ['Apiary ' + a.name for a in self.apiaries]
+            [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
+            [local['Apiary'] + ' ' + a.name for a in self.apiaries]
         )
 
     def process_event(self, event):
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             if event.ui_element == self.apiary_selection_list:
-                if event.text.startswith('Apiary'):
+                if event.text.startswith(local['Apiary']):
                     index = int(event.text.split()[-1])
                     self.apiary_windows.append(
                         ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)

@@ -15,7 +15,7 @@ from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
-from config import BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed, dominant, mutations, products
+from config import BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed, dominant, mutations, products, local
 
 
 def weighted_if(weight, out1, out2):
@@ -164,7 +164,8 @@ class Genes:
             genes = default_genes[species]
             return Genes(**{k: (g, g) for k, g in genes.items()})
 
-
+def dom_local(allele, dom):
+    return allele.upper() if dom else allele.lower()
 class Bee:
     def __init__(self, genes: Genes, inspected: bool = False):
         self.genes = genes
@@ -176,11 +177,20 @@ class Bee:
         if not self.inspected:
             res.append(self.small_str())
             return '\n'.join(res)
-        res.append(local[type(self)])
+        name, bee_species_index = local[self.type_str]
+        res.append(name)
         genes = vars(self.genes)
-        res.append('Trait: active, inactive')
+        res.append(local['trait'])
         for key in genes:
-            res.append(f'  {key} : {genes[key][0]}, {genes[key][1]}')
+            try:
+                allele0 = local[genes[key][0]][bee_species_index]
+                allele1 = local[genes[key][1]][bee_species_index]
+            except IndexError:
+                allele0 = local[genes[key][0]][0] # TODO: remove [0]
+                allele1 = local[genes[key][1]][0]
+            dom0 = dominant[genes[key][0]]
+            dom1 = dominant[genes[key][1]]
+            res.append(f'  {local[key]} : {dom_local(allele0, dom0)}, {dom_local(allele1, dom1)}')
         return '\n'.join(res)
 
     def __hash__(self):
@@ -190,16 +200,31 @@ class Bee:
         return type(self) == type(other) and self.genes == other.genes and self.inspected == other.inspected
 
     def small_str(self):
+        name, bee_species_index = local[self.type_str]
         if not self.inspected or self.genes.species[0] == self.genes.species[1]:
-            return local[self.genes.species[0]] + ' ' + local[type(self)]
+            try:
+                allele = local[self.genes.species[0]][bee_species_index]
+            except IndexError:
+                allele = local[self.genes.species[0]][0]
+            dom = dominant[self.genes.species[0]]
+            return dom_local(allele, dom) + ' ' + name
         else:
-            return local[self.genes.species[0]] + '-' + local[self.genes.species[1]] + ' Hybrid'
+            try:
+                allele0 = local[self.genes.species[0]][bee_species_index]
+                allele1 = local[self.genes.species[1]][bee_species_index]
+            except IndexError:
+                allele0 = local[self.genes.species[0]][0]
+                allele1 = local[self.genes.species[1]][0]
+            dom0 = dominant[self.genes.species[0]]
+            dom1 = dominant[self.genes.species[1]]
+            return dom_local(allele0, dom0) + '-' + dom_local(allele1, dom1) + ' Hybrid'
 
     def inspect(self):
         self.inspected = True
 
 
 class Queen(Bee):
+    type_str = 'Queen'
     def __init__(self, g1, g2, inspected: bool = False):
         self.g1 = g1
         self.g2 = g2
@@ -212,11 +237,12 @@ class Queen(Bee):
 
     def die(self):
         return [Princess(self.g1.crossingover(self.g2))] + [
-            Drone(self.g1.crossingover(self.g2)) for i in range(self.genes.fertility[0])
+            Drone(self.g1.crossingover(self.g2)) for i in range(self.genes.fertility[0].value)
         ]
 
 
 class Princess(Bee):
+    type_str = 'Princess'
     def __init__(self, genes, inspected: bool = False):
         super().__init__(genes, inspected)
 
@@ -227,44 +253,9 @@ class Princess(Bee):
 
 
 class Drone(Bee):
+    type_str = 'Drone'
     def __init__(self, genes, inspected: bool = False):
         super().__init__(genes, inspected)
-
-
-local = {
-    Drone: 'Drone',
-    Princess: 'Princess',
-    Queen: 'Queen',
-    BeeSpecies.FOREST: 'FOREST',
-    BeeSpecies.MEADOWS: 'MEADOWS',
-    BeeSpecies.COMMON: 'COMMON',
-    BeeSpecies.CULTIVATED: 'CULTIVATED',
-    BeeSpecies.MAJESTIC: 'MAJESTIC',
-    BeeSpecies.NOBLE: 'NOBLE',
-    BeeSpecies.IMPERIAL: 'IMPERIAL',
-    BeeSpecies.DILIGENT: 'DILIGENT',
-    BeeSpecies.UNWEARY: 'UNWEARY',
-    BeeSpecies.INDUSTRIOUS: 'INDUSTRIOUS',
-    BeeFertility(2): '2',
-    BeeFertility(3): '3',
-    BeeFertility(4): '4',
-    BeeLifespan.LONGEST: 'Longest',
-    BeeLifespan.LONGER: 'Longer',
-    BeeLifespan.LONG: 'Long',
-    BeeLifespan.ELONGATED: 'Elongated',
-    BeeLifespan.NORMAL: 'Normal',
-    BeeLifespan.SHORTENED: 'Shortened',
-    BeeLifespan.SHORT: 'Short',
-    BeeLifespan.SHORTER: 'Shorter',
-    BeeLifespan.SHORTEST: 'Shortest',
-    BeeSpeed.FASTEST: 'FASTEST',
-    BeeSpeed.FASTER: 'FASTER',
-    BeeSpeed.FAST: 'FAST',
-    BeeSpeed.NORMAL: 'NORMAL',
-    BeeSpeed.SLOW: 'SLOW',
-    BeeSpeed.SLOWER: 'SLOWER',
-    BeeSpeed.SLOWEST: 'SLOWEST',
-}
 
 
 class Resources:
@@ -571,7 +562,7 @@ class Apiary:
                     resources_to_add = dict()
                     for res_name in res:
                         amt, prob = res[res_name]
-                        probability = (self.princess.slot.genes.speed[0]) * (self.production_modifier) * (prob)
+                        probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * (prob)
                         # print(self.princess.slot.genes.speed[0], prob, probability)
                         if random.random() < probability:
                             resources_to_add[res_name] = amt
