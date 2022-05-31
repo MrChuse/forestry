@@ -17,6 +17,20 @@ buildings:
   Take: Take all # take all button
   Alveary: Alveary
   Inspect: Inspect # left side bar button
+resources:
+  RESOURCES: RESOURCES
+  honey: honey
+  wood: wood
+  flowers: flowers
+  gold: gold
+  royal jelly: royal jelly
+  string: string
+  pollen cluster: pollen cluster
+esc_menu:
+  Mendelian Inheritance: Mendelian Inheritance
+  Save: Save
+  Load: Load
+  Exit: Exit
 genes_alleles:
   BeeSpecies:
     FOREST: [FOREST]

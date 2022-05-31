@@ -17,6 +17,20 @@ buildings:
   Take: Взять все
   Alveary: Алвеарий
   Inspect: Исследовать
+resources:
+  RESOURCES: РЕСУРСЫ
+  honey: мед
+  wood: дерево
+  flowers: цветы
+  gold: золото
+  royal jelly: маточное молочко
+  string: нить
+  pollen cluster: скопление пыльцы
+esc_menu:
+  Mendelian Inheritance: Законы Менделя
+  Save: Сохранить
+  Load: Загрузить
+  Exit: Выйти из игры
 genes_alleles:
   BeeSpecies:
     FOREST: [ЛЕСНОЙ, ЛЕСНАЯ]

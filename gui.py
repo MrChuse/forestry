@@ -574,7 +574,9 @@ class ResourcePanel(UIPanel):
                 'top_target': self.text_box
             }
         )
-        self.build_dropdown = UINonChangingDropDownMenu([local['Inventory'], local['Apiary'], local['Alveary']], local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
+        self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
+        self.local_build_options = [local[option] for option in self.original_build_options]
+        self.build_dropdown = UINonChangingDropDownMenu(self.local_build_options, local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -592,7 +594,10 @@ class ResourcePanel(UIPanel):
             })
 
     def update_text_box(self):
-        self.text_box.set_text(str(self.resources).replace('\n', '<br>'))
+        text = str(self.resources)
+        for r in local['resources'].items():
+            text = text.replace(*r)
+        self.text_box.set_text(text.replace('\n', '<br>'))
 
     def update(self, time_delta):
         self.update_text_box()
@@ -602,7 +607,10 @@ class ResourcePanel(UIPanel):
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.build_dropdown:
                 if event.text != 'Build':
-                    building = self.game.build(event.text.lower())
+                    text = event.text
+                    index = self.local_build_options.index(text)
+                    building_name = self.original_build_options[index]
+                    building = self.game.build(building_name.lower())
                     if isinstance(building, Apiary):
                         ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
                         self.game.update_windows_list()
@@ -662,7 +670,7 @@ class GUI(Game):
         self.most_recent_inventory = self.inv
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, ['Mendelian Inheritance', 'Load', 'Save', 'Exit'], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = UISelectionList(esc_menu_rect, [local['Mendelian Inheritance'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
         
         if not os.path.exists('save.forestry'):
             self.help_window()
@@ -710,15 +718,15 @@ class GUI(Game):
                             self.ui_manager, resizable=True)
                         )
             elif event.ui_element == self.esc_menu:
-                if event.text == 'Exit':
+                if event.text == local['Exit']:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
-                elif event.text == 'Load':
+                elif event.text == local['Load']:
                     self.load('save')
                     self.print('Loaded save from disk')
-                elif event.text == 'Save':
+                elif event.text == local['Save']:
                     self.save('save')
                     self.print('Saved the game to the disk')
-                elif event.text == 'Mendelian Inheritance':
+                elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
                 self.esc_menu.hide()
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:

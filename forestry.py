@@ -283,7 +283,7 @@ class Resources:
         s = ''
         for k in resources:
             if self.res[k] - resources[k] < 0:
-                s += f'Not enough {k}: you have {self.res[k]} but you need {resources[k]}\n'
+                s += f'Not enough {local["resources"][k]}: you have {self.res[k]} but you need {resources[k]}\n'
         if s != '':
             raise ValueError(s)
         for k in resources:
