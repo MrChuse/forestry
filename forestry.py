@@ -15,7 +15,7 @@ from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
-from config import BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed, dominant, mutations, products, local
+from config import BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed, dominant, mutations, products, local, helper_text, mendel_text
 
 
 def weighted_if(weight, out1, out2):

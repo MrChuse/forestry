@@ -71,4 +71,6 @@ local['resources'] = local_conf['resources']
 for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
     for allele_name, allele_local in dict_of_alleles.items():
         local[genes_enums[gene_name][allele_name]] = allele_local
-# print(local)
+
+helper_text = local_conf['texts']['helper_text'].replace('\n', '<br>')
+mendel_text = local_conf['texts']['mendel_text'].replace('\n', '<br>')

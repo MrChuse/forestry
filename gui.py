@@ -11,8 +11,7 @@ from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow
 
-from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant
-from helper_texts import helper_text, mendel_text
+from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -74,6 +73,7 @@ class UIButtonSlot(UIButton):
         obj_id = self.get_object_id_from_bee(bee)
         prev_obj_id = self.most_specific_combined_id.split('.')[-1]
         if obj_id != prev_obj_id:
+            print(obj_id, prev_obj_id)
             pos = self.relative_rect.topleft
             size = self.rect.size
             self.kill()
