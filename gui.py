@@ -11,7 +11,7 @@ from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow
 
-from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text
+from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -532,12 +532,20 @@ class InspectPanel(UIPanel):
         if not bee.inspected:
             res.append(bee.small_str())
         else:
-            res.append(str(bee).replace('\n', '<br>'))
-            # res.append(local[type(bee)])
-            # genes = vars(bee.genes)
-            # res.append('Trait: active, inactive')
-            # for key in genes:
-            #     res.append(f'  {key} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{genes[key][0]}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{genes[key][1]}</font>')
+            name, bee_species_index = local[bee.type_str]
+            res.append(name)
+            genes = vars(bee.genes)
+            res.append(local['trait'])
+            for key in genes:
+                try:
+                    allele0 = local[genes[key][0]][bee_species_index]
+                    allele1 = local[genes[key][1]][bee_species_index]
+                except IndexError:
+                    allele0 = local[genes[key][0]][0] # TODO: remove [0]
+                    allele1 = local[genes[key][1]][0]
+                dom0 = dominant[genes[key][0]]
+                dom1 = dominant[genes[key][1]]
+                res.append(f'  {local[key]} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{dom_local(allele0, dom0)}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{dom_local(allele1, dom1)}</font>')
         self.text_box.set_text('<br>'.join(res))
 
     def process_event(self, event: pygame.event.Event) -> bool:
