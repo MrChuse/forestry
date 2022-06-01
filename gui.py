@@ -96,6 +96,7 @@ class UIButtonSlot(UIButton):
         return super().update(time_delta)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        tmp = super().set_dimensions(dimensions)
         text_box_size = self.text_box.rect.size
         bottomright = self.relative_rect.bottomright
         pos = (bottomright[0] - text_box_size[0], bottomright[1] - text_box_size[1])
@@ -105,7 +106,7 @@ class UIButtonSlot(UIButton):
             topright = self.relative_rect.topright
             pos = (topright[0] - inspected_width, topright[1])
             self.inspected_status.set_relative_position(pos)
-        return super().set_dimensions(dimensions)
+        return tmp
 
     def kill(self):
         self.text_box.kill()
