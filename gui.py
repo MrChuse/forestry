@@ -73,7 +73,6 @@ class UIButtonSlot(UIButton):
         obj_id = self.get_object_id_from_bee(bee)
         prev_obj_id = self.most_specific_combined_id.split('.')[-1]
         if obj_id != prev_obj_id:
-            print(obj_id, prev_obj_id)
             pos = self.relative_rect.topleft
             size = self.rect.size
             self.kill()
