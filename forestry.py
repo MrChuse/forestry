@@ -231,14 +231,17 @@ class Queen(Bee):
         super().__init__(g1, inspected)
         self.lifespan = g1.lifespan[0].value
         self.remaining_lifespan = self.lifespan
+        self.children = None
 
     def small_str(self):
         return super().small_str() + ', rem: ' + str(self.remaining_lifespan)
 
     def die(self):
-        return [Princess(self.g1.crossingover(self.g2))] + [
-            Drone(self.g1.crossingover(self.g2)) for i in range(self.genes.fertility[0].value)
-        ]
+        if self.children is None:
+            self.children = [Princess(self.g1.crossingover(self.g2))] + [
+                Drone(self.g1.crossingover(self.g2)) for i in range(self.genes.fertility[0].value)
+            ]
+        return self.children
 
 
 class Princess(Bee):
@@ -398,23 +401,24 @@ class Inventory:
 
     def check_enough_space(self, list_things: Union[List[Bee], List[Slot]]):
         not_in_storage = 0
-        for thing in list_things:
+        for thing_index, thing in enumerate(list_things):
             index = 0
             if isinstance(thing, Slot):
                 bee = thing.slot
             else:
                 bee = thing
             while index < self.capacity:
-                if self.storage[index].is_empty():
+                if self.storage[index].is_empty(): # this slot is empty, we are handling empty slots later
                     index += 1
                     continue
-                if self.storage[index].slot == bee:
+                if self.storage[index].slot == bee: # this thing is already in storage
                     break
                 else:
                     index += 1
             else:
-                not_in_storage += 1
-        return not_in_storage <= self.empty_slots()
+                if thing not in list_things[:thing_index]: # if thing was already seen
+                    not_in_storage += 1
+        return not_in_storage <= self.empty_slots() # return True if amt of things not found in storage less than amt of empty slots
                 
 
     def place_bees(self, list_things: Union[List[Bee], List[Slot]]):
@@ -544,9 +548,10 @@ class Apiary:
 
     def try_queen_die(self):
         if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
-            queen = self.princess.slot
-            bees = queen.die()
-            self.inv.place_bees(bees)
+            try:
+                self.inv.place_bees(self.princess.slot.die())
+            except SlotOccupiedError:
+                return False
             self.princess.take()
             return True
         return False

@@ -464,7 +464,8 @@ class ApiaryWindow(UIWindow):
                 if event.ui_element == b:
                     mods = pygame.key.get_mods()
                     if mods & pygame.KMOD_LSHIFT:
-                        self.game.most_recent_inventory.place_bees([b.slot])
+                        bee, amt = self.apiary.take(index)
+                        self.game.most_recent_inventory.place_bees([bee]*amt)
                     else:
                         if self.cursor.slot.is_empty():
                             self.cursor.slot.put(*self.apiary.take(index))
