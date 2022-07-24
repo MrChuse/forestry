@@ -4,6 +4,7 @@ import os.path
 from typing import List, Tuple, Union
 
 import pygame
+from pygame import mixer
 import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
                                  UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
@@ -790,6 +791,11 @@ class GUI(Game):
 
 def main():
     try:
+        mixer.init()
+        sounds = {
+            'click-start': mixer.Sound('assets/ui-click-start.wav'),
+            'click-end': mixer.Sound('assets/ui-click-end.wav')
+        }
         pygame.init()
 
         pygame.display.set_caption('Bee Breeding Game')
@@ -820,6 +826,10 @@ def main():
                     if event.key == pygame.K_SPACE:
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
+                elif event.type == pygame_gui.UI_BUTTON_START_PRESS:
+                    sounds['click-start'].play()
+                elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    sounds['click-end'].play()
                 try:
                     if game is not None:
                         game.process_event(event)
