@@ -27,6 +27,7 @@ resources:
   string: string
   pollen cluster: pollen cluster
 esc_menu:
+  Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance
   Save: Save
   Load: Load

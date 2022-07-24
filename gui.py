@@ -680,13 +680,13 @@ class GUI(Game):
         self.most_recent_inventory = self.inv
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, [local['Mendelian Inheritance'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
         
         if not os.path.exists('save.forestry'):
             self.help_window()
 
     def help_window(self):
-        r = pygame.Rect(0, 0, self.window_size[0]/2, self.window_size[1]/2)
+        r = pygame.Rect(0, 0, self.window_size[0] - 100, self.window_size[1] - 100)
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return UIMessageWindow(r, helper_text, self.ui_manager)
 
@@ -738,6 +738,8 @@ class GUI(Game):
                     self.print('Saved the game to the disk')
                 elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
+                elif local['Greetings Window']:
+                    self.help_window()
                 self.esc_menu.hide()
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if isinstance(event.ui_element, InventoryWindow):

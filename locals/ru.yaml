@@ -27,6 +27,7 @@ resources:
   string: нить
   pollen cluster: скопление пыльцы
 esc_menu:
+  Greetings Window: Окно Приветствия
   Mendelian Inheritance: Законы Менделя
   Save: Сохранить
   Load: Загрузить
