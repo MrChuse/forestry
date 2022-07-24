@@ -583,6 +583,7 @@ class Game:
         self.inv = Inventory(49, '0')
         self.inventories.append(self.inv)
         self.apiaries = [Apiary('0', self.resources.add_resources)]
+        self.total_inspections = 0
             
         self.exit_event = threading.Event()
 
@@ -663,6 +664,7 @@ class Game:
         if bee is not None and not bee.inspected:
             self.resources.remove_resources({'honey': 1})
             bee.inspected = True
+            self.total_inspections += 1
 
     @except_print(IndexError)
     def build(self, *params):
@@ -700,7 +702,8 @@ class Game:
         return {
             'resources': self.resources,
             'inventories': self.inventories,
-            'apiaries': self.apiaries
+            'apiaries': self.apiaries,
+            'total_inspections': self.total_inspections,
         }
             
     def save(self, name):
@@ -713,4 +716,5 @@ class Game:
         self.resources = saved['resources']
         self.inventories = saved['inventories']
         self.apiaries = saved['apiaries']
+        self.total_inspections = saved['total_inspections']
         return saved

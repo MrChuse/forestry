@@ -10,7 +10,7 @@ from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
                                  UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
 from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 from pygame_gui.core import ObjectID
-from pygame_gui.windows import UIMessageWindow
+from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
 from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
 
@@ -523,6 +523,7 @@ class InspectPanel(UIPanel):
         self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,)
         self.bee_button.empty_object_id = '#DroneEmpty'
         self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
+        self.inspect_confirm = None
     
     def process_inspect(self):
         bee = self.bee_button.slot.slot
@@ -555,6 +556,15 @@ class InspectPanel(UIPanel):
                 self.cursor.slot.swap(self.bee_button.slot)
                 self.process_inspect()
             elif event.ui_element == self.inspect_button:
+                if self.game.total_inspections == 0:
+                    r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                    self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
+                else:
+                    self.game.inspect_bee(self.bee_button.slot.slot)
+                    self.process_inspect()
+                    self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+        if event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
+            if event.ui_element == self.inspect_confirm:
                 self.game.inspect_bee(self.bee_button.slot.slot)
                 self.process_inspect()
                 self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status

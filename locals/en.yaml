@@ -17,6 +17,7 @@ buildings:
   Take: Take all # take all button
   Alveary: Alveary
   Inspect: Inspect # left side bar button
+  Inspection popup: Inspection costs 1 honey to perform
 resources:
   RESOURCES: RESOURCES
   honey: honey

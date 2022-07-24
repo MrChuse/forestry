@@ -17,6 +17,7 @@ buildings:
   Take: Взять все
   Alveary: Алвеарий
   Inspect: Исследовать
+  Inspection popup: Исследование тратит 1 единицу меда
 resources:
   RESOURCES: РЕСУРСЫ
   honey: мед
