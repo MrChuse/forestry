@@ -41,7 +41,7 @@ class UIWindowNoX(UIWindow):
 
 class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
-    def __init__(self, slot: Slot, *args, **kwargs):
+    def __init__(self, slot: Slot, *args, highlighted=False, **kwargs):
         self.slot = slot
         self.args = args
         self.kwargs = kwargs
@@ -60,6 +60,7 @@ class UIButtonSlot(UIButton):
         if not self.slot.is_empty():
             self.inspected_status = UIRelativeStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus')
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
+        self.highlighted = highlighted
 
     def get_object_id_from_bee(self, bee: Bee):
         typ = {
@@ -67,7 +68,13 @@ class UIButtonSlot(UIButton):
             Drone: 'Drone',
             Queen: 'Queen'
         }
-        return f'#{bee.genes.species[0].name.upper()}_{typ[type(bee)]}' if bee is not None else self.empty_object_id
+        return f'#{bee.genes.species[0].name.upper()}_{typ[type(bee)]}{"_highlighted" if self.highlighted else ""}' if bee is not None else self.empty_object_id
+
+    def highlight(self):
+        self.highlighted = True
+    
+    def unhighlight(self):
+        self.highlighted = False
 
     def update(self, time_delta: float):
         bee = self.slot.slot
@@ -82,7 +89,7 @@ class UIButtonSlot(UIButton):
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
-            self.__init__(self.slot, *self.args, **self.kwargs)
+            self.__init__(self.slot, *self.args, highlighted=self.highlighted, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
@@ -113,6 +120,18 @@ class UIButtonSlot(UIButton):
         if self.inspected_status is not None:
             self.inspected_status.kill()
         return super().kill()
+    
+    def process_event(self, event: pygame.event.Event) -> bool:
+        ret = super().process_event(event)
+        if event.type == pygame_gui.UI_BUTTON_ON_HOVERED: # TODO: come up with better solution
+            if isinstance(event.ui_element, UIButtonSlot):
+                if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
+                    self.highlight()
+        elif event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+            if isinstance(event.ui_element, UIButtonSlot):
+                if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
+                    self.unhighlight()
+        return ret
 
 class Cursor(UIButtonSlot):
     def __init__(self, slot, *args, **kwargs):

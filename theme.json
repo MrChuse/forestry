@@ -43,8 +43,32 @@
       }
     }
   },
+  "#FOREST_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/FOREST_Princess.png"
+      }
+    }
+  },
   "#FOREST_Drone": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/FOREST_Drone.png"
+      }
+    }
+  },
+  "#FOREST_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/FOREST_Drone.png"
@@ -59,8 +83,32 @@
       }
     }
   },
+  "#FOREST_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/FOREST_Queen.png"
+      }
+    }
+  },
   "#MEADOWS_Princess": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/MEADOWS_Princess.png"
+      }
+    }
+  },
+  "#MEADOWS_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/MEADOWS_Princess.png"
@@ -75,8 +123,32 @@
       }
     }
   },
+  "#MEADOWS_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/MEADOWS_Drone.png"
+      }
+    }
+  },
   "#MEADOWS_Queen": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/MEADOWS_Queen.png"
+      }
+    }
+  },
+  "#MEADOWS_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/MEADOWS_Queen.png"
@@ -91,8 +163,32 @@
       }
     }
   },
+  "#COMMON_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/COMMON_Princess.png"
+      }
+    }
+  },
   "#COMMON_Drone": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/COMMON_Drone.png"
+      }
+    }
+  },
+  "#COMMON_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/COMMON_Drone.png"
@@ -107,8 +203,32 @@
       }
     }
   },
+  "#COMMON_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/COMMON_Queen.png"
+      }
+    }
+  },
   "#CULTIVATED_Princess": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/CULTIVATED_Princess.png"
+      }
+    }
+  },
+  "#CULTIVATED_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/CULTIVATED_Princess.png"
@@ -123,8 +243,32 @@
       }
     }
   },
+  "#CULTIVATED_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/CULTIVATED_Drone.png"
+      }
+    }
+  },
   "#CULTIVATED_Queen": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/CULTIVATED_Queen.png"
+      }
+    }
+  },
+  "#CULTIVATED_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/CULTIVATED_Queen.png"
@@ -139,8 +283,32 @@
       }
     }
   },
+  "#NOBLE_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/NOBLE_Princess.png"
+      }
+    }
+  },
   "#NOBLE_Drone": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/NOBLE_Drone.png"
+      }
+    }
+  },
+  "#NOBLE_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/NOBLE_Drone.png"
@@ -155,8 +323,32 @@
       }
     }
   },
+  "#NOBLE_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/NOBLE_Queen.png"
+      }
+    }
+  },
   "#MAJESTIC_Princess": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/MAJESTIC_Princess.png"
+      }
+    }
+  },
+  "#MAJESTIC_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/MAJESTIC_Princess.png"
@@ -171,8 +363,32 @@
       }
     }
   },
+  "#MAJESTIC_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/MAJESTIC_Drone.png"
+      }
+    }
+  },
   "#MAJESTIC_Queen": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/MAJESTIC_Queen.png"
+      }
+    }
+  },
+  "#MAJESTIC_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/MAJESTIC_Queen.png"
@@ -187,8 +403,32 @@
       }
     }
   },
+  "#IMPERIAL_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/IMPERIAL_Princess.png"
+      }
+    }
+  },
   "#IMPERIAL_Drone": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/IMPERIAL_Drone.png"
+      }
+    }
+  },
+  "#IMPERIAL_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/IMPERIAL_Drone.png"
@@ -203,8 +443,32 @@
       }
     }
   },
+  "#IMPERIAL_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/IMPERIAL_Queen.png"
+      }
+    }
+  },
   "#DILIGENT_Princess": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/DILIGENT_Princess.png"
+      }
+    }
+  },
+  "#DILIGENT_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/DILIGENT_Princess.png"
@@ -219,8 +483,32 @@
       }
     }
   },
+  "#DILIGENT_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/DILIGENT_Drone.png"
+      }
+    }
+  },
   "#DILIGENT_Queen": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/DILIGENT_Queen.png"
+      }
+    }
+  },
+  "#DILIGENT_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/DILIGENT_Queen.png"
@@ -235,8 +523,32 @@
       }
     }
   },
+  "#UNWEARY_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/UNWEARY_Princess.png"
+      }
+    }
+  },
   "#UNWEARY_Drone": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/UNWEARY_Drone.png"
+      }
+    }
+  },
+  "#UNWEARY_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/UNWEARY_Drone.png"
@@ -251,8 +563,32 @@
       }
     }
   },
+  "#UNWEARY_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/UNWEARY_Queen.png"
+      }
+    }
+  },
   "#INDUSTRIOUS_Princess": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/INDUSTRIOUS_Princess.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/INDUSTRIOUS_Princess.png"
@@ -267,8 +603,32 @@
       }
     }
   },
+  "#INDUSTRIOUS_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/INDUSTRIOUS_Drone.png"
+      }
+    }
+  },
   "#INDUSTRIOUS_Queen": {
     "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/INDUSTRIOUS_Queen.png"
+      }
+    }
+  },
+  "#INDUSTRIOUS_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
     "images": {
       "normal_image": {
         "path": "assets/INDUSTRIOUS_Queen.png"
