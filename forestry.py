@@ -96,7 +96,7 @@ class SlotOccupiedError(RuntimeError):
     pass
 
 
-Allele = Union[BeeSpecies, BeeFertility]
+Allele = Union[BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed]
 Gene = Tuple[Allele, Allele]
 
 
@@ -196,7 +196,7 @@ class Bee:
     def __hash__(self):
         return hash(self.genes)
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Bee'):
         return type(self) == type(other) and self.genes == other.genes and self.inspected == other.inspected
 
     def small_str(self):
@@ -225,11 +225,11 @@ class Bee:
 
 class Queen(Bee):
     type_str = 'Queen'
-    def __init__(self, g1, g2, inspected: bool = False):
-        self.g1 = g1
-        self.g2 = g2
-        super().__init__(g1, inspected)
-        self.lifespan = g1.lifespan[0].value
+    def __init__(self, parent1: Bee, parent2: Bee, inspected: bool = False):
+        self.parent1 = parent1
+        self.parent2 = parent2
+        super().__init__(parent1.genes, inspected)
+        self.lifespan = parent1.genes.lifespan[0].value
         self.remaining_lifespan = self.lifespan
         self.children = None
 
@@ -238,8 +238,8 @@ class Queen(Bee):
 
     def die(self):
         if self.children is None:
-            self.children = [Princess(self.g1.crossingover(self.g2))] + [
-                Drone(self.g1.crossingover(self.g2)) for i in range(self.genes.fertility[0].value)
+            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes))] + [
+                Drone(self.parent1.genes.crossingover(self.parent2.genes)) for i in range(self.genes.fertility[0].value)
             ]
         return self.children
 
@@ -252,7 +252,7 @@ class Princess(Bee):
     def mate(self, other: 'Drone') -> Queen:
         if not isinstance(other, Drone):
             raise TypeError('Princesses can only mate drones')
-        return Queen(self.genes, other.genes)
+        return Queen(self, other)
 
 
 class Drone(Bee):
@@ -663,7 +663,7 @@ class Game:
     def inspect_bee(self, bee):
         if bee is not None and not bee.inspected:
             self.resources.remove_resources({'honey': 1})
-            bee.inspected = True
+            bee.inspect()
             self.total_inspections += 1
 
     @except_print(IndexError)
