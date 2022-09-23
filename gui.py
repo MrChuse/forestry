@@ -72,7 +72,7 @@ class UIButtonSlot(UIButton):
 
     def highlight(self):
         self.highlighted = True
-    
+
     def unhighlight(self):
         self.highlighted = False
 
@@ -120,7 +120,7 @@ class UIButtonSlot(UIButton):
         if self.inspected_status is not None:
             self.inspected_status.kill()
         return super().kill()
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
         ret = super().process_event(event)
         if event.type == pygame_gui.UI_BUTTON_ON_HOVERED: # TODO: come up with better solution
@@ -136,7 +136,7 @@ class UIButtonSlot(UIButton):
 class Cursor(UIButtonSlot):
     def __init__(self, slot, *args, **kwargs):
         super().__init__(slot, *args, **kwargs)
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
         return False
 
@@ -174,7 +174,7 @@ class InventoryWindow(UIWindow):
         kwargs['window_display_title'] = local['Inventory'] + ' ' + inv.name
         kwargs['resizable'] = True
         super().__init__(rect, manager, *args, **kwargs)
-    
+
     def rebuild(self):
         """
         Rebuilds the window when the theme has changed.
@@ -326,12 +326,12 @@ class InventoryWindow(UIWindow):
                     pos = (self.margin + i * (hor_size + self.margin), self.margin + j * (vert_size + self.margin))
                     b.set_relative_position(pos)
                     b.set_dimensions(bsize)
-                    
-    
+
+
     def set_dimensions(self, size):
         self.place_buttons(size)
         super().set_dimensions(size)
-    
+
     def process_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.sort_window_button:
@@ -367,7 +367,7 @@ class UIRelativeStatusBar(UIStatusBar):
                                          (self.capacity_width, self.capacity_height))
 
         self.redraw()
-    
+
     def update(self, time_delta: float):
         """
         Updates the status bar sprite's image and rectangle with the latest status and position
@@ -439,14 +439,14 @@ class ApiaryWindow(UIWindow):
                 'bottom': 'bottom',
                 'top_target': self.buttons[3]
             })
-    
+
     def update_health_bar(self):
         bee = self.apiary.princess.slot
         if isinstance(bee, Queen):
             self.queen_health.percent_full = bee.remaining_lifespan / bee.lifespan
         else:
             self.queen_health.percent_full = 0
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.take_all_button:
@@ -492,7 +492,7 @@ class ApiaryWindow(UIWindow):
                         else:
                             self.game.print('Cursor not empty', out=1)
         return super().process_event(event)
-    
+
     def update(self, time_delta):
         self.update_health_bar()
         self.princess_button.tool_tip_text = self.princess_button.slot.small_str()
@@ -543,7 +543,7 @@ class InspectPanel(UIPanel):
         self.bee_button.empty_object_id = '#DroneEmpty'
         self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
         self.inspect_confirm = None
-    
+
     def process_inspect(self):
         bee = self.bee_button.slot.slot
         if bee is None:
@@ -600,7 +600,7 @@ class ResourcePanel(UIPanel):
         bottom_buttons_height = 40
 
         r = pygame.Rect((0, 0), (rect.size[0]-6, rect.size[1]/2))
-        self.text_box = UITextBox(str(self.resources), 
+        self.text_box = UITextBox(str(self.resources),
             r,
             manager,
             container=self)
@@ -641,7 +641,7 @@ class ResourcePanel(UIPanel):
     def update(self, time_delta):
         self.update_text_box()
         super().update(time_delta)
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.build_dropdown:
@@ -654,7 +654,7 @@ class ResourcePanel(UIPanel):
                         ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
                         self.game.update_windows_list()
                     elif isinstance(building, Inventory):
-                        InventoryWindow(building, 7, 7, self.cursor, 
+                        InventoryWindow(building, 7, 7, self.cursor,
                         pygame.Rect(0, 0, self.game.apiary_selection_list.rect.left, self.game.window_size[1]),
                         self.ui_manager, resizable=True)
                         self.game.update_windows_list()
@@ -758,7 +758,7 @@ class GUI(Game):
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
         self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
-        
+
         if not os.path.exists('save.forestry'):
             self.help_window()
 
@@ -782,7 +782,7 @@ class GUI(Game):
         if out is not None:
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
         self.right_text_box.append_html_text(thing.replace('\n', '<br>'))
-    
+
     def update_windows_list(self):
         self.apiary_selection_list.set_item_list(
             [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
@@ -835,7 +835,7 @@ class GUI(Game):
                     self.esc_menu.hide()
                 else:
                     self.esc_menu.show()
-    
+
     def get_state(self):
         state = super().get_state()
         state['cursor_slot'] = self.cursor.slot
@@ -881,7 +881,7 @@ def main():
         pygame.init()
 
         pygame.display.set_caption('Bee Breeding Game')
-        
+
         window_surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         # window_surface = pygame.display.set_mode((800, 600))
         window_size = window_surface.get_rect().size
