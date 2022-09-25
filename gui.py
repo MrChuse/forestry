@@ -51,7 +51,7 @@ class UIButtonSlot(UIButton):
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
-        print('created a text box', slot.amount)
+        # print('created a text box', slot.amount, self.kwargs.get('visible', 1))
         self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'))
         self.text_box.hide()
         self.saved_amount = 0
@@ -91,17 +91,17 @@ class UIButtonSlot(UIButton):
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
-            print('reinit button', self.slot.amount)
+            # print('reinit button', self.slot.amount, prev_obj_id, obj_id, self.visible)
             self.__init__(self.slot, *self.args,    highlighted=self.highlighted, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
             if self.slot.amount < 2:
-                print('in if slot < 2')
                 self.text_box.hide()
             else:
-                self.text_box.set_text(str(self.slot.amount))
-                self.text_box.show()
+                if self.visible:
+                    self.text_box.set_text(str(self.slot.amount))
+                    self.text_box.show()
             self.saved_amount = self.slot.amount
         return super().update(time_delta)
 
@@ -128,16 +128,13 @@ class UIButtonSlot(UIButton):
     def hide(self):
         if self.visible:
             super().hide()
-            print('hide self')
             self.text_box.hide()
-            print('hide text', self.slot.amount)
             if self.inspected_status is not None:
                 self.inspected_status.hide()
 
     def show(self):
         if not self.visible:
             super().show()
-            print('show self')
             if self.slot.amount >= 2:
                 self.text_box.set_text(str(self.slot.amount))
                 self.saved_amount = self.slot.amount
@@ -706,7 +703,6 @@ class MatingEntryPanel(UIGridPanel):
         super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, subelements_function=self.subelements_method)
 
     def subelements_method(self, container):
-        print('generating buttons')
         buttons = []
         for index, (cls, allele, inspected) in enumerate(zip(
                 [Princess, Princess, Drone, Drone, Drone, Drone],
@@ -722,22 +718,13 @@ class MatingEntryPanel(UIGridPanel):
         buttons.insert(5, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_right_arrow_button'))
         return buttons
 
-    def process_event(self, event: pygame.event.Event) -> bool:
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            for i, el in enumerate(self.subelements):
-                if event.ui_element == el:
-                    print(i)
-
-        return super().process_event(event)
 
 class MatingHistoryWindow(UIGridWindow):
     def __init__(self, mating_history: MatingHistory, rect: pygame.Rect, manager, window_display_title: str = "", element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None, visible: int = 1):
         self.mating_history = mating_history
-        print('before mating history init')
         super().__init__(rect, manager, window_display_title, element_id, object_id, True, visible, 0, 0, self.subelements_method)
 
     def subelements_method(self, container):
-        print('generating panels')
         entry_panels = []
         for index, (entry, count) in enumerate(zip(*self.mating_history.get_history_counts())):
             entry_panels.append(MatingEntryPanel(count, entry, pygame.Rect(0,70*index,0,0), 0, self.ui_manager, container=container))
@@ -745,11 +732,11 @@ class MatingHistoryWindow(UIGridWindow):
 
     def update(self, time_delta: float):
         if self.mating_history.something_changed:
-            print('something changed, so kill')
-            self.grid_panel.hide()
-            # self.grid_panel.kill()
-            # self.grid_panel = None
-            # self.set_subelements()
+            # print(f'something changed, so kill, {time.time() - self.timer}')
+            self.grid_panel.hide() # this should hide the buttons too
+            self.grid_panel.kill() # investigate the killing with grid_panel.kill doesn't kill the buttons inside
+            self.grid_panel = None
+            self.set_subelements()
             self.mating_history.acknowledge_changes()
         return super().update(time_delta)
 
@@ -879,7 +866,6 @@ class GUI(Game):
                 if isinstance(event.ui_element, ApiaryWindow):
                     self.apiary_windows.remove(event.ui_element)
                 if isinstance(event.ui_element, MatingHistoryWindow):
-                    print('closing window')
                     self.mating_history_window = None
             except ValueError:
                 pass
