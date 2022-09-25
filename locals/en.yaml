@@ -17,6 +17,7 @@ buildings:
   Take: Take all # take all button
   Alveary: Alveary
   Inspect: Inspect # left side bar button
+  Inspection popup: Inspection costs 1 honey to perform
 resources:
   RESOURCES: RESOURCES
   honey: honey
@@ -27,10 +28,12 @@ resources:
   string: string
   pollen cluster: pollen cluster
 esc_menu:
+  Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance
   Save: Save
   Load: Load
   Exit: Exit
+  Mating History: Mating History
 genes_alleles:
   BeeSpecies:
     FOREST: [FOREST]
@@ -117,7 +120,7 @@ texts:
     Note that these examples show you the mechanics of the game and not real world.
     Due to the third law, it's enough to demonstrate the breeding of single-gene organisms.
     I will name their alleles with letters <font color=#ec3661>A</font>, <font color=#ec3661>B</font>, <font color=#3687ec>c</font> and <font color=#3687ec>d</font>.
-    
+
     First, let's consider two purebred organisms:
     <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype and different in their phenotype)
     <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>

@@ -1,17 +1,19 @@
 import math
 import time
 import os.path
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 import pygame
+from pygame import mixer
 import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
                                  UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
 from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
 from pygame_gui.core import ObjectID
-from pygame_gui.windows import UIMessageWindow
+from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
-from forestry import Apiary, Bee, Drone, Game, Inventory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
+from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
+from ui import UIGridWindow, UIGridPanel
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -40,7 +42,7 @@ class UIWindowNoX(UIWindow):
 
 class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
-    def __init__(self, slot: Slot, *args, **kwargs):
+    def __init__(self, slot: Slot, *args, highlighted=False, **kwargs):
         self.slot = slot
         self.args = args
         self.kwargs = kwargs
@@ -49,6 +51,7 @@ class UIButtonSlot(UIButton):
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
+        # print('created a text box', slot.amount, self.kwargs.get('visible', 1))
         self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'))
         self.text_box.hide()
         self.saved_amount = 0
@@ -59,6 +62,7 @@ class UIButtonSlot(UIButton):
         if not self.slot.is_empty():
             self.inspected_status = UIRelativeStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus')
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
+        self.highlighted = highlighted
 
     def get_object_id_from_bee(self, bee: Bee):
         typ = {
@@ -66,14 +70,19 @@ class UIButtonSlot(UIButton):
             Drone: 'Drone',
             Queen: 'Queen'
         }
-        return f'#{bee.genes.species[0].name.upper()}_{typ[type(bee)]}' if bee is not None else self.empty_object_id
+        return f'#{bee.genes.species[0].name.upper()}_{typ[type(bee)]}{"_highlighted" if self.highlighted else ""}' if bee is not None else self.empty_object_id
+
+    def highlight(self):
+        self.highlighted = True
+
+    def unhighlight(self):
+        self.highlighted = False
 
     def update(self, time_delta: float):
         bee = self.slot.slot
         obj_id = self.get_object_id_from_bee(bee)
         prev_obj_id = self.most_specific_combined_id.split('.')[-1]
         if obj_id != prev_obj_id:
-            print(obj_id, prev_obj_id)
             pos = self.relative_rect.topleft
             size = self.rect.size
             self.kill()
@@ -82,17 +91,18 @@ class UIButtonSlot(UIButton):
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
-            self.__init__(self.slot, *self.args, **self.kwargs)
+            # print('reinit button', self.slot.amount, prev_obj_id, obj_id, self.visible)
+            self.__init__(self.slot, *self.args,    highlighted=self.highlighted, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
             if self.slot.amount < 2:
                 self.text_box.hide()
-                self.saved_amount = 0
             else:
-                self.text_box.set_text(str(self.slot.amount))
-                self.saved_amount = self.slot.amount
-                self.text_box.show()
+                if self.visible:
+                    self.text_box.set_text(str(self.slot.amount))
+                    self.text_box.show()
+            self.saved_amount = self.slot.amount
         return super().update(time_delta)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -109,15 +119,46 @@ class UIButtonSlot(UIButton):
         return tmp
 
     def kill(self):
+        self.text_box.hide()
         self.text_box.kill()
         if self.inspected_status is not None:
             self.inspected_status.kill()
         return super().kill()
 
+    def hide(self):
+        if self.visible:
+            super().hide()
+            self.text_box.hide()
+            if self.inspected_status is not None:
+                self.inspected_status.hide()
+
+    def show(self):
+        if not self.visible:
+            super().show()
+            if self.slot.amount >= 2:
+                self.text_box.set_text(str(self.slot.amount))
+                self.saved_amount = self.slot.amount
+                self.text_box.show()
+            if self.inspected_status is not None:
+                self.inspected_status.show()
+
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        ret = super().process_event(event)
+        if event.type == pygame_gui.UI_BUTTON_ON_HOVERED: # TODO: come up with better solution
+            if isinstance(event.ui_element, UIButtonSlot):
+                if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
+                    self.highlight()
+        elif event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+            if isinstance(event.ui_element, UIButtonSlot):
+                if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
+                    self.unhighlight()
+        return ret
+
 class Cursor(UIButtonSlot):
     def __init__(self, slot, *args, **kwargs):
         super().__init__(slot, *args, **kwargs)
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
         return False
 
@@ -155,7 +196,7 @@ class InventoryWindow(UIWindow):
         kwargs['window_display_title'] = local['Inventory'] + ' ' + inv.name
         kwargs['resizable'] = True
         super().__init__(rect, manager, *args, **kwargs)
-    
+
     def rebuild(self):
         """
         Rebuilds the window when the theme has changed.
@@ -307,12 +348,12 @@ class InventoryWindow(UIWindow):
                     pos = (self.margin + i * (hor_size + self.margin), self.margin + j * (vert_size + self.margin))
                     b.set_relative_position(pos)
                     b.set_dimensions(bsize)
-                    
-    
+
+
     def set_dimensions(self, size):
         self.place_buttons(size)
         super().set_dimensions(size)
-    
+
     def process_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.sort_window_button:
@@ -348,7 +389,7 @@ class UIRelativeStatusBar(UIStatusBar):
                                          (self.capacity_width, self.capacity_height))
 
         self.redraw()
-    
+
     def update(self, time_delta: float):
         """
         Updates the status bar sprite's image and rectangle with the latest status and position
@@ -420,15 +461,22 @@ class ApiaryWindow(UIWindow):
                 'bottom': 'bottom',
                 'top_target': self.buttons[3]
             })
-    
+
     def update_health_bar(self):
         bee = self.apiary.princess.slot
         if isinstance(bee, Queen):
             self.queen_health.percent_full = bee.remaining_lifespan / bee.lifespan
         else:
             self.queen_health.percent_full = 0
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_h:
+                for b in self.buttons:
+                    b.hide()
+            if event.key == pygame.K_g:
+                for b in self.buttons:
+                    b.show()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.take_all_button:
                 r = []
@@ -465,14 +513,15 @@ class ApiaryWindow(UIWindow):
                 if event.ui_element == b:
                     mods = pygame.key.get_mods()
                     if mods & pygame.KMOD_LSHIFT:
-                        self.game.most_recent_inventory.place_bees([b.slot])
+                        bee, amt = self.apiary.take(index)
+                        self.game.most_recent_inventory.place_bees([bee]*amt)
                     else:
                         if self.cursor.slot.is_empty():
                             self.cursor.slot.put(*self.apiary.take(index))
                         else:
                             self.game.print('Cursor not empty', out=1)
         return super().process_event(event)
-    
+
     def update(self, time_delta):
         self.update_health_bar()
         self.princess_button.tool_tip_text = self.princess_button.slot.small_str()
@@ -522,7 +571,8 @@ class InspectPanel(UIPanel):
         self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,)
         self.bee_button.empty_object_id = '#DroneEmpty'
         self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
-    
+        self.inspect_confirm = None
+
     def process_inspect(self):
         bee = self.bee_button.slot.slot
         if bee is None:
@@ -554,6 +604,15 @@ class InspectPanel(UIPanel):
                 self.cursor.slot.swap(self.bee_button.slot)
                 self.process_inspect()
             elif event.ui_element == self.inspect_button:
+                if self.game.total_inspections == 0:
+                    r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                    self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
+                else:
+                    self.game.inspect_bee(self.bee_button.slot.slot)
+                    self.process_inspect()
+                    self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+        if event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
+            if event.ui_element == self.inspect_confirm:
                 self.game.inspect_bee(self.bee_button.slot.slot)
                 self.process_inspect()
                 self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
@@ -570,7 +629,7 @@ class ResourcePanel(UIPanel):
         bottom_buttons_height = 40
 
         r = pygame.Rect((0, 0), (rect.size[0]-6, rect.size[1]/2))
-        self.text_box = UITextBox(str(self.resources), 
+        self.text_box = UITextBox(str(self.resources),
             r,
             manager,
             container=self)
@@ -611,7 +670,7 @@ class ResourcePanel(UIPanel):
     def update(self, time_delta):
         self.update_text_box()
         super().update(time_delta)
-    
+
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.build_dropdown:
@@ -624,7 +683,7 @@ class ResourcePanel(UIPanel):
                         ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
                         self.game.update_windows_list()
                     elif isinstance(building, Inventory):
-                        InventoryWindow(building, 7, 7, self.cursor, 
+                        InventoryWindow(building, 7, 7, self.cursor,
                         pygame.Rect(0, 0, self.game.apiary_selection_list.rect.left, self.game.window_size[1]),
                         self.ui_manager, resizable=True)
                         self.game.update_windows_list()
@@ -635,6 +694,52 @@ class ResourcePanel(UIPanel):
             if event.ui_element == self.forage_button:
                 self.game.forage(self.game.most_recent_inventory)
         return super().process_event(event)
+
+class MatingEntryPanel(UIGridPanel):
+    def __init__(self, count: int, entry: MatingEntry, relative_rect: pygame.Rect, starting_layer_height: int, manager, *, element_id: str = 'panel', margins: Dict[str, int] = None, container = None, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None, visible: int = 1):
+        self.count = count
+        self.entry = entry
+        relative_rect.size = (518, 70)
+        super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, subelements_function=self.subelements_method)
+
+    def subelements_method(self, container):
+        buttons = []
+        for index, (cls, allele, inspected) in enumerate(zip(
+                [Princess, Princess, Drone, Drone, Drone, Drone],
+                [self.entry.parent1_dom, self.entry.parent1_rec, self.entry.parent2_dom, self.entry.parent2_rec, self.entry.child_dom, self.entry.child_rec],
+                [self.entry.parent1_inspected, self.entry.parent1_inspected, self.entry.parent2_inspected, self.entry.parent2_inspected, self.entry.child_inspected, self.entry.child_inspected])):
+            if index % 2 == 1 and not inspected:
+                slot = Slot()
+            else:
+                bee = cls(Genes((allele, allele), None, None, None), inspected=inspected)
+                slot = Slot(bee, self.count)
+            buttons.append(UIButtonSlot(slot, pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container))
+        buttons.insert(2, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_plus_button'))
+        buttons.insert(5, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_right_arrow_button'))
+        return buttons
+
+
+class MatingHistoryWindow(UIGridWindow):
+    def __init__(self, mating_history: MatingHistory, rect: pygame.Rect, manager, window_display_title: str = "", element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None, visible: int = 1):
+        self.mating_history = mating_history
+        super().__init__(rect, manager, window_display_title, element_id, object_id, True, visible, 0, 0, self.subelements_method)
+
+    def subelements_method(self, container):
+        entry_panels = []
+        for index, (entry, count) in enumerate(zip(*self.mating_history.get_history_counts())):
+            entry_panels.append(MatingEntryPanel(count, entry, pygame.Rect(0,70*index,0,0), 0, self.ui_manager, container=container))
+        return entry_panels
+
+    def update(self, time_delta: float):
+        if self.mating_history.something_changed:
+            # print(f'something changed, so kill, {time.time() - self.timer}')
+            self.grid_panel.hide() # this should hide the buttons too
+            self.grid_panel.kill() # investigate the killing with grid_panel.kill doesn't kill the buttons inside
+            self.grid_panel = None
+            self.set_subelements()
+            self.mating_history.acknowledge_changes()
+        return super().update(time_delta)
+
 
 class GUI(Game):
     def __init__(self, window_size, manager, cursor_manager):
@@ -677,15 +782,18 @@ class GUI(Game):
             manager, resizable=True)
         self.inventory_windows.append(self.inv_window)
         self.most_recent_inventory = self.inv
+
+        self.mating_history_window = None
+
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, [local['Mendelian Inheritance'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
-        
+        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+
         if not os.path.exists('save.forestry'):
             self.help_window()
 
     def help_window(self):
-        r = pygame.Rect(0, 0, self.window_size[0]/2, self.window_size[1]/2)
+        r = pygame.Rect(0, 0, self.window_size[0] - 100, self.window_size[1] - 100)
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return UIMessageWindow(r, helper_text, self.ui_manager)
 
@@ -693,6 +801,11 @@ class GUI(Game):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return UIMessageWindow(r, mendel_text, self.ui_manager)
+
+    def open_mating_history_window(self):
+        r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
+        r.center = (self.window_size[0]/2, self.window_size[1]/2)
+        return MatingHistoryWindow(self.mating_history, r, self.ui_manager, 'Mating History')
 
     def render(self):
         pass
@@ -704,7 +817,7 @@ class GUI(Game):
         if out is not None:
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
         self.right_text_box.append_html_text(thing.replace('\n', '<br>'))
-    
+
     def update_windows_list(self):
         self.apiary_selection_list.set_item_list(
             [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
@@ -737,6 +850,11 @@ class GUI(Game):
                     self.print('Saved the game to the disk')
                 elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
+                elif event.text == local['Greetings Window']:
+                    self.help_window()
+                elif event.text == local['Mating History']:
+                    if self.mating_history_window is None:
+                        self.mating_history_window = self.open_mating_history_window()
                 self.esc_menu.hide()
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if isinstance(event.ui_element, InventoryWindow):
@@ -747,6 +865,8 @@ class GUI(Game):
                     self.inventory_windows.remove(event.ui_element)
                 if isinstance(event.ui_element, ApiaryWindow):
                     self.apiary_windows.remove(event.ui_element)
+                if isinstance(event.ui_element, MatingHistoryWindow):
+                    self.mating_history_window = None
             except ValueError:
                 pass
         elif event.type == pygame.KEYDOWN:
@@ -755,7 +875,7 @@ class GUI(Game):
                     self.esc_menu.hide()
                 else:
                     self.esc_menu.show()
-    
+
     def get_state(self):
         state = super().get_state()
         state['cursor_slot'] = self.cursor.slot
@@ -786,14 +906,22 @@ class GUI(Game):
         self.resource_panel.inspect_panel.bee_button.slot = saved['inspect_slot']
         self.inventory_windows = [InventoryWindow(inv, 7, 7, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
         self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in saved['apiary_windows']]
+        if self.mating_history_window is not None:
+            self.mating_history_window.mating_history = self.mating_history
+            self.mating_history.something_changed = True
         return saved
 
 def main():
     try:
+        mixer.init()
+        sounds = {
+            'click-start': mixer.Sound('assets/ui-click-start.wav'),
+            'click-end': mixer.Sound('assets/ui-click-end.wav')
+        }
         pygame.init()
 
         pygame.display.set_caption('Bee Breeding Game')
-        
+
         window_surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         # window_surface = pygame.display.set_mode((800, 600))
         window_size = window_surface.get_rect().size
@@ -806,6 +934,9 @@ def main():
 
         game = None
         game = GUI(window_size, manager, cursor_manager)
+        # def a(window):
+        #     return [UIPanel(pygame.Rect(0, 0, 518, 70), 0, manager, container=window) for i in range(1)]
+        # w = UIGridWindow(pygame.Rect(0, 0, 400, 400), manager, resizable=True, subelements_function=a)
         clock = pygame.time.Clock()
         is_running = True
         visual_debug = False
@@ -820,6 +951,10 @@ def main():
                     if event.key == pygame.K_SPACE:
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
+                elif event.type == pygame_gui.UI_BUTTON_START_PRESS:
+                    sounds['click-start'].play()
+                elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    sounds['click-end'].play()
                 try:
                     if game is not None:
                         game.process_event(event)

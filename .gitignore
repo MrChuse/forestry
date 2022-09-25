@@ -133,10 +133,4 @@ dmypy.json
 # Forestry saves
 *.forestry
 
-# helper files
-duplicate_pngs.py
-theme.py
-download_drones.py
-princess.body3.png
-queen.body3.png
-black_drone.py
+\!promotion/

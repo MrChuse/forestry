@@ -96,7 +96,7 @@ class SlotOccupiedError(RuntimeError):
     pass
 
 
-Allele = Union[BeeSpecies, BeeFertility]
+Allele = Union[BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed]
 Gene = Tuple[Allele, Allele]
 
 
@@ -167,9 +167,11 @@ class Genes:
 def dom_local(allele, dom):
     return allele.upper() if dom else allele.lower()
 class Bee:
+    type_str = 'unknown'
     def __init__(self, genes: Genes, inspected: bool = False):
         self.genes = genes
         self.inspected = inspected
+        self.mating_entries = []
         super().__init__()
 
     def __str__(self):
@@ -196,7 +198,7 @@ class Bee:
     def __hash__(self):
         return hash(self.genes)
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Bee'):
         return type(self) == type(other) and self.genes == other.genes and self.inspected == other.inspected
 
     def small_str(self):
@@ -221,24 +223,30 @@ class Bee:
 
     def inspect(self):
         self.inspected = True
+        for set_inspected in self.mating_entries:
+            set_inspected()
+        self.mating_entries.clear()
 
 
 class Queen(Bee):
     type_str = 'Queen'
-    def __init__(self, g1, g2, inspected: bool = False):
-        self.g1 = g1
-        self.g2 = g2
-        super().__init__(g1, inspected)
-        self.lifespan = g1.lifespan[0].value
+    def __init__(self, parent1: Bee, parent2: Bee, inspected: bool = False):
+        self.parent1 = parent1
+        self.parent2 = parent2
+        super().__init__(parent1.genes, inspected)
+        self.lifespan = parent1.genes.lifespan[0].value
         self.remaining_lifespan = self.lifespan
+        self.children = None
 
     def small_str(self):
         return super().small_str() + ', rem: ' + str(self.remaining_lifespan)
 
     def die(self):
-        return [Princess(self.g1.crossingover(self.g2))] + [
-            Drone(self.g1.crossingover(self.g2)) for i in range(self.genes.fertility[0].value)
-        ]
+        if self.children is None:
+            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes))] + [
+                Drone(self.parent1.genes.crossingover(self.parent2.genes)) for i in range(self.genes.fertility[0].value)
+            ]
+        return self.children
 
 
 class Princess(Bee):
@@ -249,7 +257,7 @@ class Princess(Bee):
     def mate(self, other: 'Drone') -> Queen:
         if not isinstance(other, Drone):
             raise TypeError('Princesses can only mate drones')
-        return Queen(self.genes, other.genes)
+        return Queen(self, other)
 
 
 class Drone(Bee):
@@ -289,12 +297,87 @@ class Resources:
         for k in resources:
             self.res[k] -= resources[k]
 
+@dataclass
+class MatingEntry:
+    parent1_dom : BeeSpecies
+    parent1_rec : Union[BeeSpecies, None]
+    parent2_dom : BeeSpecies
+    parent2_rec : Union[BeeSpecies, None]
+    child_dom : BeeSpecies
+    child_rec : Union[BeeSpecies, None]
+    parent1_inspected : bool = False
+    parent2_inspected : bool = False
+    child_inspected : bool = False
+
+    def set_parent1_inspected(self):
+        self.parent1_inspected = True
+        self.set_history_something_changed()
+
+    def set_parent2_inspected(self):
+        self.parent2_inspected = True
+        self.set_history_something_changed()
+
+    def set_child_inspected(self):
+        self.child_inspected = True
+        self.set_history_something_changed()
+
+
+class MatingHistory:
+    def __init__(self):
+        self.history = []
+        self.counts = []
+        self.something_changed = False
+
+    def append(self, entry: MatingEntry):
+        if entry not in self.history:
+            entry.set_history_something_changed = self.set_something_changed # dirty!
+            self.history.append(entry)
+            self.counts.append(1)
+            res = entry
+        else:
+            index = self.history.index(entry)
+            self.counts[index] += 1
+            res = self.history[index]
+        self.something_changed = True
+        return res
+
+    def get_history_counts(self, debug=False):
+        if debug:
+            return self.history, self.counts
+        front_history = []
+        front_counts = []
+        for entry, count in zip(self.history, self.counts):
+            front_entry = MatingEntry(
+                entry.parent1_dom,
+                entry.parent1_rec if entry.parent1_inspected else None,
+                entry.parent2_dom,
+                entry.parent2_rec if entry.parent2_inspected else None,
+                entry.child_dom,
+                entry.child_rec if entry.child_inspected else None,
+                entry.parent1_inspected,
+                entry.parent2_inspected,
+                entry.child_inspected,
+            )
+            if front_entry not in front_history:
+                front_history.append(front_entry)
+                front_counts.append(count)
+            else:
+                index = front_history.index(front_entry)
+                front_counts[index] += count
+        return front_history, front_counts
+
+    def set_something_changed(self):
+        self.something_changed = True
+
+    def acknowledge_changes(self, debug=False):
+        if not debug:
+            self.something_changed = False
 
 class Slot:
     empty_str = 'Slot empty'
-    def __init__(self):
-        self.slot = None
-        self.amount = 0
+    def __init__(self, slot=None, amount=0):
+        self.slot = slot
+        self.amount = amount
         super().__init__()
 
     def __str__(self):
@@ -311,10 +394,11 @@ class Slot:
 
     def str_amount(self):
         return f'({self.amount})' if self.amount > 1 else ''
-        
+
     def put(self, bee, amount=1):
         if amount > 0:
             if self.slot == bee:
+                self.slot.mating_entries.extend(bee.mating_entries) # with this change Slots are now capable of only holding bees :(
                 self.amount += amount
                 return
             if self.slot is None:
@@ -362,7 +446,7 @@ class Inventory:
 
     def __len__(self):
         return self.capacity
-    
+
     def __str__(self):
         res = ['------ INV ------']
 
@@ -379,7 +463,7 @@ class Inventory:
     def take(self, index):
         bee = self.storage[index].take()
         return bee
-    
+
     def take_all(self, index):
         return self.storage[index].take_all()
 
@@ -398,24 +482,25 @@ class Inventory:
 
     def check_enough_space(self, list_things: Union[List[Bee], List[Slot]]):
         not_in_storage = 0
-        for thing in list_things:
+        for thing_index, thing in enumerate(list_things):
             index = 0
             if isinstance(thing, Slot):
                 bee = thing.slot
             else:
                 bee = thing
             while index < self.capacity:
-                if self.storage[index].is_empty():
+                if self.storage[index].is_empty(): # this slot is empty, we are handling empty slots later
                     index += 1
                     continue
-                if self.storage[index].slot == bee:
+                if self.storage[index].slot == bee: # this thing is already in storage
                     break
                 else:
                     index += 1
             else:
-                not_in_storage += 1
-        return not_in_storage <= self.empty_slots()
-                
+                if thing not in list_things[:thing_index]: # if thing was already seen
+                    not_in_storage += 1
+        return not_in_storage <= self.empty_slots() # return True if amt of things not found in storage less than amt of empty slots
+
 
     def place_bees(self, list_things: Union[List[Bee], List[Slot]]):
         if not self.check_enough_space(list_things):
@@ -448,7 +533,7 @@ class Inventory:
                     except SlotOccupiedError:
                         index += 1
                         continue
-    
+
     def sort(self):
         r = []
         for slot in self:
@@ -475,12 +560,13 @@ def except_print(*exceptions):
 
 class Apiary:
     production_modifier = 1/3
-    def __init__(self, name, add_resources):
+    def __init__(self, name, add_resources, add_mating_entry):
         self.inv = Inventory(7)
         self.princess = Slot()
         self.drone = Slot()
         self.name = name
         self.add_resources = add_resources
+        self.add_mating_entry = add_mating_entry
         super().__init__()
 
     def __getitem__(self, key):
@@ -524,7 +610,7 @@ class Apiary:
             if self.princess.slot.remaining_lifespan == 0:
                 self.try_queen_die()
         return bee, amount
-    
+
     def take_several(self, indices):
         res = []
         for i in indices:
@@ -544,10 +630,25 @@ class Apiary:
 
     def try_queen_die(self):
         if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
-            queen = self.princess.slot
-            bees = queen.die()
-            self.inv.place_bees(bees)
-            self.princess.take()
+            try:
+                self.inv.place_bees(self.princess.slot.die())
+            except SlotOccupiedError:
+                return False
+            queen : Queen = self.princess.take()
+
+            for child in queen.children:
+                entry = MatingEntry(
+                    *queen.parent1.genes.species,
+                    *queen.parent2.genes.species,
+                    *child.genes.species,
+                    queen.parent1.inspected,
+                    queen.parent2.inspected,
+                    child.inspected,
+                )
+                entry = self.add_mating_entry(entry)
+                queen.parent1.mating_entries.append(entry.set_parent1_inspected)
+                queen.parent2.mating_entries.append(entry.set_parent2_inspected)
+                child.mating_entries.append(entry.set_child_inspected)
             return True
         return False
 
@@ -574,11 +675,13 @@ class Apiary:
 class Game:
     def __init__(self):
         self.resources = Resources(honey=0)
+        self.mating_history = MatingHistory()
         self.inventories = []
         self.inv = Inventory(49, '0')
         self.inventories.append(self.inv)
-        self.apiaries = [Apiary('0', self.resources.add_resources)]
-            
+        self.apiaries = [Apiary('0', self.resources.add_resources, self.mating_history.append)]
+        self.total_inspections = 0
+
         self.exit_event = threading.Event()
 
         self.inner_state_thread = threading.Thread(target=self.update_state)
@@ -602,13 +705,13 @@ class Game:
             else:
                 res.append(int(w))
         return res
-    
+
     @staticmethod
     def where_what(*params):
         where, *what = params
         where = int(where)
         return where, Game.parse_ranges_numbers(*what)
-            
+
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def put(self, *params):
         where, what = Game.where_what(*params)
@@ -642,7 +745,7 @@ class Game:
     @except_print(ValueError)
     def swap(self, *params):
         self.inv.swap(*map(int, params))
-        
+
     @staticmethod
     def forage(inventory):
         genes = Genes.sample()
@@ -657,14 +760,15 @@ class Game:
     def inspect_bee(self, bee):
         if bee is not None and not bee.inspected:
             self.resources.remove_resources({'honey': 1})
-            bee.inspected = True
+            bee.inspect()
+            self.total_inspections += 1
 
     @except_print(IndexError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
             self.resources.remove_resources(
                 {'honey': 10, 'wood': 5, 'flowers': 5})
-            self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources))
+            self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources, self.mating_history.append))
             return self.apiaries[-1]
         elif params[0] in ['inventory', 'inv', 'i']:
             self.resources.remove_resources(
@@ -685,7 +789,7 @@ class Game:
 
             for apiary in self.apiaries:
                 apiary.update()
-            
+
             self.state_updated()
 
     def state_updated(self):
@@ -695,9 +799,11 @@ class Game:
         return {
             'resources': self.resources,
             'inventories': self.inventories,
-            'apiaries': self.apiaries
+            'apiaries': self.apiaries,
+            'total_inspections': self.total_inspections,
+            'mating_history': self.mating_history
         }
-            
+
     def save(self, name):
         with open(name + '.forestry', 'wb') as f:
             pickle.dump(self.get_state(), f)
@@ -708,4 +814,6 @@ class Game:
         self.resources = saved['resources']
         self.inventories = saved['inventories']
         self.apiaries = saved['apiaries']
+        self.total_inspections = saved['total_inspections']
+        self.mating_history = saved['mating_history']
         return saved
