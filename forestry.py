@@ -320,7 +320,7 @@ class MatingEntry:
     def set_child_inspected(self):
         self.child_inspected = True
         self.set_history_something_changed()
-    
+
 
 class MatingHistory:
     def __init__(self):
@@ -394,7 +394,7 @@ class Slot:
 
     def str_amount(self):
         return f'({self.amount})' if self.amount > 1 else ''
-        
+
     def put(self, bee, amount=1):
         if amount > 0:
             if self.slot == bee:
@@ -446,7 +446,7 @@ class Inventory:
 
     def __len__(self):
         return self.capacity
-    
+
     def __str__(self):
         res = ['------ INV ------']
 
@@ -463,7 +463,7 @@ class Inventory:
     def take(self, index):
         bee = self.storage[index].take()
         return bee
-    
+
     def take_all(self, index):
         return self.storage[index].take_all()
 
@@ -500,7 +500,7 @@ class Inventory:
                 if thing not in list_things[:thing_index]: # if thing was already seen
                     not_in_storage += 1
         return not_in_storage <= self.empty_slots() # return True if amt of things not found in storage less than amt of empty slots
-                
+
 
     def place_bees(self, list_things: Union[List[Bee], List[Slot]]):
         if not self.check_enough_space(list_things):
@@ -533,7 +533,7 @@ class Inventory:
                     except SlotOccupiedError:
                         index += 1
                         continue
-    
+
     def sort(self):
         r = []
         for slot in self:
@@ -610,7 +610,7 @@ class Apiary:
             if self.princess.slot.remaining_lifespan == 0:
                 self.try_queen_die()
         return bee, amount
-    
+
     def take_several(self, indices):
         res = []
         for i in indices:
@@ -681,7 +681,7 @@ class Game:
         self.inventories.append(self.inv)
         self.apiaries = [Apiary('0', self.resources.add_resources, self.mating_history.append)]
         self.total_inspections = 0
-            
+
         self.exit_event = threading.Event()
 
         self.inner_state_thread = threading.Thread(target=self.update_state)
@@ -705,13 +705,13 @@ class Game:
             else:
                 res.append(int(w))
         return res
-    
+
     @staticmethod
     def where_what(*params):
         where, *what = params
         where = int(where)
         return where, Game.parse_ranges_numbers(*what)
-            
+
     @except_print(IndexError, ValueError, SlotOccupiedError)
     def put(self, *params):
         where, what = Game.where_what(*params)
@@ -745,7 +745,7 @@ class Game:
     @except_print(ValueError)
     def swap(self, *params):
         self.inv.swap(*map(int, params))
-        
+
     @staticmethod
     def forage(inventory):
         genes = Genes.sample()
@@ -789,7 +789,7 @@ class Game:
 
             for apiary in self.apiaries:
                 apiary.update()
-            
+
             self.state_updated()
 
     def state_updated(self):
@@ -803,7 +803,7 @@ class Game:
             'total_inspections': self.total_inspections,
             'mating_history': self.mating_history
         }
-            
+
     def save(self, name):
         with open(name + '.forestry', 'wb') as f:
             pickle.dump(self.get_state(), f)
