@@ -13,6 +13,7 @@ from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
 from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
+from ui import UIGridWindow, UIGridPanel
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -50,6 +51,7 @@ class UIButtonSlot(UIButton):
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
+        print('created a text box', slot.amount)
         self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'))
         self.text_box.hide()
         self.saved_amount = 0
@@ -89,17 +91,18 @@ class UIButtonSlot(UIButton):
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
             self.kwargs['tool_tip_text'] = text
-            self.__init__(self.slot, *self.args, highlighted=self.highlighted, **self.kwargs)
+            print('reinit button', self.slot.amount)
+            self.__init__(self.slot, *self.args,    highlighted=self.highlighted, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
             if self.slot.amount < 2:
+                print('in if slot < 2')
                 self.text_box.hide()
-                self.saved_amount = 0
             else:
                 self.text_box.set_text(str(self.slot.amount))
-                self.saved_amount = self.slot.amount
                 self.text_box.show()
+            self.saved_amount = self.slot.amount
         return super().update(time_delta)
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
@@ -116,10 +119,32 @@ class UIButtonSlot(UIButton):
         return tmp
 
     def kill(self):
+        self.text_box.hide()
         self.text_box.kill()
         if self.inspected_status is not None:
             self.inspected_status.kill()
         return super().kill()
+
+    def hide(self):
+        if self.visible:
+            super().hide()
+            print('hide self')
+            self.text_box.hide()
+            print('hide text', self.slot.amount)
+            if self.inspected_status is not None:
+                self.inspected_status.hide()
+
+    def show(self):
+        if not self.visible:
+            super().show()
+            print('show self')
+            if self.slot.amount >= 2:
+                self.text_box.set_text(str(self.slot.amount))
+                self.saved_amount = self.slot.amount
+                self.text_box.show()
+            if self.inspected_status is not None:
+                self.inspected_status.show()
+
 
     def process_event(self, event: pygame.event.Event) -> bool:
         ret = super().process_event(event)
@@ -448,6 +473,13 @@ class ApiaryWindow(UIWindow):
             self.queen_health.percent_full = 0
 
     def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_h:
+                for b in self.buttons:
+                    b.hide()
+            if event.key == pygame.K_g:
+                for b in self.buttons:
+                    b.show()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.take_all_button:
                 r = []
@@ -666,46 +698,59 @@ class ResourcePanel(UIPanel):
                 self.game.forage(self.game.most_recent_inventory)
         return super().process_event(event)
 
-
-class MatingEntryPanel(UIPanel):
+class MatingEntryPanel(UIGridPanel):
     def __init__(self, count: int, entry: MatingEntry, relative_rect: pygame.Rect, starting_layer_height: int, manager, *, element_id: str = 'panel', margins: Dict[str, int] = None, container = None, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None, visible: int = 1):
+        self.count = count
+        self.entry = entry
         relative_rect.size = (518, 70)
-        self.buttons = []
-        super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
-        for index, (cls, allele, inspected, offset) in enumerate(zip(
+        super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, subelements_function=self.subelements_method)
+
+    def subelements_method(self, container):
+        print('generating buttons')
+        buttons = []
+        for index, (cls, allele, inspected) in enumerate(zip(
                 [Princess, Princess, Drone, Drone, Drone, Drone],
-                [entry.parent1_dom, entry.parent1_rec, entry.parent2_dom, entry.parent2_rec, entry.child_dom, entry.child_rec],
-                [entry.parent1_inspected, entry.parent1_inspected, entry.parent2_inspected, entry.parent2_inspected, entry.child_inspected, entry.child_inspected],
-                [0, 64, 192, 256, 384, 448])):
+                [self.entry.parent1_dom, self.entry.parent1_rec, self.entry.parent2_dom, self.entry.parent2_rec, self.entry.child_dom, self.entry.child_rec],
+                [self.entry.parent1_inspected, self.entry.parent1_inspected, self.entry.parent2_inspected, self.entry.parent2_inspected, self.entry.child_inspected, self.entry.child_inspected])):
             if index % 2 == 1 and not inspected:
                 slot = Slot()
             else:
                 bee = cls(Genes((allele, allele), None, None, None), inspected=inspected)
-                slot = Slot(bee, count)
-            self.buttons.append(UIButtonSlot(slot, pygame.Rect(offset, 0, 64, 64), '', self.ui_manager, self))
+                slot = Slot(bee, self.count)
+            buttons.append(UIButtonSlot(slot, pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container))
+        buttons.insert(2, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_plus_button'))
+        buttons.insert(5, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_right_arrow_button'))
+        return buttons
 
-    def kill(self):
-        for b in self.buttons:
-            b.kill()
-        return super().kill()
+    def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            for i, el in enumerate(self.subelements):
+                if event.ui_element == el:
+                    print(i)
 
+        return super().process_event(event)
 
-class MatingHistoryWindow(UIWindow):
-    def __init__(self,debug, mating_history: MatingHistory, rect: pygame.Rect, manager, window_display_title: str = "", element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None, resizable: bool = False, visible: int = 1):
-        super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible)
+class MatingHistoryWindow(UIGridWindow):
+    def __init__(self, mating_history: MatingHistory, rect: pygame.Rect, manager, window_display_title: str = "", element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None, visible: int = 1):
         self.mating_history = mating_history
-        self.entry_panels = []
+        print('before mating history init')
+        super().__init__(rect, manager, window_display_title, element_id, object_id, True, visible, 0, 0, self.subelements_method)
 
-        self.debug = debug
+    def subelements_method(self, container):
+        print('generating panels')
+        entry_panels = []
+        for index, (entry, count) in enumerate(zip(*self.mating_history.get_history_counts())):
+            entry_panels.append(MatingEntryPanel(count, entry, pygame.Rect(0,70*index,0,0), 0, self.ui_manager, container=container))
+        return entry_panels
 
     def update(self, time_delta: float):
         if self.mating_history.something_changed:
-            for panel in self.entry_panels:
-                panel.kill()
-            self.entry_panels = []
-            for index, (entry, count) in enumerate(zip(*self.mating_history.get_history_counts(self.debug))):
-                self.entry_panels.append(MatingEntryPanel(count, entry, pygame.Rect(0,70*index,0,0), 0, self.ui_manager, container=self))
-            self.mating_history.acknowledge_changes(self.debug)
+            print('something changed, so kill')
+            self.grid_panel.hide()
+            # self.grid_panel.kill()
+            # self.grid_panel = None
+            # self.set_subelements()
+            self.mating_history.acknowledge_changes()
         return super().update(time_delta)
 
 
@@ -751,13 +796,11 @@ class GUI(Game):
         self.inventory_windows.append(self.inv_window)
         self.most_recent_inventory = self.inv
 
-        self.q = MatingHistoryWindow(0, self.mating_history, pygame.Rect((0,0), window_size), manager, 'ACTUAL')
-        self.w = MatingHistoryWindow(1, self.mating_history, pygame.Rect((0,0), window_size), manager, 'DEBUG')
-
+        self.mating_history_window = None
 
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
 
         if not os.path.exists('save.forestry'):
             self.help_window()
@@ -771,6 +814,11 @@ class GUI(Game):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return UIMessageWindow(r, mendel_text, self.ui_manager)
+
+    def open_mating_history_window(self):
+        r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
+        r.center = (self.window_size[0]/2, self.window_size[1]/2)
+        return MatingHistoryWindow(self.mating_history, r, self.ui_manager, 'Mating History')
 
     def render(self):
         pass
@@ -815,8 +863,11 @@ class GUI(Game):
                     self.print('Saved the game to the disk')
                 elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
-                elif local['Greetings Window']:
+                elif event.text == local['Greetings Window']:
                     self.help_window()
+                elif event.text == local['Mating History']:
+                    if self.mating_history_window is None:
+                        self.mating_history_window = self.open_mating_history_window()
                 self.esc_menu.hide()
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if isinstance(event.ui_element, InventoryWindow):
@@ -827,6 +878,9 @@ class GUI(Game):
                     self.inventory_windows.remove(event.ui_element)
                 if isinstance(event.ui_element, ApiaryWindow):
                     self.apiary_windows.remove(event.ui_element)
+                if isinstance(event.ui_element, MatingHistoryWindow):
+                    print('closing window')
+                    self.mating_history_window = None
             except ValueError:
                 pass
         elif event.type == pygame.KEYDOWN:
@@ -866,9 +920,9 @@ class GUI(Game):
         self.resource_panel.inspect_panel.bee_button.slot = saved['inspect_slot']
         self.inventory_windows = [InventoryWindow(inv, 7, 7, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
         self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in saved['apiary_windows']]
-        self.q.mating_history = self.mating_history
-        self.w.mating_history = self.mating_history
-        self.mating_history.something_changed = True
+        if self.mating_history_window is not None:
+            self.mating_history_window.mating_history = self.mating_history
+            self.mating_history.something_changed = True
         return saved
 
 def main():
@@ -894,6 +948,9 @@ def main():
 
         game = None
         game = GUI(window_size, manager, cursor_manager)
+        # def a(window):
+        #     return [UIPanel(pygame.Rect(0, 0, 518, 70), 0, manager, container=window) for i in range(1)]
+        # w = UIGridWindow(pygame.Rect(0, 0, 400, 400), manager, resizable=True, subelements_function=a)
         clock = pygame.time.Clock()
         is_running = True
         visual_debug = False

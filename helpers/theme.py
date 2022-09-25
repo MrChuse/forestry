@@ -38,6 +38,20 @@ theme = {
             'text_horiz_alignment': 'center',
             'text_vert_alignment': 'center'
         }
+    },
+    '#mating_history_right_arrow_button':{
+        'images':{
+            'normal_image':{
+                'path': 'assets/mating_history_right_arrow.png'
+            }
+        }
+    },
+    '#mating_history_plus_button':{
+        'images':{
+            'normal_image':{
+                'path': 'assets/mating_history_plus.png'
+            }
+        }
     }
 }
 
