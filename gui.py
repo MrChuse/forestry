@@ -13,7 +13,7 @@ from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
 from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
-from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar
+from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar, UIFloatingTextBox
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -461,7 +461,7 @@ class ApiaryWindow(UIWindow):
                         if self.cursor.slot.is_empty():
                             self.cursor.slot.put(*self.apiary.take(index))
                         else:
-                            self.game.print('Cursor not empty', out=1)
+                            self.game.print("Can't take from slot", out=1)
         return super().process_event(event)
 
     def update(self, time_delta):
@@ -690,6 +690,7 @@ class GUI(Game):
         Slot.empty_str = ''
         Slot.str_amount = lambda x: ''
 
+        self.cursor_manager = cursor_manager
         self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', cursor_manager)
         self.window_size = window_size
         self.ui_manager = manager
@@ -699,15 +700,6 @@ class GUI(Game):
         self.inventory_windows = []
         api_window = ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((resource_panel_width, 0), (300, 420)), manager)
         self.apiary_windows.append(api_window)
-        right_text_box_rect = pygame.Rect(0, 0, resource_panel_width, window_size[1])
-        right_text_box_rect.right = 0
-        self.right_text_box = UITextBox(' ------- Logs ------- <br>', right_text_box_rect, manager,
-            anchors={
-                'top':'top',
-                'bottom':'bottom',
-                'left':'right',
-                'right':'right',
-            })
         apiary_selection_list_rect = pygame.Rect(0, 0, 100, window_size[1])
         apiary_selection_list_rect.right = 0
         self.apiary_selection_list = UISelectionList(apiary_selection_list_rect, [], manager,
@@ -716,7 +708,6 @@ class GUI(Game):
                 'bottom':'bottom',
                 'left':'right',
                 'right':'right',
-                'right_target': self.right_text_box
             })
         self.update_windows_list()
         self.inv_window = InventoryWindow(self.inv, 7, 7, self.cursor,
@@ -758,7 +749,7 @@ class GUI(Game):
         thing = sep.join(map(str, strings)) + end
         if out is not None:
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
-        self.right_text_box.append_html_text(thing.replace('\n', '<br>'))
+        UIFloatingTextBox(1.3, (0, -50), thing, pygame.Rect(pygame.mouse.get_pos(), (250, -1)), self.cursor_manager)
 
     def update_windows_list(self):
         self.apiary_selection_list.set_item_list(
