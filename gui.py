@@ -340,7 +340,7 @@ class InventoryWindow(UIGridWindow):
         return self.buttons
 
     def process_event(self, event):
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.sort_window_button:
                 self.inv.sort()
             for index, button in enumerate(self.buttons):
@@ -419,7 +419,7 @@ class ApiaryWindow(UIWindow):
             if event.key == pygame.K_g:
                 for b in self.buttons:
                     b.show()
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.take_all_button:
                 r = []
                 for b in self.buttons:
@@ -541,7 +541,7 @@ class InspectPanel(UIPanel):
         self.text_box.set_text('<br>'.join(res))
 
     def process_event(self, event: pygame.event.Event) -> bool:
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.bee_button:
                 self.cursor.slot.swap(self.bee_button.slot)
                 self.process_inspect()
