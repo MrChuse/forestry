@@ -829,10 +829,6 @@ class GUI(Game):
             window.kill()
         for window in self.inventory_windows:
             window.kill()
-        for i, row in enumerate(self.inv_window.buttons):
-            for j, b in enumerate(row):
-                slot = self.inv[j * len(row) + i]
-                b.slot = slot
         self.resource_panel.resources = self.resources
         self.update_windows_list()
         self.cursor.slot = saved['cursor_slot']
