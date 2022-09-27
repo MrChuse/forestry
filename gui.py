@@ -155,7 +155,7 @@ class UIButtonSlot(UIButton):
         ret = super().process_event(event)
         if event.type == pygame_gui.UI_BUTTON_ON_HOVERED: # TODO: come up with better solution
             if isinstance(event.ui_element, UIButtonSlot):
-                if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
+                if event.ui_element.slot.slot is not None and event.ui_element != self and event.ui_element.slot.slot == self.slot.slot:
                     self.highlight()
         elif event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
             if isinstance(event.ui_element, UIButtonSlot):
