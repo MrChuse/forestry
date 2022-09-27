@@ -717,6 +717,8 @@ class GUI(Game):
         self.most_recent_inventory = self.inv
 
         self.mating_history_window = None
+        self.load_confirm = None
+        self.save_confirm = None
 
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
@@ -776,11 +778,12 @@ class GUI(Game):
                 if event.text == local['Exit']:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 elif event.text == local['Load']:
-                    self.load('save')
-                    self.print('Loaded save from disk')
+                    r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                    self.load_confirm = UIConfirmationDialog(r, self.cursor_manager, local['load_confirm'])
                 elif event.text == local['Save']:
-                    self.save('save')
-                    self.print('Saved the game to the disk')
+                    if os.path.exists('save.forestry'):
+                        r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                        self.save_confirm = UIConfirmationDialog(r, self.cursor_manager, local['save_confirm'])
                 elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
                 elif event.text == local['Greetings Window']:
@@ -808,6 +811,13 @@ class GUI(Game):
                     self.esc_menu.hide()
                 else:
                     self.esc_menu.show()
+        elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
+            if event.ui_element == self.load_confirm:
+                self.load('save')
+                self.print('Loaded save from disk')
+            elif event.ui_element == self.save_confirm:
+                self.save('save')
+                self.print('Saved the game to the disk')
 
     def get_state(self):
         state = super().get_state()
