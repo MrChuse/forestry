@@ -41,8 +41,7 @@ class UIGridPanel(UIPanel):
             return
         available_space = self.get_container().get_abs_rect().width
         total_columns = max(1, available_space // self.subelement_size[0])
-        horizontal_space_left = available_space - total_columns * self.subelement_size[0]
-        marginx = max(self.min_marginx, horizontal_space_left / (total_columns + 1))
+        marginx = self.min_marginx
         # print(f'top one {available_space=},{total_columns=},{horizontal_space_left=},{marginx=}')
         total_rows = len(self.subelements) // total_columns
         total_rows += 1 if len(self.subelements) % total_columns else 0
@@ -53,14 +52,13 @@ class UIGridPanel(UIPanel):
             if self.scroll_bar is not None:
                 self.scroll_bar.kill()
                 self.scroll_bar = None
-            marginy = max(self.min_marginy, (self.get_container().get_abs_rect().height % self.subelement_size[1]) / (total_rows + 1))
+            marginy = self.min_marginy
             height_adjustment = 0
         else:
             # need a scrollbar, recalculate the margins
             available_space = self.get_container().get_abs_rect().width - self.scroll_bar_width
             total_columns = max(1, available_space // self.subelement_size[0])
-            horizontal_space_left = available_space % self.subelement_size[0]
-            marginx = max(self.min_marginx, horizontal_space_left / (total_columns + 1))
+            marginx = self.min_marginx
             # print(f'bot one {available_space=},{total_columns=},{horizontal_space_left=},{marginx=}')
             total_rows = len(self.subelements) // total_columns
             total_rows += 1 if len(self.subelements) % total_columns else 0
