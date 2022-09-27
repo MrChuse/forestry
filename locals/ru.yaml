@@ -34,6 +34,8 @@ esc_menu:
   Load: Загрузить
   Exit: Выйти из игры
   Mating History: История скрещивания
+  load_confirm: Несохраненный прогресс может быть потерян. Продолжить?
+  save_confirm: Сохраненный прогресс может быть потерян. Продолжить?
 genes_alleles:
   BeeSpecies:
     FOREST: [ЛЕСНОЙ, ЛЕСНАЯ]
