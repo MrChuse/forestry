@@ -188,14 +188,9 @@ class Cursor(UIButtonSlot):
         return super().update(time_delta)
 
 class InventoryWindow(UIGridWindow):
-    def __init__(self, inv: Inventory, button_hor, button_vert,  cursor: Cursor, rect, manager, *args, **kwargs):
+    def __init__(self, inv: Inventory,  cursor: Cursor, rect, manager, *args, **kwargs):
         self.inv = inv
-        self.button_hor = button_hor
-        self.button_vert = button_vert
         self.cursor = cursor
-        if len(self.inv) != button_hor * button_vert:
-            raise ValueError(
-                'Inventory should have button_hor*button_vert number of slots')
 
         self.title_bar_sort_button_width = 100
         self.sort_window_button = None
@@ -635,7 +630,7 @@ class ResourcePanel(UIPanel):
                         ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
                         self.game.update_windows_list()
                     elif isinstance(building, Inventory):
-                        InventoryWindow(building, 7, 7, self.cursor,
+                        InventoryWindow(building, self.cursor,
                         pygame.Rect(0, 0, self.game.apiary_selection_list.rect.left, self.game.window_size[1]),
                         self.ui_manager, resizable=True)
                         self.game.update_windows_list()
@@ -723,7 +718,7 @@ class GUI(Game):
                 'right':'right',
             })
         self.update_windows_list()
-        self.inv_window = InventoryWindow(self.inv, 7, 7, self.cursor,
+        self.inv_window = InventoryWindow(self.inv, self.cursor,
             pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
             manager, resizable=True)
         self.inventory_windows.append(self.inv_window)
@@ -788,7 +783,7 @@ class GUI(Game):
                 else:
                     index = int(event.text.split()[-1])
                     self.inventory_windows.append(
-                        InventoryWindow(self.inventories[index], 7, 7, self.cursor,
+                        InventoryWindow(self.inventories[index], self.cursor,
                             pygame.Rect(0, 0, self.apiary_selection_list.rect.left, self.window_size[1]),
                             self.ui_manager, resizable=True)
                         )
@@ -879,7 +874,7 @@ class GUI(Game):
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in saved['inspect_windows']]
         for window, slot in zip(self.inspect_windows, saved['inspect_slots']):
             window.bee_button.slot = slot
-        self.inventory_windows = [InventoryWindow(inv, 7, 7, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
+        self.inventory_windows = [InventoryWindow(inv, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
         self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in saved['apiary_windows']]
         if self.mating_history_window is not None:
             self.mating_history_window.mating_history = self.mating_history
