@@ -11,6 +11,8 @@ class UIGridPanel(UIPanel):
         self.subelements_function = subelements_function
         self.subelements = None
         self.subelement_size = None
+        self.total_rows = None
+        self.total_columns = None
         self.min_marginx = min_marginx
         self.min_marginy = min_marginy
 
@@ -88,6 +90,8 @@ class UIGridPanel(UIPanel):
             pos = (marginx * (i+1) + self.subelement_size[0] * i,
                     marginy * (j+1) + self.subelement_size[1] * j + height_adjustment)
             element.set_relative_position(pos)
+        self.total_columns = total_columns
+        self.total_rows = total_rows
 
     def set_dimensions(self, dimensions: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         super().set_dimensions(dimensions)
@@ -136,3 +140,21 @@ class UIGridWindow(UIWindow):
     def rebuild(self):
         super().rebuild()
         self.grid_panel.rebuild()
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        if (self is not None and event.type == pygame.MOUSEBUTTONUP and
+                event.button == pygame.BUTTON_LEFT and self.resizing_mode_active and
+                self.grid_panel.subelements is not None):
+
+            xdim = self.grid_panel.subelement_size[0] * self.grid_panel.total_columns +\
+                   self.grid_panel.min_marginx * (self.grid_panel.total_columns + 1) +\
+                   2 * self.shadow_width + 2 * self.grid_panel.shadow_width + 2 * self.grid_panel.subelements[0].shadow_width
+            if self.grid_panel.scroll_bar is not None:
+                xdim += self.grid_panel.scroll_bar_width
+
+            # ydim = self.grid_panel.subelement_size[1] * self.grid_panel.total_rows +\
+            #        self.grid_panel.min_marginy * (self.grid_panel.total_rows + 1) +\
+            #        2 * self.shadow_width
+
+            self.set_dimensions((xdim, self.rect.height))
+        return super().process_event(event)
