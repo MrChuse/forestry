@@ -553,7 +553,7 @@ class InspectPanel(UIPanel):
                 self.bee_stats.process_inspect()
             elif event.ui_element == self.inspect_button:
                 if self.game.total_inspections == 0:
-                    r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                    r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
                     self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
                 else:
                     self.game.inspect_bee(self.bee_button.slot.slot)
@@ -784,11 +784,11 @@ class GUI(Game):
                 if event.text == local['Exit']:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 elif event.text == local['Load']:
-                    r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                    r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
                     self.load_confirm = UIConfirmationDialog(r, self.cursor_manager, local['load_confirm'])
                 elif event.text == local['Save']:
                     if os.path.exists('save.forestry'):
-                        r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
+                        r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
                         self.save_confirm = UIConfirmationDialog(r, self.cursor_manager, local['save_confirm'])
                 elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
