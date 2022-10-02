@@ -14,6 +14,7 @@ from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
 from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
 from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar, UIFloatingTextBox
+from migration import CURRENT_FRONT_VERSION, update_front_versions
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
@@ -840,6 +841,7 @@ class GUI(Game):
 
     def get_state(self):
         state = super().get_state()
+        state['front_version'] = CURRENT_FRONT_VERSION
         state['cursor_slot'] = self.cursor.slot
         insp_win = []
         insp_slots = []
@@ -860,6 +862,11 @@ class GUI(Game):
 
     def load(self, name):
         saved = super().load(name)
+
+        if saved.get('front_version', 0) < CURRENT_FRONT_VERSION:
+            for update_front_func in update_front_versions[saved.get('front_version', 0):]:
+                saved = update_front_func(saved)
+
         for window in self.apiary_windows:
             window.kill()
         for window in self.inventory_windows:

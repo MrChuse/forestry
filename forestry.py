@@ -795,7 +795,7 @@ class Game:
     def state_updated(self):
         pass
 
-    def get_state(self):
+    def get_state(self) -> dict:
         return {
             'resources': self.resources,
             'inventories': self.inventories,
@@ -808,7 +808,7 @@ class Game:
         with open(name + '.forestry', 'wb') as f:
             pickle.dump(self.get_state(), f)
 
-    def load(self, name):
+    def load(self, name) -> dict:
         with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
         self.resources = saved['resources']
