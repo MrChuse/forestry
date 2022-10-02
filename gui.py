@@ -501,32 +501,23 @@ class UINonChangingDropDownMenu(UIDropDownMenu):
             self.object_ids
         )
 
-class InspectPanel(UIPanel):
-    def __init__(self, game: Game, cursor: Cursor, rect, starting_layer_height, manager, *args, **kwargs):
-        self.game = game
-        self.cursor = cursor
-        super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
-        inspect_button_height = 64
-        self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height - 6, inspect_button_height), local['Inspect'], manager, self)
-        bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
-        bee_button_rect.right = rect.right - 6
-        self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,)
-        self.bee_button.empty_object_id = '#DroneEmpty'
-        self.text_box = UITextBox('', pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
-        self.inspect_confirm = None
+class BeeStats(UITextBox):
+    def __init__(self, bee: Bee, relative_rect: pygame.Rect, manager, wrap_to_height: bool = False, layer_starting_height: int = 1, container = None, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None, visible: int = 1):
+        self.bee = bee
+        super().__init__('', relative_rect, manager, wrap_to_height, layer_starting_height, container, parent_element, object_id, anchors, visible)
+        self.process_inspect()
 
     def process_inspect(self):
-        bee = self.bee_button.slot.slot
-        if bee is None:
-            self.text_box.set_text('')
+        if self.bee is None:
+            self.set_text('')
             return
         res = []
-        if not bee.inspected:
-            res.append(bee.small_str())
+        if not self.bee.inspected:
+            res.append(self.bee.small_str())
         else:
-            name, bee_species_index = local[bee.type_str]
+            name, bee_species_index = local[self.bee.type_str]
             res.append(name)
-            genes = vars(bee.genes)
+            genes = vars(self.bee.genes)
             res.append(local['trait'])
             for key in genes:
                 try:
@@ -538,25 +529,40 @@ class InspectPanel(UIPanel):
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
                 res.append(f'  {local[key]} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{dom_local(allele0, dom0)}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{dom_local(allele1, dom1)}</font>')
-        self.text_box.set_text('<br>'.join(res))
+        self.set_text('<br>'.join(res))
+
+class InspectPanel(UIPanel):
+    def __init__(self, game: Game, cursor: Cursor, rect, starting_layer_height, manager, *args, **kwargs):
+        self.game = game
+        self.cursor = cursor
+        super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
+        inspect_button_height = 64
+        self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height - 6, inspect_button_height), local['Inspect'], manager, self)
+        bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
+        bee_button_rect.right = rect.right - 6
+        self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,)
+        self.bee_button.empty_object_id = '#DroneEmpty'
+        self.bee_stats = BeeStats(None, pygame.Rect(0, inspect_button_height, rect.width-6, rect.height-inspect_button_height-6), manager, container=self)
+        self.inspect_confirm = None
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.bee_button:
                 self.cursor.slot.swap(self.bee_button.slot)
-                self.process_inspect()
+                self.bee_stats.bee = self.bee_button.slot.slot
+                self.bee_stats.process_inspect()
             elif event.ui_element == self.inspect_button:
                 if self.game.total_inspections == 0:
                     r = pygame.Rect((pygame.mouse.get_pos()), (200, 100))
                     self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
                 else:
                     self.game.inspect_bee(self.bee_button.slot.slot)
-                    self.process_inspect()
+                    self.bee_stats.process_inspect()
                     self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
         if event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.inspect_confirm:
                 self.game.inspect_bee(self.bee_button.slot.slot)
-                self.process_inspect()
+                self.bee_stats.process_inspect()
                 self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
         return super().process_event(event)
 
