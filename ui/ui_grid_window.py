@@ -120,6 +120,7 @@ class UIGridWindow(UIWindow):
         self.min_marginy = min_marginy
         self.grid_panel = None
         super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible)
+        self.snap_dimensions()
 
     def create_grid_panel(self):
         if self.grid_panel is None:
@@ -141,20 +142,23 @@ class UIGridWindow(UIWindow):
         super().rebuild()
         self.grid_panel.rebuild()
 
+    def snap_dimensions(self):
+        xdim = self.grid_panel.subelement_size[0] * self.grid_panel.total_columns +\
+                self.grid_panel.min_marginx * (self.grid_panel.total_columns + 1) +\
+                2 * self.shadow_width + 2 * self.grid_panel.shadow_width + 2 * self.grid_panel.subelements[0].shadow_width
+        if self.grid_panel.scroll_bar is not None:
+            xdim += self.grid_panel.scroll_bar_width
+
+        # ydim = self.grid_panel.subelement_size[1] * self.grid_panel.total_rows +\
+        #        self.grid_panel.min_marginy * (self.grid_panel.total_rows + 1) +\
+        #        2 * self.shadow_width
+
+        self.set_dimensions((xdim, self.rect.height))
+
     def process_event(self, event: pygame.event.Event) -> bool:
         if (self is not None and event.type == pygame.MOUSEBUTTONUP and
                 event.button == pygame.BUTTON_LEFT and self.resizing_mode_active and
                 self.grid_panel.subelements is not None):
+            self.snap_dimensions()
 
-            xdim = self.grid_panel.subelement_size[0] * self.grid_panel.total_columns +\
-                   self.grid_panel.min_marginx * (self.grid_panel.total_columns + 1) +\
-                   2 * self.shadow_width + 2 * self.grid_panel.shadow_width + 2 * self.grid_panel.subelements[0].shadow_width
-            if self.grid_panel.scroll_bar is not None:
-                xdim += self.grid_panel.scroll_bar_width
-
-            # ydim = self.grid_panel.subelement_size[1] * self.grid_panel.total_rows +\
-            #        self.grid_panel.min_marginy * (self.grid_panel.total_rows + 1) +\
-            #        2 * self.shadow_width
-
-            self.set_dimensions((xdim, self.rect.height))
         return super().process_event(event)
