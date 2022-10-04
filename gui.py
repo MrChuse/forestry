@@ -6,14 +6,13 @@ from typing import List, Tuple, Union, Dict
 import pygame
 from pygame import mixer
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel, UIProgressBar, UIStatusBar,
-                                 UITextBox, UIWindow, UIDropDownMenu, UISelectionList)
-from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
+from pygame_gui.elements import (UIButton, UIPanel,
+                                 UITextBox, UIWindow, UISelectionList)
 from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
 from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
-from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar, UIFloatingTextBox
+from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar, UIFloatingTextBox, UINonChangingDropDownMenu
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
 def process_cursor_slot_interaction(event, cursor, slot):
@@ -457,37 +456,6 @@ class ApiaryWindow(UIWindow):
         self.princess_button.tool_tip_text = self.princess_button.slot.small_str()
         super().update(time_delta)
 
-class UINonChangingExpandedDropDownState(UIExpandedDropDownState):
-    def process_event(self, event: pygame.event.Event) -> bool:
-        if event.type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element in self.active_buttons:
-            self.should_transition = True
-
-        if (event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and
-                event.ui_element == self.options_selection_list):
-            self.should_transition = True
-
-            event_data = {'text': self.options_selection_list.get_single_selection(),
-                          'ui_element': self.drop_down_menu_ui,
-                          'ui_object_id': self.drop_down_menu_ui.most_specific_combined_id}
-            pygame.event.post(pygame.event.Event(pygame_gui.UI_DROP_DOWN_MENU_CHANGED, event_data))
-
-        return False  # don't consume any events
-
-class UINonChangingDropDownMenu(UIDropDownMenu):
-    def __init__(self, options_list, starting_option: str, relative_rect: pygame.Rect, manager, container=None, parent_element=None, object_id=None, expansion_height_limit=None, anchors=None, visible: int = 1):
-        super().__init__(options_list, starting_option, relative_rect, manager, container, parent_element, object_id, expansion_height_limit, anchors, visible)
-        self.menu_states['expanded'] = UINonChangingExpandedDropDownState(
-            self,
-            self.options_list,
-            self.selected_option,
-            self.background_rect,
-            self.open_button_width,
-            self.expand_direction,
-            self.ui_manager,
-            self,
-            self.element_ids,
-            self.object_ids
-        )
 
 class BeeStats(UITextBox):
     def __init__(self, bee: Bee, relative_rect: pygame.Rect, manager, wrap_to_height: bool = False, layer_starting_height: int = 1, container = None, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None, visible: int = 1):
