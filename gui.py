@@ -513,7 +513,7 @@ class BeeStats(UITextBox):
         else:
             name, bee_species_index = local[self.bee.type_str]
             res.append(name)
-            genes = vars(self.bee.genes)
+            genes = self.bee.genes.asdict()
             res.append(local['trait'])
             for key in genes:
                 try:

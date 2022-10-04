@@ -2,14 +2,12 @@
 # coding: utf-8
 
 
-import asyncio
+import dataclasses
 import pickle
 import random
-import sys
 import textwrap
 import threading
 import time
-import typing
 from collections import defaultdict
 from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
@@ -107,6 +105,13 @@ class Genes:
     lifespan: Gene
     speed: Gene
 
+    def asdict(self):
+        d = dataclasses.asdict(self)
+        for key in d:
+            if d[key] is None:
+                del d[key]
+        return d
+
     @staticmethod
     def mutate(allele1, allele2):
         mut = mutations.get((allele1, allele2))
@@ -120,7 +125,7 @@ class Genes:
                 )  # gene from mutation
         return (allele1, allele2)  # same genes if not mutated
 
-    def crossingover(self, genes2):
+    def crossingover(self, genes2: 'Genes'):
         spec1 = weighted_if(0.5, *(self.species))
         spec2 = weighted_if(0.5, *(genes2.species))
         new_spec1, new_spec2 = Genes.mutate(spec1, spec2)
@@ -135,8 +140,8 @@ class Genes:
             mutated_2 = True
 
         l = []
-        genes1_dict = vars(self)
-        genes2_dict = vars(genes2)
+        genes1_dict = self.asdict()
+        genes2_dict = genes2.asdict()
         for key, key2 in zip(genes1_dict, genes2_dict):
             assert key == key2, 'fields should be equal...'
             g1 = genes1_dict[key]
