@@ -53,7 +53,7 @@ class UIButtonSlot(UIButton):
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
         # print('created a text box', slot.amount, self.kwargs.get('visible', 1))
-        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'))
+        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'), anchors=self.kwargs.get('anchors'))
         self.text_box.hide()
         self.saved_amount = 0
         r = pygame.Rect(0,0,0,0)
@@ -61,7 +61,7 @@ class UIButtonSlot(UIButton):
         r.topright = self.relative_rect.topright
         self.inspected_status = None
         if not self.slot.is_empty():
-            self.inspected_status = UIRelativeStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus')
+            self.inspected_status = UIRelativeStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus', anchors=self.kwargs.get('anchors'))
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         self.highlighted = highlighted
 
@@ -534,10 +534,17 @@ class InspectWindow(UIWindow):
         rect = pygame.Rect(rect.left, rect.top, 350, 300)
         super().__init__(rect, manager, local['Inspect Window'], element_id, object_id, resizable=False, visible=1)
         inspect_button_height = 64
-        self.inspect_button = UIButton(pygame.Rect(0, 0, rect.width - inspect_button_height - 6, inspect_button_height), local['Inspect'], manager, self)
+        self.inspect_button = UIButton(pygame.Rect(0, 0, self.get_container().get_size()[0] - inspect_button_height, inspect_button_height), local['Inspect'], manager, self)
         bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
-        bee_button_rect.right = self.get_container().get_rect().right - 6
-        self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self)
+        self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'right',
+                'bottom': 'bottom',
+                'top': 'top',
+                'left_target': self.inspect_button
+            }
+        )
         self.bee_button.empty_object_id = '#DroneEmpty'
         self.bee_stats = BeeStats(None, pygame.Rect(0, inspect_button_height, self.get_container().get_rect().width, self.get_container().get_rect().height-inspect_button_height), manager, container=self)
         self.inspect_confirm = None
