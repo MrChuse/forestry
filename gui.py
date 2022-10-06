@@ -2,11 +2,12 @@ import math
 import time
 import os.path
 from typing import List, Tuple, Union, Dict
+import warnings
 
 import pygame
 from pygame import mixer
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel,
+from pygame_gui.elements import (UIButton, UIPanel, UITooltip,
                                  UITextBox, UIWindow, UISelectionList)
 from pygame_gui.core import ObjectID
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
@@ -31,6 +32,90 @@ def process_cursor_slot_interaction(event, cursor, slot):
             slot.put(cursor.slot.slot) # put one
             cursor.slot.take()
 
+INSPECT_BEE = pygame.event.custom_type()
+class InspectPopup(UITooltip):
+    def __init__(self, bee_button: 'UIButtonSlot', hover_distance: Tuple[int, int], manager, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None):
+        super().__init__('', hover_distance, manager, parent_element, object_id, anchors)
+
+        self.bee_button = bee_button
+        if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
+            width = 170
+        else:
+            width = 320
+        self.bee_stats = BeeStats(self.bee_button.slot.slot, pygame.Rect(0, 0, width, -1), manager, True, container=None,
+                                  layer_starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1)
+
+
+        self.inspect_button_height = 32
+        self.inspect_button = None
+        if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
+            self.inspect_button = UIButton(pygame.Rect(0, 0, width, self.inspect_button_height), local['Inspect'], manager, None,
+                starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1)
+            self.inspect_button.set_hold_range((2, 2))
+
+        xdim = self.bee_stats.rect.size[0]
+        ydim = self.bee_stats.rect.size[1]
+        if self.inspect_button is not None:
+            ydim += self.inspect_button.rect.size[1]
+        super().set_dimensions((xdim, ydim))
+        self.text_block.kill()
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            if event.ui_element == self.inspect_button:
+                event_data = {'bee_button': self.bee_button,
+                              'bee_stats': self.bee_stats}
+                pygame.event.post(pygame.event.Event(INSPECT_BEE, event_data))
+        return super().process_event(event)
+
+    def kill(self):
+        self.bee_stats.kill()
+        if self.inspect_button is not None:
+            self.inspect_button.kill()
+        return super().kill()
+
+    def find_valid_position(self, position: pygame.math.Vector2) -> bool:
+        window_rect = self.ui_manager.get_root_container().get_rect()
+
+        if not window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
+            self.relative_rect = self.rect.copy()
+            warnings.warn("initial position for tool tip is off screen,"
+                          " unable to find valid position")
+            return False
+
+        self.rect.left = int(position.x - self.rect.width/2)
+        self.rect.top = int(position.y + self.hover_distance_from_target[1])
+
+        if window_rect.contains(self.rect):
+            self.relative_rect = self.rect.copy()
+            if self.inspect_button is not None:
+                self.bee_stats.set_position((self.rect.left, self.rect.top + self.inspect_button_height))
+                self.inspect_button.set_position(self.rect.topleft)
+            else:
+                self.bee_stats.set_position(self.rect.topleft)
+
+            return True
+        else:
+            if self.rect.bottom > window_rect.bottom:
+                self.rect.bottom = int(position.y - self.hover_distance_from_target[1])
+            if self.rect.right > window_rect.right:
+                self.rect.right = window_rect.right - self.hover_distance_from_target[0]
+            if self.rect.left < window_rect.left:
+                self.rect.left = window_rect.left + self.hover_distance_from_target[0]
+
+        if window_rect.contains(self.rect):
+            self.relative_rect = self.rect.copy()
+            if self.inspect_button is not None:
+                self.bee_stats.set_position((self.rect.left, self.rect.top + self.inspect_button_height))
+                self.inspect_button.set_position(self.rect.topleft)
+            else:
+                self.bee_stats.set_position(self.rect.topleft)
+            return True
+        else:
+            self.relative_rect = self.rect.copy()
+            warnings.warn("Unable to fit tool tip on screen")
+            return False
+
 
 class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
@@ -40,21 +125,25 @@ class UIButtonSlot(UIButton):
         self.kwargs = kwargs
         self.kwargs['generate_click_events_from'] = [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT]
         super().__init__(*args, **kwargs)
+
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
-        # print('created a text box', slot.amount, self.kwargs.get('visible', 1))
         self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'), anchors=self.kwargs.get('anchors'))
         self.text_box.hide()
         self.saved_amount = 0
-        r = pygame.Rect(0,0,0,0)
-        r.size = 20, 20
-        r.topright = self.relative_rect.topright
+
         self.inspected_status = None
         if not self.slot.is_empty():
+            r = pygame.Rect(0,0,0,0)
+            r.size = 20, 20
+            r.topright = self.relative_rect.topright
             self.inspected_status = UIRelativeStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus', anchors=self.kwargs.get('anchors'))
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
+
         self.highlighted = highlighted
+
+        self.inspect_popup = None
 
     def get_object_id_from_bee(self, bee: Bee):
         typ = {
@@ -78,11 +167,11 @@ class UIButtonSlot(UIButton):
             pos = self.relative_rect.topleft
             size = self.rect.size
             self.kill()
-            text = self.slot.small_str()
-            text = text if text != '' else None
+            # text = self.slot.small_str()
+            # text = text if text != '' else None
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
-            self.kwargs['tool_tip_text'] = text
+            # self.kwargs['tool_tip_text'] = text
             # print('reinit button', self.slot.amount, prev_obj_id, obj_id, self.visible)
             self.__init__(self.slot, *self.args,    highlighted=self.highlighted, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
@@ -123,7 +212,24 @@ class UIButtonSlot(UIButton):
         self.text_box.kill()
         if self.inspected_status is not None:
             self.inspected_status.kill()
+        if self.inspect_popup is not None:
+            self.inspect_popup.kill()
         return super().kill()
+
+    def while_hovering(self, time_delta: float, mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
+        if self.inspect_popup is None and self.hover_time > self.tool_tip_delay:
+            hover_height = int(self.rect.height / 2)
+            self.inspect_popup = InspectPopup(self, (-150, hover_height), self.ui_manager)
+            self.inspect_popup.find_valid_position(pygame.math.Vector2(mouse_pos[0], self.rect.centery))
+        super().while_hovering(time_delta, mouse_pos)
+
+    def on_unhovered(self):
+        if self.inspect_popup is not None:
+            if self.inspect_popup.inspect_button is None or\
+                    not self.inspect_popup.inspect_button.in_hold_range(self.ui_manager.get_mouse_position()):
+                self.inspect_popup.kill()
+                self.inspect_popup = None
+        return super().on_unhovered()
 
     def hide(self):
         if self.visible:
@@ -153,6 +259,11 @@ class UIButtonSlot(UIButton):
             if isinstance(event.ui_element, UIButtonSlot):
                 if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
                     self.unhighlight()
+            if (self.inspect_popup is not None and
+                    self.inspect_popup.inspect_button is not None and
+                    event.ui_element == self.inspect_popup.inspect_button):
+                self.inspect_popup.kill()
+                self.inspect_popup = None
         return ret
 
 class Cursor(UIButtonSlot):
@@ -507,7 +618,6 @@ class InspectWindow(UIWindow):
         )
         self.bee_button.empty_object_id = '#DroneEmpty'
         self.bee_stats = BeeStats(None, pygame.Rect(0, inspect_button_height, self.get_container().get_rect().width, self.get_container().get_rect().height-inspect_button_height), manager, container=self)
-        self.inspect_confirm = None
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
@@ -516,18 +626,9 @@ class InspectWindow(UIWindow):
                 self.bee_stats.bee = self.bee_button.slot.slot
                 self.bee_stats.process_inspect()
             elif event.ui_element == self.inspect_button:
-                if self.game.total_inspections == 0:
-                    r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
-                    self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
-                else:
-                    self.game.inspect_bee(self.bee_button.slot.slot)
-                    self.bee_stats.process_inspect()
-                    self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
-        if event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
-            if event.ui_element == self.inspect_confirm:
-                self.game.inspect_bee(self.bee_button.slot.slot)
-                self.bee_stats.process_inspect()
-                self.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+                event_data = {'bee_button': self.bee_button,
+                              'bee_stats': self.bee_stats}
+                pygame.event.post(pygame.event.Event(INSPECT_BEE, event_data))
         return super().process_event(event)
 
 
@@ -793,6 +894,16 @@ class GUI(Game):
                     self.esc_menu.hide()
                 else:
                     self.esc_menu.show()
+        elif event.type == INSPECT_BEE:
+            if self.total_inspections == 0:
+                r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
+                self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
+                self.inspect_confirm.bee_button = event.bee_button
+                self.inspect_confirm.bee_stats = event.bee_stats
+            else:
+                self.inspect_bee(event.bee_button.slot.slot)
+                event.bee_stats.process_inspect()
+                event.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.load_confirm:
                 self.load('save')
@@ -800,6 +911,10 @@ class GUI(Game):
             elif event.ui_element == self.save_confirm:
                 self.save('save')
                 self.print('Saved the game to the disk')
+            elif event.ui_element == self.inspect_confirm:
+                self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
+                self.inspect_confirm.bee_stats.process_inspect()
+                self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
 
     def get_state(self):
         state = super().get_state()
@@ -871,9 +986,8 @@ def main():
 
         game = None
         game = GUI(window_size, manager, cursor_manager)
-        # def a(window):
-        #     return [UIPanel(pygame.Rect(0, 0, 518, 70), 0, manager, container=window) for i in range(1)]
-        # w = UIGridWindow(pygame.Rect(0, 0, 400, 400), manager, resizable=True, subelements_function=a)
+        # genes = Genes.sample()
+        # text = BeeStats(Princess(genes), pygame.Rect(100, 100, 100, -1), manager)
         clock = pygame.time.Clock()
         is_running = True
         visual_debug = False
