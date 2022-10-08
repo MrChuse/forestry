@@ -16,6 +16,8 @@ buildings:
   Apiary: Улей
   Take: Взять все
   Alveary: Алвеарий
+  Open Inspect Window: Открыть окно исследования
+  Inspect Window: Окно исследования
   Inspect: Исследовать
   Inspection popup: Исследование тратит 1 единицу меда
 resources:

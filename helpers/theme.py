@@ -13,6 +13,20 @@ theme = {
             'text_horiz_alignment': 'center'
         }
     },
+    '#unpinned':{
+        'images':{
+            'normal_image':{
+                'path': 'assets/pin.png'
+            }
+        }
+    },
+    '#pinned':{
+        'prototype': '#unpinned',
+        'colours':{
+            'normal_bg': '#686c9c',
+            'hovered_bg': '#686c9c'
+        }
+    },
     '#InspectedStatus':{
         'colours':{
             'filled_bar': '#73D444',

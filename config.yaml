@@ -13,10 +13,10 @@ genes_alleles:
     - [DILIGENT, 8, False]
     - [UNWEARY, 9, True]
     - [INDUSTRIOUS, 10, False]
-    
+
   BeeFertility:
-    - [ONE, 1, True]
-    - [TWO, 2, False]
+    - [ONE, 1, False]
+    - [TWO, 2, True]
     - [THREE, 3, False]
     - [FOUR, 4, False]
 
