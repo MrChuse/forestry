@@ -9,7 +9,7 @@ from pygame import mixer
 import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UITooltip,
                                  UITextBox, UIWindow, UISelectionList)
-from pygame_gui.core import ObjectID
+from pygame_gui.core import ObjectID, UIContainer
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
 from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
@@ -36,27 +36,42 @@ INSPECT_BEE = pygame.event.custom_type()
 class InspectPopup(UITooltip):
     def __init__(self, bee_button: 'UIButtonSlot', hover_distance: Tuple[int, int], manager, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None):
         super().__init__('', hover_distance, manager, parent_element, object_id, anchors)
-
+        self.container = UIContainer(pygame.Rect(0, 0, -1, -1), manager, starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1, parent_element=self)
         self.bee_button = bee_button
         if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
             width = 170
         else:
             width = 320
-        self.bee_stats = BeeStats(self.bee_button.slot.slot, pygame.Rect(0, 0, width, -1), manager, True, container=None,
-                                  layer_starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1)
-
-
+        self.top_margin = 4
         self.inspect_button_height = 32
+
+        bee_stats_rect = pygame.Rect(0, self.top_margin, width, -1)
         self.inspect_button = None
         if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
-            self.inspect_button = UIButton(pygame.Rect(0, 0, width, self.inspect_button_height), local['Inspect'], manager, None,
-                starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1)
+            self.inspect_button = UIButton(pygame.Rect(0, self.top_margin, width - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self.container)
             self.inspect_button.set_hold_range((2, 2))
+            bee_stats_rect.top += self.inspect_button_height
+
+        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, manager, True, container=self.container)
+
+        self.pin_button_unpinned = UIButton(pygame.Rect(width - self.inspect_button_height,
+                                                        self.top_margin,
+                                                        self.inspect_button_height,
+                                                        self.inspect_button_height),
+                                            '', manager, self.container, object_id='#unpinned', starting_height=2)
+        self.pin_button_pinned = UIButton(pygame.Rect(width - self.inspect_button_height,
+                                                      self.top_margin,
+                                                      self.inspect_button_height,
+                                                      self.inspect_button_height),
+                                          '', manager, self.container, object_id='#pinned', starting_height=2)
+        self.pin_button_pinned.hide()
+        self.pinned = False
 
         xdim = self.bee_stats.rect.size[0]
-        ydim = self.bee_stats.rect.size[1]
+        ydim = self.bee_stats.rect.size[1] + self.top_margin
         if self.inspect_button is not None:
             ydim += self.inspect_button.rect.size[1]
+        self.container.set_dimensions((xdim, ydim))
         super().set_dimensions((xdim, ydim))
         self.text_block.kill()
 
@@ -66,12 +81,18 @@ class InspectPopup(UITooltip):
                 event_data = {'bee_button': self.bee_button,
                               'bee_stats': self.bee_stats}
                 pygame.event.post(pygame.event.Event(INSPECT_BEE, event_data))
+            elif event.ui_element == self.pin_button_unpinned:
+                self.pinned = True
+                self.pin_button_unpinned.hide()
+                self.pin_button_pinned.show()
+            elif event.ui_element == self.pin_button_pinned:
+                self.pinned = False
+                self.pin_button_pinned.hide()
+                self.pin_button_unpinned.show()
         return super().process_event(event)
 
     def kill(self):
-        self.bee_stats.kill()
-        if self.inspect_button is not None:
-            self.inspect_button.kill()
+        self.container.kill()
         return super().kill()
 
     def find_valid_position(self, position: pygame.math.Vector2) -> bool:
@@ -84,16 +105,11 @@ class InspectPopup(UITooltip):
             return False
 
         self.rect.left = int(position.x - self.rect.width/2)
-        self.rect.top = int(position.y + self.hover_distance_from_target[1])
+        self.rect.top = int(position.y + self.hover_distance_from_target[1] - self.top_margin)
 
         if window_rect.contains(self.rect):
             self.relative_rect = self.rect.copy()
-            if self.inspect_button is not None:
-                self.bee_stats.set_position((self.rect.left, self.rect.top + self.inspect_button_height))
-                self.inspect_button.set_position(self.rect.topleft)
-            else:
-                self.bee_stats.set_position(self.rect.topleft)
-
+            self.container.set_position(self.rect.topleft)
             return True
         else:
             if self.rect.bottom > window_rect.bottom:
@@ -105,11 +121,7 @@ class InspectPopup(UITooltip):
 
         if window_rect.contains(self.rect):
             self.relative_rect = self.rect.copy()
-            if self.inspect_button is not None:
-                self.bee_stats.set_position((self.rect.left, self.rect.top + self.inspect_button_height))
-                self.inspect_button.set_position(self.rect.topleft)
-            else:
-                self.bee_stats.set_position(self.rect.topleft)
+            self.container.set_position(self.rect.topleft)
             return True
         else:
             self.relative_rect = self.rect.copy()
@@ -167,12 +179,8 @@ class UIButtonSlot(UIButton):
             pos = self.relative_rect.topleft
             size = self.rect.size
             self.kill()
-            # text = self.slot.small_str()
-            # text = text if text != '' else None
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
-            # self.kwargs['tool_tip_text'] = text
-            # print('reinit button', self.slot.amount, prev_obj_id, obj_id, self.visible)
             self.__init__(self.slot, *self.args,    highlighted=self.highlighted, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
@@ -184,6 +192,13 @@ class UIButtonSlot(UIButton):
                     self.text_box.set_text(str(self.slot.amount))
                     self.text_box.show()
             self.saved_amount = self.slot.amount
+
+        if (self.inspect_popup is not None and
+                not self.inspect_popup.pinned and
+                not self.hover_point(*self.ui_manager.get_mouse_position()) and
+                not self.inspect_popup.container.hover_point(*self.ui_manager.get_mouse_position())):
+            self.inspect_popup.kill()
+            self.inspect_popup = None
         return super().update(time_delta)
 
     def _set_relative_position_subelements(self):
@@ -220,16 +235,9 @@ class UIButtonSlot(UIButton):
         if self.inspect_popup is None and self.hover_time > self.tool_tip_delay:
             hover_height = int(self.rect.height / 2)
             self.inspect_popup = InspectPopup(self, (-150, hover_height), self.ui_manager)
-            self.inspect_popup.find_valid_position(pygame.math.Vector2(mouse_pos[0], self.rect.centery))
+            self.inspect_popup.find_valid_position(pygame.math.Vector2(self.rect.centerx, self.rect.centery))
         super().while_hovering(time_delta, mouse_pos)
 
-    def on_unhovered(self):
-        if self.inspect_popup is not None:
-            if self.inspect_popup.inspect_button is None or\
-                    not self.inspect_popup.inspect_button.in_hold_range(self.ui_manager.get_mouse_position()):
-                self.inspect_popup.kill()
-                self.inspect_popup = None
-        return super().on_unhovered()
 
     def hide(self):
         if self.visible:
@@ -259,11 +267,6 @@ class UIButtonSlot(UIButton):
             if isinstance(event.ui_element, UIButtonSlot):
                 if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
                     self.unhighlight()
-            if (self.inspect_popup is not None and
-                    self.inspect_popup.inspect_button is not None and
-                    event.ui_element == self.inspect_popup.inspect_button):
-                self.inspect_popup.kill()
-                self.inspect_popup = None
         return ret
 
 class Cursor(UIButtonSlot):
