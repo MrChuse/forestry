@@ -12,7 +12,7 @@ from pygame_gui.elements import (UIButton, UIPanel, UITooltip,
 from pygame_gui.core import ObjectID, UIContainer
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
 
-from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, local, dominant, helper_text, mendel_text, dom_local
+from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, SlotOccupiedError, local, dominant, helper_text, mendel_text, dom_local
 from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar, UIFloatingTextBox, UINonChangingDropDownMenu
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
@@ -544,8 +544,13 @@ class ApiaryWindow(UIWindow):
                             raise ValueError("Can't put more than 1 princess into apiary")
                         bee1 = self.apiary.take_princess()
                         bee2 = self.cursor.slot.take_all()
+                        try:
+                            self.apiary.put_princess(*bee2)
+                        except TypeError as e:
+                            self.cursor.slot.put(*bee2)
+                            self.apiary.put_princess(*bee1)
+                            raise e
                         self.cursor.slot.put(*bee1)
-                        self.apiary.put_princess(*bee2)
             elif event.ui_element == self.drone_button:
                 if isinstance(self.cursor.slot.slot, (Drone, type(None))):
                     process_cursor_slot_interaction(event, self.cursor, self.drone_button.slot)
