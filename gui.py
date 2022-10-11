@@ -8,7 +8,7 @@ import warnings
 import pygame
 from pygame import mixer
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel, UITooltip,
+from pygame_gui.elements import (UIButton, UIPanel, UITooltip, UILabel,
                                  UITextBox, UIWindow, UISelectionList)
 from pygame_gui.core import ObjectID, UIContainer
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
@@ -765,6 +765,42 @@ class MatingHistoryWindow(UIGridWindow):
             self.mating_history.acknowledge_changes()
         return super().update(time_delta)
 
+class UICheckbox(UIButton):
+    def __init__(self, relative_rect: pygame.Rect, checked: bool, manager, container = None, tool_tip_text: Union[str, None] = None, starting_height: int = 1, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None, allow_double_clicks: bool = False, generate_click_events_from = frozenset([pygame.BUTTON_LEFT]), visible: int = 1):
+        self.checked = checked
+        if object_id is None:
+            object_id = '#checkbox'
+        super().__init__(relative_rect, '✓' if self.checked else '', manager, container, tool_tip_text, starting_height, parent_element, object_id, anchors, allow_double_clicks, generate_click_events_from, visible)
+        if self.checked:
+            self.select()
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        tmp = super().process_event(event)
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self:
+                self.checked = not self.checked
+                if self.checked:
+                    self.select()
+                    self.set_text('✓')
+                else:
+                    self.unselect()
+                    self.set_text('')
+        return tmp
+
+
+class SettingsWindow(UIWindow):
+    def __init__(self, rect: pygame.Rect, manager, window_display_title: str = "", element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None, resizable: bool = False, visible: int = 1):
+        super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible)
+        self.full_screen_checkbox = UICheckbox(pygame.Rect(0, 0, 20, 20), True, manager, self)
+        self.full_screen_text = UILabel(pygame.Rect(0,0,100,20), local['Fullscreen'], manager, container=self,
+            anchors={
+                'left': 'left',
+                'right': 'right',
+                'bottom': 'bottom',
+                'top': 'top',
+                'left_target': self.full_screen_checkbox
+            })
+
 
 class GUI(Game):
     def __init__(self, window_size, manager, cursor_manager):
@@ -806,10 +842,13 @@ class GUI(Game):
 
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
 
         if not os.path.exists('save.forestry'):
             self.help_window()
+
+    def settings_window(self):
+        return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
 
     def help_window(self):
         r = pygame.Rect(0, 0, self.window_size[0] - 100, self.window_size[1] - 100)
@@ -873,6 +912,8 @@ class GUI(Game):
                     if os.path.exists('save.forestry'):
                         r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
                         self.save_confirm = UIConfirmationDialog(r, self.cursor_manager, local['save_confirm'])
+                elif event.text == local['Settings']:
+                    self.settings_window()
                 elif event.text == local['Mendelian Inheritance']:
                     self.mendel_window()
                 elif event.text == local['Greetings Window']:

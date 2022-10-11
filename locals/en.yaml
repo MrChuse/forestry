@@ -34,6 +34,8 @@ esc_menu:
   Mendelian Inheritance: Mendelian Inheritance
   Save: Save
   Load: Load
+  Settings: Settings
+  Fullscreen: Fullscreen
   Exit: Exit
   Mating History: Mating History
   load_confirm: You can lose unsaved progress. Continue?

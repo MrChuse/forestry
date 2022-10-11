@@ -13,6 +13,11 @@ theme = {
             'text_horiz_alignment': 'center'
         }
     },
+    '#checkbox': {
+        'misc': {
+            "text_horiz_alignment_padding": "0"
+        }
+    },
     '#unpinned':{
         'images':{
             'normal_image':{
