@@ -232,7 +232,7 @@ class UIButtonSlot(UIButton):
         return super().kill()
 
     def while_hovering(self, time_delta: float, mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        if self.inspect_popup is None and self.hover_time > self.tool_tip_delay:
+        if self.inspect_popup is None and self.hover_time > self.tool_tip_delay and not self.slot.is_empty():
             hover_height = int(self.rect.height / 2)
             self.inspect_popup = InspectPopup(self, (-150, hover_height), self.ui_manager)
             self.inspect_popup.find_valid_position(pygame.math.Vector2(self.rect.centerx, self.rect.centery))
@@ -572,7 +572,6 @@ class ApiaryWindow(UIWindow):
 
     def update(self, time_delta):
         self.update_health_bar()
-        self.princess_button.tool_tip_text = self.princess_button.slot.small_str()
         super().update(time_delta)
 
 
