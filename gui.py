@@ -1,6 +1,7 @@
 import math
 import time
 import os.path
+from traceback import print_exc
 from typing import List, Tuple, Union, Dict
 import warnings
 
@@ -1020,7 +1021,11 @@ def main():
                     if not consumed:
                         manager.process_events(event)
                 except Exception as e:
-                    game.print(e, out=1)
+                    if game is not None:
+                        game.print(e, out=1)
+                    else:
+                        print(e)
+                        print_exc()
 
             manager.update(time_delta)
             cursor_manager.update(time_delta)
