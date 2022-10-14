@@ -34,8 +34,11 @@ esc_menu:
   Mendelian Inheritance: Mendelian Inheritance
   Save: Save
   Load: Load
+  Cancel: Cancel
   Settings: Settings
   Fullscreen: Fullscreen
+  Master volume: Master volume
+  Click volume: Click volume
   Exit: Exit
   Mating History: Mating History
   load_confirm: You can lose unsaved progress. Continue?

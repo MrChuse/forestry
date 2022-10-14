@@ -1,3 +1,4 @@
+import json
 import math
 import time
 import os.path
@@ -8,7 +9,7 @@ import warnings
 import pygame
 from pygame import mixer
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel, UITooltip, UILabel,
+from pygame_gui.elements import (UIButton, UIPanel, UITooltip, UILabel, UIHorizontalSlider,
                                  UITextBox, UIWindow, UISelectionList)
 from pygame_gui.core import ObjectID, UIContainer
 from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
@@ -657,7 +658,7 @@ class ResourcePanel(UIPanel):
         self.forage_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), local['Forage'], manager, container=self,
             anchors={
                 'top':'top',
-                'bottom':'bottom',
+                'bottom':'top',
                 'left':'left',
                 'right':'right',
                 'top_target': self.text_box
@@ -668,7 +669,7 @@ class ResourcePanel(UIPanel):
         self.build_dropdown = UINonChangingDropDownMenu(self.local_build_options, local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
             anchors={
                 'top':'top',
-                'bottom':'bottom',
+                'bottom':'top',
                 'left':'left',
                 'right':'right',
                 'top_target': self.forage_button
@@ -676,7 +677,7 @@ class ResourcePanel(UIPanel):
         self.open_inspect_window_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), local['Open Inspect Window'], manager, container=self,
             anchors={
                 'top':'top',
-                'bottom':'bottom',
+                'bottom':'top',
                 'left':'left',
                 'right':'right',
                 'top_target': self.build_dropdown
@@ -788,18 +789,135 @@ class UICheckbox(UIButton):
         return tmp
 
 
+APPLY_VOLUME_CHANGE = pygame.event.custom_type()
 class SettingsWindow(UIWindow):
+    settings = None
     def __init__(self, rect: pygame.Rect, manager, window_display_title: str = "", element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None, resizable: bool = False, visible: int = 1):
         super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible)
-        self.full_screen_checkbox = UICheckbox(pygame.Rect(0, 0, 20, 20), True, manager, self)
-        self.full_screen_text = UILabel(pygame.Rect(0,0,100,20), local['Fullscreen'], manager, container=self,
+        self.settings = self.load_settings()
+        self.full_screen_checkbox = UICheckbox(pygame.Rect(20, 20, 20, 20), self.settings['fullscreen'], manager, self)
+        self.full_screen_label = UILabel(pygame.Rect(0,-20,100,20), local['Fullscreen'], manager, container=self,
             anchors={
                 'left': 'left',
-                'right': 'right',
-                'bottom': 'bottom',
+                'right': 'left',
+                'bottom': 'top',
                 'top': 'top',
-                'left_target': self.full_screen_checkbox
+                'left_target': self.full_screen_checkbox,
+                'top_target': self.full_screen_checkbox
             })
+        self.master_volume_slider = UIHorizontalSlider(pygame.Rect((20, 0), (100, 20)), int(self.settings['master_volume'] * 100), (0, 100), manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'top',
+                'top': 'top',
+                'top_target': self.full_screen_checkbox
+            })
+        self.master_volume_value_label = UILabel(pygame.Rect(0,-20,25,20), str(self.master_volume_slider.current_value), manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'top',
+                'top': 'top',
+                'left_target': self.master_volume_slider,
+                'top_target': self.master_volume_slider
+            })
+        self.master_volume_label = UILabel(pygame.Rect(0,-20,120,20), local['Master volume'], manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'top',
+                'top': 'top',
+                'left_target': self.master_volume_value_label,
+                'top_target': self.master_volume_value_label
+            })
+        self.click_volume_slider = UIHorizontalSlider(pygame.Rect((20, 0), (100, 20)), int(self.settings['click_volume'] * 100), (0, 100), manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'top',
+                'top': 'top',
+                'top_target': self.master_volume_slider
+            })
+        self.click_volume_value_label = UILabel(pygame.Rect(0,-20,25,20), str(self.click_volume_slider.current_value), manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'top',
+                'top': 'top',
+                'left_target': self.click_volume_slider,
+                'top_target': self.click_volume_slider
+            })
+        self.click_volume_label = UILabel(pygame.Rect(0,-20,120,20), local['Click volume'], manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'top',
+                'top': 'top',
+                'left_target': self.click_volume_value_label,
+                'top_target': self.click_volume_value_label
+            })
+
+
+        # bottom buttons stuff
+        save_button_rect = pygame.Rect((0, 0), (100, 40))
+        save_button_rect.left = 20
+        save_button_rect.bottom = -20
+        self.save_button = UIButton(save_button_rect, local['Save'], manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'bottom',
+                'top': 'bottom'
+            })
+        self.cancel_button = UIButton(save_button_rect, local['Cancel'], manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'bottom': 'bottom',
+                'top': 'bottom',
+                'left_target': self.save_button
+            })
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        consume = super().process_event(event)
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.save_button:
+                self.persist_settings()
+            elif event.ui_element == self.cancel_button:
+                self.kill()
+        elif event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+            if event.ui_element == self.master_volume_slider:
+                self.master_volume_value_label.set_text(str(int(self.master_volume_slider.current_value)))
+            elif event.ui_element == self.click_volume_slider:
+                self.click_volume_value_label.set_text(str(int(self.click_volume_slider.current_value)))
+        return consume
+
+    def persist_settings(self, filename='settings'):
+        settings = {}
+        settings['fullscreen'] = self.full_screen_checkbox.is_selected
+        settings['click_volume'] = self.click_volume_slider.current_value / 100
+        settings['master_volume'] = self.master_volume_slider.current_value / 100
+        with open(filename, 'w') as f:
+            json.dump(settings, f, indent=2)
+        if self.settings['master_volume'] != settings['master_volume'] or\
+           self.settings['click_volume'] != settings['click_volume']:
+            event_data = {'settings': settings}
+            pygame.event.post(pygame.event.Event(APPLY_VOLUME_CHANGE, event_data))
+        self.settings = settings
+
+    @staticmethod
+    def load_settings(filename='settings'):
+        settings = {
+            'fullscreen': True,
+            'master_volume': 1,
+            'click_volume': 1,
+        }
+
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                settings.update(json.load(f))
+        return settings
 
 
 class GUI(Game):
@@ -814,13 +932,15 @@ class GUI(Game):
         self.window_size = window_size
         self.ui_manager = manager
         self.inspect_windows = []
-        resource_panel_width = 330
-        self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, resource_panel_width, window_size[1]), 0, manager)
+        self.resource_panel_width = 330
+        self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, self.resource_panel_width, window_size[1]), 0, manager)
         self.apiary_windows = []
         self.inventory_windows = []
-        api_window = ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((resource_panel_width, 0), (300, 420)), manager)
+        api_window = ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resource_panel_width, 0), (300, 420)), manager)
         self.apiary_windows.append(api_window)
-        apiary_selection_list_rect = pygame.Rect(0, 0, 100, window_size[1])
+
+        self.apiary_selection_list_width = 100
+        apiary_selection_list_rect = pygame.Rect(0, 0, self.apiary_selection_list_width, window_size[1])
         apiary_selection_list_rect.right = 0
         self.apiary_selection_list = UISelectionList(apiary_selection_list_rect, [], manager,
             anchors={
@@ -886,6 +1006,10 @@ class GUI(Game):
             [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
             [local['Apiary'] + ' ' + a.name for a in self.apiaries]
         )
+
+    def set_dimensions(self, size):
+        self.resource_panel.set_dimensions((self.resource_panel_width, size[1]))
+        self.apiary_selection_list.set_dimensions((self.apiary_selection_list_width, size[1]))
 
     def process_event(self, event):
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
@@ -1016,15 +1140,21 @@ def main():
     try:
         mixer.init()
         sounds = {
-            'click-start': mixer.Sound('assets/ui-click-start.wav'),
-            'click-end': mixer.Sound('assets/ui-click-end.wav')
+            'click_start': mixer.Sound('assets/ui-click-start.wav'),
+            'click_end': mixer.Sound('assets/ui-click-end.wav')
         }
         pygame.init()
 
         pygame.display.set_caption('Bee Breeding Game')
 
-        window_surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        # window_surface = pygame.display.set_mode((800, 600))
+        settings = SettingsWindow.load_settings()
+        pygame.event.post(pygame.event.Event(APPLY_VOLUME_CHANGE, {'settings': settings}))
+
+
+        if settings['fullscreen']:
+            window_surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        else:
+            window_surface = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
         window_size = window_surface.get_rect().size
 
         background = pygame.Surface(window_size)
@@ -1035,8 +1165,8 @@ def main():
 
         game = None
         game = GUI(window_size, manager, cursor_manager)
-        # genes = Genes.sample()
-        # text = BeeStats(Princess(genes), pygame.Rect(100, 100, 100, -1), manager)
+
+        # settings = SettingsWindow(pygame.Rect(100, 100, 300, 300), manager, resizable=True)
         clock = pygame.time.Clock()
         is_running = True
         visual_debug = False
@@ -1045,16 +1175,27 @@ def main():
             # state = game.get_state()
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    is_running = False
+                if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+                    sounds['click_start'].play()
+                elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    sounds['click_end'].play()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
-                elif event.type == pygame_gui.UI_BUTTON_START_PRESS:
-                    sounds['click-start'].play()
-                elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    sounds['click-end'].play()
+                elif event.type == APPLY_VOLUME_CHANGE:
+                    for key in ['click_start', 'click_end']:
+                        sounds[key].set_volume(event.settings['master_volume'] * event.settings['click_volume'])
+                elif event.type == pygame.QUIT:
+                    is_running = False
+                elif event.type == pygame.WINDOWSIZECHANGED:
+                    if event.window is None:
+                        manager.set_window_resolution((event.x, event.y))
+                        cursor_manager.set_window_resolution((event.x, event.y))
+                        background = pygame.Surface((event.x, event.y))
+                        background.fill(pygame.Color('#000000'))
+                        if game is not None:
+                            game.set_dimensions((event.x, event.y))
                 try:
                     if game is not None:
                         game.process_event(event)
