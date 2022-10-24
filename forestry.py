@@ -277,6 +277,12 @@ class Resources:
         self.res.update(kwargs)
         super().__init__()
 
+    def __contains__(self, key):
+        return key in self.res
+
+    def __len__(self):
+        return len(self.res)
+
     def __str__(self):
         res = ['------ RESOURCES ------']
         for k in self.res:
@@ -679,7 +685,7 @@ class Apiary:
 
 class Game:
     def __init__(self):
-        self.resources = Resources(honey=0)
+        self.resources = Resources()
         self.mating_history = MatingHistory()
         self.inventories = []
         self.inv = Inventory(49, '0')
@@ -801,7 +807,9 @@ class Game:
         pass
 
     def get_state(self) -> dict:
+        from migration import CURRENT_BACK_VERSION # import here to avoid circular imports
         return {
+            'back_version': CURRENT_BACK_VERSION,
             'resources': self.resources,
             'inventories': self.inventories,
             'apiaries': self.apiaries,
@@ -816,6 +824,13 @@ class Game:
     def load(self, name) -> dict:
         with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
+
+        from migration import CURRENT_BACK_VERSION, update_back_versions # import here to avoid circular imports
+
+        if saved.get('back_version', 0) < CURRENT_BACK_VERSION:
+            for update_front_func in update_back_versions[saved.get('back_version', 0):]:
+                saved = update_front_func(saved)
+
         self.resources = saved['resources']
         self.inventories = saved['inventories']
         self.apiaries = saved['apiaries']

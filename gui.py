@@ -1,3 +1,4 @@
+from enum import IntEnum
 import json
 import math
 import time
@@ -49,7 +50,7 @@ class InspectPopup(UITooltip):
 
         bee_stats_rect = pygame.Rect(0, self.top_margin, width, -1)
         self.inspect_button = None
-        if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
+        if not self.bee_button.slot.is_empty() and GUI.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE and not self.bee_button.slot.slot.inspected:
             self.inspect_button = UIButton(pygame.Rect(0, self.top_margin, width - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self.container)
             self.inspect_button.set_hold_range((2, 2))
             bee_stats_rect.top += self.inspect_button_height
@@ -641,7 +642,7 @@ class InspectWindow(UIWindow):
         return super().process_event(event)
 
 
-
+TUTORIAL_STAGE_CHANGED = pygame.event.custom_type()
 class ResourcePanel(UIPanel):
     def __init__(self, game: 'GUI', cursor: Cursor, rect: pygame.Rect, starting_layer_height, manager, *args, **kwargs):
         self.game = game
@@ -655,15 +656,7 @@ class ResourcePanel(UIPanel):
             r,
             manager,
             container=self)
-        self.forage_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), local['Forage'], manager, container=self,
-            anchors={
-                'top':'top',
-                'bottom':'top',
-                'left':'left',
-                'right':'right',
-                'top_target': self.text_box
-            }
-        )
+
         self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
         self.local_build_options = [local[option] for option in self.original_build_options]
         self.build_dropdown = UINonChangingDropDownMenu(self.local_build_options, local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
@@ -672,21 +665,17 @@ class ResourcePanel(UIPanel):
                 'bottom':'top',
                 'left':'left',
                 'right':'right',
-                'top_target': self.forage_button
+                'top_target': self.text_box
             })
-        self.open_inspect_window_button = UIButton(pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), local['Open Inspect Window'], manager, container=self,
-            anchors={
-                'top':'top',
-                'bottom':'top',
-                'left':'left',
-                'right':'right',
-                'top_target': self.build_dropdown
-            }
-        )
-        self.game.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0))
 
     def update_text_box(self):
         text = str(self.resources)
+        if GUI.current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
+            GUI.current_tutorial_stage = TutorialStage.RESOURCES_AVAILABLE
+            pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
+        elif GUI.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE and 'honey' in self.resources:
+            GUI.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
+            pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
         for r in local['resources'].items():
             text = text.replace(*r)
         self.text_box.set_text(text.replace('\n', '<br>'))
@@ -714,11 +703,6 @@ class ResourcePanel(UIPanel):
                     else: #if isinstance(building, Alveary):
                         win_window = UIMessageWindow(pygame.Rect((0,0), self.game.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
                         win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
-        elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element == self.forage_button:
-                self.game.forage(self.game.most_recent_inventory)
-            elif event.ui_element == self.open_inspect_window_button:
-                self.game.open_inspect_window()
         return super().process_event(event)
 
 class MatingEntryPanel(UIGridPanel):
@@ -920,12 +904,23 @@ class SettingsWindow(UIWindow):
         return settings
 
 
+class TutorialStage(IntEnum):
+    BEFORE_FORAGE = 1
+    NO_RESOURCES = 2
+    RESOURCES_AVAILABLE = 3
+    INSPECT_AVAILABLE = 4
+
+
 class GUI(Game):
+    current_tutorial_stage = TutorialStage.BEFORE_FORAGE # bad design TODO: rethink and refactor
     def __init__(self, window_size, manager, cursor_manager):
         self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
         Slot.str_amount = lambda x: ''
+
+        if not os.path.exists('save.forestry'):
+            self.help_window()
 
         self.cursor_manager = cursor_manager
         self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', cursor_manager)
@@ -933,28 +928,32 @@ class GUI(Game):
         self.ui_manager = manager
         self.inspect_windows = []
         self.resource_panel_width = 330
-        self.resource_panel = ResourcePanel(self, self.cursor, pygame.Rect(0, 0, self.resource_panel_width, window_size[1]), 0, manager)
-        self.apiary_windows = []
-        self.inventory_windows = []
-        api_window = ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resource_panel_width, 0), (300, 420)), manager)
-        self.apiary_windows.append(api_window)
+        resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
+        self.resource_panel = ResourcePanel(self, self.cursor, resource_panel_rect, 0, manager, visible=False)
 
-        self.apiary_selection_list_width = 100
-        apiary_selection_list_rect = pygame.Rect(0, 0, self.apiary_selection_list_width, window_size[1])
-        apiary_selection_list_rect.right = 0
-        self.apiary_selection_list = UISelectionList(apiary_selection_list_rect, [], manager,
+        self.forage_button = UIButton(pygame.Rect(self.resource_panel.panel_container.rect.left, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], manager, container=None,
             anchors={
                 'top':'top',
-                'bottom':'bottom',
-                'left':'right',
+                'bottom':'top',
+                'left':'left',
                 'right':'right',
-            })
-        self.update_windows_list()
-        self.inv_window = InventoryWindow(self.inv, self.cursor,
-            pygame.Rect(api_window.rect.right, 0, self.apiary_selection_list.rect.left-api_window.rect.right, window_size[1]),
-            manager, resizable=True)
-        self.inventory_windows.append(self.inv_window)
-        self.most_recent_inventory = self.inv
+                'top_target': self.resource_panel.build_dropdown
+            }
+        )
+        self.open_inspect_window_button = UIButton(pygame.Rect(self.resource_panel.panel_container.rect.left, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], manager, container=None,
+            anchors={
+                'top':'top',
+                'bottom':'top',
+                'left':'left',
+                'right':'right',
+                'top_target': self.forage_button
+            },
+            visible=False)
+        self.apiary_windows = []
+        self.inventory_windows = []
+
+        self.apiary_selection_list_width = 100
+        self.apiary_selection_list = None
 
         self.mating_history_window = None
         self.load_confirm = None
@@ -963,9 +962,6 @@ class GUI(Game):
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
         self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
-
-        if not os.path.exists('save.forestry'):
-            self.help_window()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -990,6 +986,18 @@ class GUI(Game):
             rect = pygame.Rect(pygame.mouse.get_pos(), (0, 0))
         self.inspect_windows.append(InspectWindow(self, self.cursor, rect, self.ui_manager))
 
+    def open_apiary_selection_list(self):
+        apiary_selection_list_rect = pygame.Rect(0, 0, self.apiary_selection_list_width, self.window_size[1])
+        apiary_selection_list_rect.right = 0
+        self.apiary_selection_list = UISelectionList(apiary_selection_list_rect, [], self.ui_manager,
+            anchors={
+                'top':'top',
+                'bottom':'bottom',
+                'left':'right',
+                'right':'right',
+            })
+        self.update_windows_list()
+
     def render(self):
         pass
 
@@ -999,17 +1007,20 @@ class GUI(Game):
         thing = sep.join(map(str, strings)) + end
         if out is not None:
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
-        UIFloatingTextBox(1.3, (0, -50), thing, pygame.Rect(pygame.mouse.get_pos(), (250, -1)), self.cursor_manager)
+        UIFloatingTextBox(1.3, (0, -50), thing.replace('\n', '<br>'), pygame.Rect(pygame.mouse.get_pos(), (250, -1)), self.cursor_manager)
 
     def update_windows_list(self):
-        self.apiary_selection_list.set_item_list(
-            [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
-            [local['Apiary'] + ' ' + a.name for a in self.apiaries]
-        )
+        if self.apiary_selection_list is not None:
+            self.apiary_selection_list.set_item_list(
+                [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
+                [local['Apiary'] + ' ' + a.name for a in self.apiaries]
+            )
 
     def set_dimensions(self, size):
-        self.resource_panel.set_dimensions((self.resource_panel_width, size[1]))
-        self.apiary_selection_list.set_dimensions((self.apiary_selection_list_width, size[1]))
+        if self.resource_panel is not None:
+            self.resource_panel.set_dimensions((self.resource_panel_width, size[1]))
+        if self.apiary_selection_list is not None:
+            self.apiary_selection_list.set_dimensions((self.apiary_selection_list_width, size[1]))
 
     def process_event(self, event):
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
@@ -1061,6 +1072,9 @@ class GUI(Game):
                     self.inspect_windows.remove(event.ui_element)
             except ValueError:
                 print('Somehow window was closed that wasnt in any list:', event.ui_element)
+            else:
+                if isinstance(event.ui_element, (InventoryWindow, ApiaryWindow)):
+                    self.open_apiary_selection_list()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 if self.esc_menu.visible:
@@ -1086,12 +1100,36 @@ class GUI(Game):
                 self.print('Saved the game to the disk')
             elif event.ui_element == self.inspect_confirm:
                 self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
-                self.inspect_confirm.bee_stats.process_inspect()
+                self.inspect_confirm.bee_stats.process_inspect() # added bee_stats and bee_button in INSPECT_BEE elif; refactor?
                 self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+        elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.forage_button:
+                if GUI.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
+                    GUI.current_tutorial_stage = TutorialStage.NO_RESOURCES # progress the tutorial
+
+                    self.apiary_windows.append(ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resource_panel_width, 0), (300, 420)), self.ui_manager))
+
+                    self.inv_window = InventoryWindow(self.inv, self.cursor,
+                        pygame.Rect(self.apiary_windows[0].rect.right, 0, self.window_size[0] - self.apiary_selection_list_width - self.apiary_windows[0].rect.right, self.window_size[1]),
+                        self.ui_manager, resizable=True)
+                    self.inventory_windows.append(self.inv_window)
+                    self.most_recent_inventory = self.inv
+
+                self.forage(self.most_recent_inventory)
+            elif event.ui_element == self.open_inspect_window_button:
+                self.open_inspect_window()
+        elif event.type == TUTORIAL_STAGE_CHANGED:
+            if self.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
+                self.resource_panel.show()
+            elif self.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
+                self.open_inspect_window_button.show()
+                self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0))
 
     def get_state(self):
         state = super().get_state()
         state['front_version'] = CURRENT_FRONT_VERSION
+        state['current_tutorial_stage'] = self.current_tutorial_stage
+        state['apiary_list_opened'] = self.apiary_selection_list is not None
         state['cursor_slot'] = self.cursor.slot
         insp_win = []
         insp_slots = []
@@ -1123,9 +1161,18 @@ class GUI(Game):
             window.kill()
         for window in self.inspect_windows:
             window.kill()
+        if self.apiary_selection_list is not None:
+            self.apiary_selection_list.kill()
+
         self.resource_panel.resources = self.resources
-        self.update_windows_list()
         self.cursor.slot = saved['cursor_slot']
+
+        if saved['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
+            self.resource_panel.show()
+        if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
+            self.open_inspect_window_button.show()
+        if saved['apiary_list_opened']:
+            self.open_apiary_selection_list()
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in saved['inspect_windows']]
         for window, slot in zip(self.inspect_windows, saved['inspect_slots']):
             window.bee_button.slot = slot
