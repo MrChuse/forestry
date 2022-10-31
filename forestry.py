@@ -273,7 +273,7 @@ class Drone(Bee):
 
 class Resources:
     def __init__(self, **kwargs):
-        self.res = defaultdict(int)
+        self.res = {}
         self.res.update(kwargs)
         super().__init__()
 
@@ -292,21 +292,27 @@ class Resources:
         return '\n'.join(res)
 
     def __getitem__(self, key):
-        return self.res[key]
+        return self.res.get(key, 0)
 
     def add_resources(self, resources):
         for k in resources:
-            self.res[k] += resources[k]
+            self.res[k] = self[k] + resources[k]
 
     def remove_resources(self, resources):
         s = ''
         for k in resources:
-            if self.res[k] - resources[k] < 0:
+            if self[k] - resources[k] < 0:
                 s += f'Not enough {local["resources"][k]}: you have {self.res[k]} but you need {resources[k]}\n'
         if s != '':
             raise ValueError(s)
         for k in resources:
             self.res[k] -= resources[k]
+
+    def check_enough(self, resources):
+        for k in resources:
+            if k not in self:
+                return False
+        return True
 
 @dataclass
 class MatingEntry:
@@ -444,6 +450,7 @@ class Slot:
 
 
 class Inventory:
+    cost = {'wood': 5, 'flowers': 5}
     def __init__(self, capacity=None, name=''):
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
@@ -570,6 +577,7 @@ def except_print(*exceptions):
 
 
 class Apiary:
+    cost = {'honey': 10, 'wood': 5, 'flowers': 5}
     production_modifier = 1/3
     def __init__(self, name, add_resources, add_mating_entry):
         self.inv = Inventory(7)
@@ -682,6 +690,8 @@ class Apiary:
                 else:
                     assert False, 'Should be unreachable'
 
+class Alveary(Apiary):
+    cost = {'honey': 100, 'royal jelly': 25, 'pollen cluster': 25}
 
 class Game:
     def __init__(self):
@@ -777,20 +787,26 @@ class Game:
     @except_print(IndexError)
     def build(self, *params):
         if params[0] in ['apiary', 'api', 'a']:  # tested
-            self.resources.remove_resources(
-                {'honey': 10, 'wood': 5, 'flowers': 5})
+            self.resources.remove_resources(Apiary.cost)
             self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources, self.mating_history.append))
             return self.apiaries[-1]
         elif params[0] in ['inventory', 'inv', 'i']:
-            self.resources.remove_resources(
-                {'wood': 5, 'flowers': 5})
+            self.resources.remove_resources(Inventory.cost)
             self.inventories.append(Inventory(49, str(len(self.inventories))))
             return self.inventories[-1]
         elif params[0] == 'alveary':
-            self.resources.remove_resources(
-                {'honey': 100, 'royal jelly': 25, 'pollen cluster': 25}
-            )
+            self.resources.remove_resources(Alveary.cost)
             self.print('You won the demo!', out=self.command_out, flush=True)
+
+    def get_available_build_options(self):
+        options = []
+        if self.resources.check_enough(Apiary.cost):
+            options.append('Apiary')
+        if self.resources.check_enough(Inventory.cost):
+            options.append('Inventory')
+        if self.resources.check_enough(Alveary.cost):
+            options.append('Alveary')
+        return options
 
     def update_state(self):
         while True:

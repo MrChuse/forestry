@@ -658,7 +658,8 @@ class ResourcePanel(UIPanel):
             container=self)
 
         self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
-        self.local_build_options = [local[option] for option in self.original_build_options]
+        self.known_build_options = []
+        self.local_build_options = []
         self.build_dropdown = UINonChangingDropDownMenu(self.local_build_options, local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
             anchors={
                 'top':'top',
@@ -666,7 +667,7 @@ class ResourcePanel(UIPanel):
                 'left':'left',
                 'right':'right',
                 'top_target': self.text_box
-            })
+            }, visible=False)
 
     def update_text_box(self):
         text = str(self.resources)
@@ -676,6 +677,14 @@ class ResourcePanel(UIPanel):
         elif GUI.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE and 'honey' in self.resources:
             GUI.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
+        available_build_options = self.game.get_available_build_options()
+        if len(available_build_options) > 0:
+            self.build_dropdown.show()
+        for option in available_build_options:
+            if option not in self.known_build_options:
+                self.known_build_options.append(option)
+                self.local_build_options.append(local[option])
+                self.build_dropdown.options_list = self.local_build_options
         for r in local['resources'].items():
             text = text.replace(*r)
         self.text_box.set_text(text.replace('\n', '<br>'))
@@ -936,7 +945,7 @@ class GUI(Game):
                 'top':'top',
                 'bottom':'top',
                 'left':'left',
-                'right':'right',
+                'right':'left',
                 'top_target': self.resource_panel.build_dropdown
             }
         )
@@ -945,7 +954,7 @@ class GUI(Game):
                 'top':'top',
                 'bottom':'top',
                 'left':'left',
-                'right':'right',
+                'right':'left',
                 'top_target': self.forage_button
             },
             visible=False)
