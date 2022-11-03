@@ -605,8 +605,24 @@ class BeeStats(UITextBox):
                     allele1 = local[genes[key][1]][0]
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
-                res.append(f'  {local[key]} : <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{dom_local(allele0, dom0)}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{dom_local(allele1, dom1)}</font>')
+                res.append(f'  {local[key]} <a href=\'{key}\'>(?)</a>: <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{dom_local(allele0, dom0)}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{dom_local(allele1, dom1)}</font>')
         self.set_text('<br>'.join(res))
+
+    def open_gene_helper(self, gene):
+        return UIMessageWindow(pygame.Rect(self.ui_manager.get_mouse_position(), (260, 200)),
+        local[gene+'_helper_text'], self.ui_manager)
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        consumed = super().process_event(event)
+        if event.type == pygame_gui.UI_TEXT_BOX_LINK_CLICKED:
+            if event.ui_element == self:
+                try:
+                    self.open_gene_helper(event.link_target)
+                    consumed = True
+                except KeyError:
+                    pass
+        return consumed
+
 
 class InspectWindow(UIWindow):
     def __init__(self, game: Game, cursor: Cursor, rect: pygame.Rect, manager, element_id: Union[str, None] = None, object_id: Union[ObjectID, str, None] = None):
@@ -1026,6 +1042,7 @@ class GUI(Game):
             )
 
     def set_dimensions(self, size):
+        self.window_size = size
         if self.resource_panel is not None:
             self.resource_panel.set_dimensions((self.resource_panel_width, size[1]))
         if self.apiary_selection_list is not None:
@@ -1130,6 +1147,7 @@ class GUI(Game):
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if self.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
                 self.resource_panel.show()
+                self.resource_panel.build_dropdown.hide()
             elif self.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
                 self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0))

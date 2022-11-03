@@ -5,9 +5,13 @@ bee_genders:
 genes:
   trait: "Trait : active, inactive"
   species: species
+  species_helper_text: Species of this bee. Active allele of this gene identifies unique appearance of this bee and the resources the queen produces while alive.
   fertility: fertility
+  fertility_helper_text: Fertility is the number of <b>drones</b> the queen will spawn after dying. Queen always spawns 1 <b>princess</b> and <i>fertility</i> <b>drones</b>.
   lifespan: lifespan
+  lifespan_helper_text: "Lifespan is the number of ticks the queen will live for. The queen has a chance to produce resources on each tick except the last one: it dies without producing anything."
   speed: speed
+  speed_helper_text: Speed is the multiplier for the chances of producing resources while queen is alive. Mind that bees of different species may produce the same resource with different production rates even if the active speed allele is the same.
 buildings:
   Forage: Forage # left side bar button
   Build: Build # left side bar button
