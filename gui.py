@@ -609,8 +609,11 @@ class BeeStats(UITextBox):
         self.set_text('<br>'.join(res))
 
     def open_gene_helper(self, gene):
+        if GUI.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
+            GUI.current_tutorial_stage = TutorialStage.GENE_HELPER_TEXT_CLICKED
+            pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
         return UIMessageWindow(pygame.Rect(self.ui_manager.get_mouse_position(), (260, 200)),
-        local[gene+'_helper_text'], self.ui_manager)
+                               local[gene+'_helper_text'], self.ui_manager)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         consumed = super().process_event(event)
@@ -934,6 +937,17 @@ class TutorialStage(IntEnum):
     NO_RESOURCES = 2
     RESOURCES_AVAILABLE = 3
     INSPECT_AVAILABLE = 4
+    GENE_HELPER_TEXT_CLICKED = 5
+
+
+class MendelTutorialWindow(UIWindow):
+    def __init__(self, rect: pygame.Rect, manager):
+        super().__init__(rect, manager, local['Mendelian Inheritance'])
+        self.minimum_dimensions = (500, 700)
+        self.interactive_panel_height = 400
+        size = self.get_container().get_size()
+        self.text_box = UITextBox(mendel_text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height)), self.ui_manager, container=self)
+        self.interactive_panel = None
 
 
 class GUI(Game):
@@ -986,7 +1000,7 @@ class GUI(Game):
 
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -999,7 +1013,7 @@ class GUI(Game):
     def mendel_window(self):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
-        return UIMessageWindow(r, mendel_text, self.ui_manager)
+        return MendelTutorialWindow(r, self.ui_manager)
 
     def open_mating_history_window(self):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
@@ -1022,6 +1036,11 @@ class GUI(Game):
                 'right':'right',
             })
         self.update_windows_list()
+
+    def open_mendel_notification(self):
+        mouse_pos = self.ui_manager.get_mouse_position()
+        r = pygame.Rect((mouse_pos[0]+260, mouse_pos[1]), (260, 200))
+        return UIMessageWindow(r, local['mendel_notification'], self.ui_manager)
 
     def render(self):
         pass
@@ -1151,6 +1170,9 @@ class GUI(Game):
             elif self.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
                 self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0))
+            elif self.current_tutorial_stage == TutorialStage.GENE_HELPER_TEXT_CLICKED:
+                self.open_mendel_notification()
+                self.esc_menu.set_item_list([local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']])
 
     def get_state(self):
         state = super().get_state()

@@ -45,6 +45,7 @@ esc_menu:
   Click volume: Click volume
   Exit: Exit
   Mating History: Mating History
+  mendel_notification: "Notification: Mendelian inheritance tutorial is now available in the esc menu."
   load_confirm: You can lose unsaved progress. Continue?
   save_confirm: You can lose saved progress. Continue?
 genes_alleles:
