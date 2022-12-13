@@ -1,23 +1,29 @@
-from enum import IntEnum
 import json
 import math
-import time
 import os.path
-from traceback import print_exc
-from typing import List, Tuple, Union, Dict
+import time
 import warnings
+from enum import IntEnum
+from traceback import print_exc
+from typing import Dict, List, Tuple, Union
 
 import pygame
-from pygame import mixer
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel, UITooltip, UILabel, UIHorizontalSlider,
-                                 UITextBox, UIWindow, UISelectionList)
+from pygame import mixer
 from pygame_gui.core import ObjectID, UIContainer
-from pygame_gui.windows import UIMessageWindow, UIConfirmationDialog
+from pygame_gui.elements import (UIButton, UIHorizontalSlider, UILabel,
+                                 UIPanel, UISelectionList, UITextBox,
+                                 UITooltip, UIWindow)
+from pygame_gui.windows import UIConfirmationDialog, UIMessageWindow
 
-from forestry import Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry, MatingHistory, Princess, Queen, Resources, Slot, SlotOccupiedError, local, dominant, helper_text, mendel_text, dom_local
-from ui import UIGridWindow, UIGridPanel, UIRelativeStatusBar, UIFloatingTextBox, UINonChangingDropDownMenu
+from forestry import (Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry,
+                      MatingHistory, Princess, Queen, Resources, Slot,
+                      SlotOccupiedError, dom_local, dominant, helper_text,
+                      local, mendel_text)
 from migration import CURRENT_FRONT_VERSION, update_front_versions
+from ui import (UIFloatingTextBox, UIGridPanel, UIGridWindow,
+                UINonChangingDropDownMenu, UIRelativeStatusBar)
+
 
 def process_cursor_slot_interaction(event, cursor, slot):
     if event.mouse_button == pygame.BUTTON_LEFT:
