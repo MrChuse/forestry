@@ -952,7 +952,7 @@ class MendelTutorialWindow(UIWindow):
         self.minimum_dimensions = (500, 700)
         self.interactive_panel_height = 400
         size = self.get_container().get_size()
-        self.text_box = UITextBox(mendel_text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height)), self.ui_manager, container=self)
+        self.text_box = UITextBox(mendel_text[0], pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height)), self.ui_manager, container=self)
         self.interactive_panel = None
 
 
@@ -962,8 +962,7 @@ class GUI(Game):
         self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
-        Slot.str_amount = lambda x: ''
-
+        Slot.str_amount = lambda x: '' # type: ignore
         if not os.path.exists('save.forestry'):
             self.help_window()
 
@@ -976,7 +975,7 @@ class GUI(Game):
         resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
         self.resource_panel = ResourcePanel(self, self.cursor, resource_panel_rect, 0, manager, visible=False)
 
-        self.forage_button = UIButton(pygame.Rect(self.resource_panel.panel_container.rect.left, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], manager, container=None,
+        self.forage_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], manager, container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -985,7 +984,7 @@ class GUI(Game):
                 'top_target': self.resource_panel.build_dropdown
             }
         )
-        self.open_inspect_window_button = UIButton(pygame.Rect(self.resource_panel.panel_container.rect.left, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], manager, container=None,
+        self.open_inspect_window_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], manager, container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -1014,7 +1013,7 @@ class GUI(Game):
     def help_window(self):
         r = pygame.Rect(0, 0, self.window_size[0] - 100, self.window_size[1] - 100)
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
-        return UIMessageWindow(r, helper_text, self.ui_manager)
+        return UIMessageWindow(r, helper_text[0], self.ui_manager)
 
     def mendel_window(self):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
@@ -1026,7 +1025,7 @@ class GUI(Game):
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return MatingHistoryWindow(self.mating_history, r, self.ui_manager, 'Mating History')
 
-    def open_inspect_window(self, rect: pygame.Rect = None):
+    def open_inspect_window(self, rect: Union[pygame.Rect, None] = None):
         if rect is None:
             rect = pygame.Rect(pygame.mouse.get_pos(), (0, 0))
         self.inspect_windows.append(InspectWindow(self, self.cursor, rect, self.ui_manager))
@@ -1085,7 +1084,7 @@ class GUI(Game):
                     index = int(event.text.split()[-1])
                     self.inventory_windows.append(
                         InventoryWindow(self.inventories[index], self.cursor,
-                            pygame.Rect(0, 0, self.apiary_selection_list.rect.left, self.window_size[1]),
+                            pygame.Rect(0, 0, self.apiary_selection_list.rect.left, self.window_size[1]), #type: ignore
                             self.ui_manager, resizable=True)
                         )
             elif event.ui_element == self.esc_menu:
@@ -1093,11 +1092,11 @@ class GUI(Game):
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 elif event.text == local['Load']:
                     r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
-                    self.load_confirm = UIConfirmationDialog(r, self.cursor_manager, local['load_confirm'])
+                    self.load_confirm = UIConfirmationDialog(r, local['load_confirm'], self.cursor_manager)
                 elif event.text == local['Save']:
                     if os.path.exists('save.forestry'):
                         r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
-                        self.save_confirm = UIConfirmationDialog(r, self.cursor_manager, local['save_confirm'])
+                        self.save_confirm = UIConfirmationDialog(r, local['save_confirm'], self.cursor_manager)
                 elif event.text == local['Settings']:
                     self.settings_window()
                 elif event.text == local['Mendelian Inheritance']:
@@ -1135,9 +1134,9 @@ class GUI(Game):
         elif event.type == INSPECT_BEE:
             if self.total_inspections == 0:
                 r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
-                self.inspect_confirm = UIConfirmationDialog(r, self.ui_manager, local['Inspection popup'])
-                self.inspect_confirm.bee_button = event.bee_button
-                self.inspect_confirm.bee_stats = event.bee_stats
+                self.inspect_confirm = UIConfirmationDialog(r, local['Inspection popup'], self.ui_manager)
+                self.inspect_confirm.bee_button = event.bee_button #type: ignore
+                self.inspect_confirm.bee_stats = event.bee_stats #type: ignore
             else:
                 self.inspect_bee(event.bee_button.slot.slot)
                 event.bee_stats.process_inspect()
@@ -1150,9 +1149,9 @@ class GUI(Game):
                 self.save('save')
                 self.print('Saved the game to the disk')
             elif event.ui_element == self.inspect_confirm:
-                self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
-                self.inspect_confirm.bee_stats.process_inspect() # added bee_stats and bee_button in INSPECT_BEE elif; refactor?
-                self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+                self.inspect_bee(self.inspect_confirm.bee_button.slot.slot) #type: ignore
+                self.inspect_confirm.bee_stats.process_inspect() #type: ignore ## added bee_stats and bee_button in INSPECT_BEE elif; refactor?
+                self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' #type: ignore ## dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:
                 if GUI.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
@@ -1175,7 +1174,7 @@ class GUI(Game):
                 self.resource_panel.build_dropdown.hide()
             elif self.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
-                self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0))
+                self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0)) #type: ignore
             elif self.current_tutorial_stage == TutorialStage.GENE_HELPER_TEXT_CLICKED:
                 self.open_mendel_notification()
                 self.esc_menu.set_item_list([local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']])
@@ -1239,6 +1238,7 @@ class GUI(Game):
         return saved
 
 def main():
+    game = None
     try:
         mixer.init()
         sounds = {
@@ -1265,7 +1265,6 @@ def main():
         manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False)
         cursor_manager = pygame_gui.UIManager(window_size, 'theme.json')
 
-        game = None
         game = GUI(window_size, manager, cursor_manager)
 
         # settings = SettingsWindow(pygame.Rect(100, 100, 300, 300), manager, resizable=True)
@@ -1307,6 +1306,7 @@ def main():
                 except Exception as e:
                     if game is not None:
                         game.print(e, out=1)
+                        print_exc()
                     else:
                         print(e)
                         print_exc()

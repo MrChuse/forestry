@@ -32,5 +32,6 @@ class UINonChangingDropDownMenu(UIDropDownMenu):
             self.ui_manager,
             self,
             self.element_ids,
-            self.object_ids
+            self.object_ids,
+            None
         )
