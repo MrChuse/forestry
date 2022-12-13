@@ -112,7 +112,6 @@ texts:
     - |
       This helper window will explain basics of genetics according to Mendelian Inheritance.
       It is not actually needed to win the game but will help if you want to breed bees efficiently.
-      You can bring up this window using Esc menu.
 
     - |
       First, let's develop an understanding of fundamentals:
@@ -127,41 +126,40 @@ texts:
       Gregor Mendel is the Moravian Augustinian monk who founded the modern science of genetics and, as this game is about genetics, it's quite useful to understand Mendelian Inheritance.
 
     - |
+      Law of independent assortment:
+      <i>Genes of different traits can segregate independently during the formation of gametes.</i>
+      This is quite self-explanatory. The offspring will get alleles of different genes independently.
+      Consequently, it's enough to demonstrate the breeding of single-gene organisms.
+      I will name their alleles with letters <font color=#ec3661>A</font>, <font color=#ec3661>B</font>, <font color=#3687ec>c</font> and <font color=#3687ec>d</font>.
+
+    - |
       Law of Dominance and Uniformity:
       <i>Some alleles are <font color=#ec3661>dominant</font> while others are <font color=#3687ec>recessive</font>; an organism with at least one <font color=#ec3661>dominant</font> allele will display the effect of the <font color=#ec3661>dominant</font> allele.</i>
       I will refer to an allele which will display its effect as the active allele. Active alleles are located in the left column of the inspection window.
+      If the child has two <font color=#ec3661>dominant</font> or two <font color=#3687ec>recessive</font> alleles, one of them will be chosen to be active at random.
+
+      I will now show several examples to demonstrate the laws.
+      Note that these examples show you the mechanics of the game and not real world.
+      First, let's consider two purebred organisms:
+      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype and different in their phenotype)
+      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>
+      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>
+
+      These offspring are called F1-generation.
+      The second experiment of this group demonstrates the first law.
 
     - |
       Law of segregation:
       <i>During gamete formation, the alleles for each gene segregate from each other so that each gamete carries only one allele for each gene.</i>
       This basically means that alleles only one allele for each gene will be inherited by an offspring and each of the alleles of the parent will be inherited with equal probability.
 
-    - |
-      Law of independent assortment:
-      <i>Genes of different traits can segregate independently during the formation of gametes.</i>
-      This is quite self-explanatory. The offspring will get alleles of different genes independently.
-
-    - |
-      I will now show several examples to demonstrate the laws.
-      Note that these examples show you the mechanics of the game and not real world.
-      Due to the third law, it's enough to demonstrate the breeding of single-gene organisms.
-      I will name their alleles with letters <font color=#ec3661>A</font>, <font color=#ec3661>B</font>, <font color=#3687ec>c</font> and <font color=#3687ec>d</font>.
-
-    - |
-      First, let's consider two purebred organisms:
-      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype and different in their phenotype)
-      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>
-      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>
-      These offspring are called F1-generation.
-      The second experiment of this group demonstrates the first law.
-
-    - |
       Let's breed two organisms of F1-generation:
       <font color=#ec3661>AB</font> + <font color=#ec3661>AB</font> -> 25% <font color=#ec3661>AA</font>, 25% <font color=#ec3661>AB</font>, 25% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>BB</font>
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>A</font><font color=#3687ec>c</font> -> 25% <font color=#ec3661>AA</font>, 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 25% <font color=#3687ec>cc</font>
       The second experiment of this group demonstrates the second law.
 
     - |
+      And some more experiments to highlight useful combinations
       Combine purebred and F1:
       <font color=#ec3661>AA</font> + <font color=#ec3661>A</font><font color=#3687ec>c</font> -> 50% <font color=#ec3661>AA</font>, 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#3687ec>cc</font> -> 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 50% <font color=#3687ec>cc</font>

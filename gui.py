@@ -951,9 +951,66 @@ class MendelTutorialWindow(UIWindow):
         super().__init__(rect, manager, local['Mendelian Inheritance'])
         self.minimum_dimensions = (500, 700)
         self.interactive_panel_height = 400
+        self.arrow_buttons_height = 40
         size = self.get_container().get_size()
-        self.text_box = UITextBox(mendel_text[0], pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height)), self.ui_manager, container=self)
-        self.interactive_panel = None
+        self.text_boxes : List[UITextBox] = []
+        for text in mendel_text:
+            text_box = UITextBox(text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height - self.arrow_buttons_height)), self.ui_manager, container=self)
+            self.text_boxes.append(text_box)
+
+        self.panels = [UIPanel(pygame.Rect((0,0), (size[0], self.interactive_panel_height)), manager=self.ui_manager, container=self,
+            anchors={
+                'left': 'left',
+                'right': 'right',
+                'top': 'top',
+                'bottom': 'bottom',
+                'top_target': text_box
+            }) for text_box in self.text_boxes]
+        self.left_arrow_button = UIButton(pygame.Rect(0, -self.arrow_buttons_height, self.arrow_buttons_height, self.arrow_buttons_height), '<', self.ui_manager, self,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'top': 'bottom',
+                'bottom': 'bottom'
+            })
+        self.right_arrow_button = UIButton(pygame.Rect(-self.arrow_buttons_height, -self.arrow_buttons_height, self.arrow_buttons_height, self.arrow_buttons_height), '>', self.ui_manager, self,
+            anchors={
+                'left': 'right',
+                'right': 'right',
+                'top': 'bottom',
+                'bottom': 'bottom'
+            })
+        self.current_page = 0
+        self.show_current_page()
+
+    def add_page(self, amount: int):
+        self.current_page += amount
+        self.current_page = min(self.current_page, len(mendel_text)-1)
+        self.current_page = max(self.current_page, 0) # clamp
+        self.show_current_page()
+
+    def set_page(self, page: int):
+        self.current_page = page
+        self.show_current_page()
+
+    def show_current_page(self):
+        for text_box in self.text_boxes:
+            text_box.hide()
+        for panel in self.panels:
+            panel.hide()
+        self.text_boxes[self.current_page].show()
+        self.panels[self.current_page].show()
+
+    def process_event(self, event: pygame.event.Event) -> bool:
+        consumed = super().process_event(event)
+        if event.type == pygame_gui. UI_BUTTON_PRESSED:
+            if event.ui_element == self.left_arrow_button:
+                self.add_page(-1)
+            elif event.ui_element == self.right_arrow_button:
+                self.add_page(1)
+        return consumed
+
+
 
 
 class GUI(Game):
@@ -1006,6 +1063,8 @@ class GUI(Game):
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
         self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+
+        self.load('save')
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -1064,6 +1123,9 @@ class GUI(Game):
                 [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
                 [local['Apiary'] + ' ' + a.name for a in self.apiaries]
             )
+
+    def add_mendelian_inheritance_to_esc_menu(self):
+        self.esc_menu.set_item_list([local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']])
 
     def set_dimensions(self, size):
         self.window_size = size
@@ -1177,7 +1239,7 @@ class GUI(Game):
                 self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0)) #type: ignore
             elif self.current_tutorial_stage == TutorialStage.GENE_HELPER_TEXT_CLICKED:
                 self.open_mendel_notification()
-                self.esc_menu.set_item_list([local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']])
+                self.add_mendelian_inheritance_to_esc_menu()
 
     def get_state(self):
         state = super().get_state()
@@ -1225,6 +1287,8 @@ class GUI(Game):
             self.resource_panel.show()
         if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
             self.open_inspect_window_button.show()
+        if saved['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
+            self.add_mendelian_inheritance_to_esc_menu()
         if saved['apiary_list_opened']:
             self.open_apiary_selection_list()
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in saved['inspect_windows']]
