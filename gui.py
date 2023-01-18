@@ -612,6 +612,7 @@ class BeeStats(UITextBox):
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
                 res.append(f'  {local[key]} <a href=\'{key}\'>(?)</a>: <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{dom_local(allele0, dom0)}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{dom_local(allele1, dom1)}</font>')
+        print(res)
         self.set_text('<br>'.join(res))
 
     def open_gene_helper(self, gene):
@@ -1020,13 +1021,14 @@ class GUI(Game):
         super().__init__()
         Slot.empty_str = ''
         Slot.str_amount = lambda x: '' # type: ignore
+
+        self.window_size = window_size
+        self.ui_manager = manager
         if not os.path.exists('save.forestry'):
             self.help_window()
 
         self.cursor_manager = cursor_manager
         self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', cursor_manager)
-        self.window_size = window_size
-        self.ui_manager = manager
         self.inspect_windows = []
         self.resource_panel_width = 330
         resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
@@ -1159,6 +1161,9 @@ class GUI(Game):
                     if os.path.exists('save.forestry'):
                         r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
                         self.save_confirm = UIConfirmationDialog(r, local['save_confirm'], self.cursor_manager)
+                    else:
+                        self.save('save')
+                        self.print('Saved the game to the disk')
                 elif event.text == local['Settings']:
                     self.settings_window()
                 elif event.text == local['Mendelian Inheritance']:
@@ -1265,7 +1270,10 @@ class GUI(Game):
         return state
 
     def load(self, name):
-        saved = super().load(name)
+        try:
+            saved = super().load(name)
+        except FileNotFoundError:
+            return
 
         if saved.get('front_version', 0) < CURRENT_FRONT_VERSION:
             for update_front_func in update_front_versions[saved.get('front_version', 0):]:
