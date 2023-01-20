@@ -294,6 +294,13 @@ class Resources:
     def __getitem__(self, key):
         return self.res.get(key, 0)
 
+    def __eq__(self, __o: object) -> bool:
+        if __o is None: return False
+        return __o.res == self.res
+
+    def copy(self):
+        return Resources(**self.res)
+
     def add_resources(self, resources):
         for k in resources:
             self.res[k] = self[k] + resources[k]

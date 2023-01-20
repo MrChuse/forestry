@@ -50,18 +50,18 @@ class InspectPopup(UITooltip):
         if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
             width = 170
         else:
-            width = 320
+            width = 318
         self.top_margin = 4
         self.inspect_button_height = 32
 
-        bee_stats_rect = pygame.Rect(0, self.top_margin, width, -1)
+        bee_stats_rect = pygame.Rect(0, self.top_margin, width, 177)
         self.inspect_button = None
         if not self.bee_button.slot.is_empty() and GUI.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE and not self.bee_button.slot.slot.inspected:
             self.inspect_button = UIButton(pygame.Rect(0, self.top_margin, width - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self.container)
             self.inspect_button.set_hold_range((2, 2))
             bee_stats_rect.top += self.inspect_button_height
 
-        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, manager, True, container=self.container)
+        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, manager, container=self.container)
 
         self.pin_button_unpinned = UIButton(pygame.Rect(width - self.inspect_button_height,
                                                         self.top_margin,
@@ -612,7 +612,6 @@ class BeeStats(UITextBox):
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
                 res.append(f'  {local[key]} <a href=\'{key}\'>(?)</a>: <font color={"#ec3661" if dominant[genes[key][0]] else "#3687ec"}>{dom_local(allele0, dom0)}</font>, <font color={"#ec3661" if dominant[genes[key][1]] else "#3687ec"}>{dom_local(allele1, dom1)}</font>')
-        print(res)
         self.set_text('<br>'.join(res))
 
     def open_gene_helper(self, gene):
@@ -674,6 +673,9 @@ class ResourcePanel(UIPanel):
         self.game = game
         self.resources = game.resources
         self.cursor = cursor
+
+        self.shown_resources = None
+
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
         bottom_buttons_height = 40
 
@@ -696,13 +698,13 @@ class ResourcePanel(UIPanel):
             }, visible=False)
 
     def update_text_box(self):
-        text = str(self.resources)
         if GUI.current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
             GUI.current_tutorial_stage = TutorialStage.RESOURCES_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
         elif GUI.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE and 'honey' in self.resources:
             GUI.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
+
         available_build_options = self.game.get_available_build_options()
         if len(available_build_options) > 0:
             self.build_dropdown.show()
@@ -711,9 +713,14 @@ class ResourcePanel(UIPanel):
                 self.known_build_options.append(option)
                 self.local_build_options.append(local[option])
                 self.build_dropdown.options_list = self.local_build_options
-        for r in local['resources'].items():
-            text = text.replace(*r)
-        self.text_box.set_text(text.replace('\n', '<br>'))
+
+        if self.shown_resources != self.resources:
+            self.shown_resources = self.resources.copy()
+            text = str(self.resources)
+            for r in local['resources'].items():
+                text = text.replace(*r)
+            self.text_box.set_text(text)
+
 
     def update(self, time_delta):
         self.update_text_box()
