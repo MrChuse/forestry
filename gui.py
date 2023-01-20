@@ -1291,6 +1291,7 @@ class GUI(Game):
         self.resource_panel.resources = self.resources
         self.cursor.slot = saved['cursor_slot']
 
+        GUI.current_tutorial_stage = saved['current_tutorial_stage']
         if saved['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
             self.resource_panel.show()
         if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
