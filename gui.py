@@ -1140,6 +1140,9 @@ class GUI(Game):
 
     def set_dimensions(self, size):
         self.window_size = size
+        esc_menu_rect = pygame.Rect(0, 0, 200, 500)
+        esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
+        self.esc_menu.set_relative_position(esc_menu_rect.topleft)
         if self.resource_panel is not None:
             self.resource_panel.set_dimensions((self.resource_panel_width, size[1]))
         if self.apiary_selection_list is not None:
