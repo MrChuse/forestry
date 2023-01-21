@@ -143,9 +143,9 @@ texts:
       I will now show several examples to demonstrate the laws.
       Note that these examples show you the mechanics of the game and not real world.
       First, let's consider two purebred organisms:
-      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype and different in their phenotype)
-      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>
-      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>
+      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype in the sense that these will produce identical offsprings and different in their phenotype). This example is shown in the first two rows.
+      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>. This example is shown in the two following rows.
+      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>. This example is shown in the last two rows.
 
       These offspring are called F1-generation.
       The second experiment of this group demonstrates the first law.

@@ -334,7 +334,11 @@ class MatingEntry:
     child_inspected : bool = False
 
     @staticmethod
-    def from_bees(parent1: Bee, parent2: Bee, child: Bee):
+    def from_bees(parent1: Bee, parent2: Bee, child: Bee, force_inspect=False):
+        if force_inspect:
+            parent1.inspect()
+            parent2.inspect()
+            child.inspect()
         return MatingEntry(
             *parent1.genes.species,
             *parent2.genes.species,
