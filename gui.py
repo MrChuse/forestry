@@ -797,9 +797,10 @@ class MatingHistoryWindow(UIGridWindow):
     def update(self, time_delta: float):
         if self.mating_history.something_changed:
             # print(f'something changed, so kill, {time.time() - self.timer}')
-            self.grid_panel.hide() # this should hide the buttons too
-            self.grid_panel.kill() # investigate the killing with grid_panel.kill doesn't kill the buttons inside
-            self.grid_panel = None
+            if self.grid_panel is not None:
+                self.grid_panel.hide() # this should hide the buttons too
+                self.grid_panel.kill() # investigate the killing with grid_panel.kill doesn't kill the buttons inside
+                self.grid_panel = None
             self.set_subelements()
             self.mating_history.acknowledge_changes()
         return super().update(time_delta)
