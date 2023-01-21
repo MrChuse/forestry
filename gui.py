@@ -145,6 +145,7 @@ class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
     def __init__(self, slot: Slot, *args, highlighted=False, **kwargs):
         self.slot = slot
+        self._is_inspectable = kwargs.pop('is_inspectable', True)
         self.args = args
         self.kwargs = kwargs
         self.kwargs['generate_click_events_from'] = [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT]
@@ -183,6 +184,14 @@ class UIButtonSlot(UIButton):
     def unhighlight(self):
         self.highlighted = False
 
+    @property
+    def is_inspectable(self):
+        return self._is_inspectable and self.bee_inspectable
+
+    @property
+    def bee_inspectable(self):
+        return not self.slot.is_empty() and not self.slot.slot.inspected
+
     def update(self, time_delta: float):
         bee = self.slot.slot
         obj_id = self.get_object_id_from_bee(bee)
@@ -193,7 +202,7 @@ class UIButtonSlot(UIButton):
             self.kill()
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
-            self.__init__(self.slot, *self.args,    highlighted=self.highlighted, **self.kwargs)
+            self.__init__(self.slot, *self.args, highlighted=self.highlighted, is_inspectable=self._is_inspectable, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount:
@@ -768,7 +777,7 @@ class MatingEntryPanel(UIGridPanel):
             else:
                 bee = cls(Genes((allele, allele), None, None, None), inspected=inspected)
                 slot = Slot(bee, self.count)
-            buttons.append(UIButtonSlot(slot, pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container))
+            buttons.append(UIButtonSlot(slot, pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, is_inspectable=False))
         buttons.insert(2, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_plus_button'))
         buttons.insert(5, UIButton(pygame.Rect(0, 0, 64, 64), '', self.ui_manager, container=container, object_id='#mating_history_right_arrow_button'))
         return buttons
