@@ -13,7 +13,9 @@ from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
-from config import BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed, dominant, mutations, products, local, helper_text, mendel_text
+
+from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed, dominant,
+                    helper_text, local, mendel_text, mutations, products)
 
 
 def weighted_if(weight, out1, out2):
@@ -839,7 +841,8 @@ class Game:
         pass
 
     def get_state(self) -> dict:
-        from migration import CURRENT_BACK_VERSION # import here to avoid circular imports
+        from migration import \
+            CURRENT_BACK_VERSION  # import here to avoid circular imports
         return {
             'back_version': CURRENT_BACK_VERSION,
             'resources': self.resources,
@@ -857,7 +860,8 @@ class Game:
         with open(name + '.forestry', 'rb') as f:
             saved = pickle.load(f)
 
-        from migration import CURRENT_BACK_VERSION, update_back_versions # import here to avoid circular imports
+        from migration import (  # import here to avoid circular imports
+            CURRENT_BACK_VERSION, update_back_versions)
 
         if saved.get('back_version', 0) < CURRENT_BACK_VERSION:
             for update_front_func in update_back_versions[saved.get('back_version', 0):]:

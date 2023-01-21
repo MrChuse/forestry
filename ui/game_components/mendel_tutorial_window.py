@@ -6,6 +6,7 @@ from pygame_gui.elements import (UIButton, UIPanel, UIStatusBar, UITextBox,
                                  UIWindow)
 
 from config import local, mendel_text
+from forestry import BeeSpecies, Drone, Genes, MatingEntry, Princess
 
 
 class MendelTutorialWindow(UIWindow):
@@ -28,6 +29,7 @@ class MendelTutorialWindow(UIWindow):
                 'bottom': 'bottom',
                 'top_target': text_box
             }) for text_box in self.text_boxes]
+        self._fill_panels()
         self.left_arrow_button = UIButton(pygame.Rect(0, -self.arrow_buttons_height, self.arrow_buttons_height, self.arrow_buttons_height), '<', self.ui_manager, self,
             anchors={
                 'left': 'left',
@@ -55,6 +57,30 @@ class MendelTutorialWindow(UIWindow):
         self.progress_bar.status_text = lambda : f'{self.current_page+1} / {len(self.text_boxes)}'
         self.progress_bar.redraw()
         self.show_current_page()
+
+    def _fill_panels(self):
+        # 0
+        # 1
+        # 2
+        # 3
+        panel = self.panels[3]
+
+        # set up 6 mating entries:
+        mating_entries = []
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), None, None, None)),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), None, None, None)),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST), None, None, None)),
+            )
+        )
+
+
 
     def add_page(self, amount: int):
         self.current_page += amount
