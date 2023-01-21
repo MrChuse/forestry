@@ -959,8 +959,8 @@ class TutorialStage(IntEnum):
 class MendelTutorialWindow(UIWindow):
     def __init__(self, rect: pygame.Rect, manager):
         super().__init__(rect, manager, local['Mendelian Inheritance'])
-        self.minimum_dimensions = (500, 700)
-        self.interactive_panel_height = 400
+        self.set_minimum_dimensions((700, 500))
+        self.interactive_panel_height = self.get_container().get_rect().height//2
         self.arrow_buttons_height = 40
         size = self.get_container().get_size()
         self.text_boxes : List[UITextBox] = []
@@ -990,7 +990,18 @@ class MendelTutorialWindow(UIWindow):
                 'top': 'bottom',
                 'bottom': 'bottom'
             })
+        progress_bar_rect = pygame.Rect(0, -self.arrow_buttons_height, 300, self.arrow_buttons_height)
+        progress_bar_rect.centerx = self.get_container().get_rect().width//2
+        self.progress_bar = UIStatusBar(progress_bar_rect, self.ui_manager, container=self, object_id='#MendelianTutorialProgressBar',
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'top': 'bottom',
+                'bottom': 'bottom'
+            })
         self.current_page = 0
+        self.progress_bar.status_text = lambda : f'{self.current_page+1} / {len(self.text_boxes)}'
+        self.progress_bar.redraw()
         self.show_current_page()
 
     def add_page(self, amount: int):
@@ -1016,8 +1027,10 @@ class MendelTutorialWindow(UIWindow):
         if event.type == pygame_gui. UI_BUTTON_PRESSED:
             if event.ui_element == self.left_arrow_button:
                 self.add_page(-1)
+                self.progress_bar.percent_full = self.current_page / (len(self.text_boxes)-1)
             elif event.ui_element == self.right_arrow_button:
                 self.add_page(1)
+                self.progress_bar.percent_full = self.current_page / (len(self.text_boxes)-1)
         return consumed
 
 

@@ -34,6 +34,12 @@
       "unfilled_bar": "#777777"
     }
   },
+  "#MendelianTutorialProgressBar": {
+    "colours": {
+      "filled_bar": "#73A444",
+      "unfilled_bar": "#777777"
+    }
+  },
   "#PrincessEmpty": {
     "images": {
       "normal_image": {

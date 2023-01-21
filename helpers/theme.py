@@ -1,6 +1,7 @@
 import json
 
 from forestry import BeeSpecies
+
 tool_tip_delay = '0.4'
 theme = {
     '#BeeButton':{
@@ -35,6 +36,12 @@ theme = {
     '#InspectedStatus':{
         'colours':{
             'filled_bar': '#73D444',
+            'unfilled_bar': '#777777'
+        }
+    },
+    '#MendelianTutorialProgressBar':{
+        'colours':{
+            'filled_bar': '#73A444',
             'unfilled_bar': '#777777'
         }
     },
