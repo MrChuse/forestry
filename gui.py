@@ -49,12 +49,14 @@ class InspectPopup(UITooltip):
         self.bee_button = bee_button
         if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
             width = 170
+            height = 35
         else:
             width = 318
+            height = 177
         self.top_margin = 4
         self.inspect_button_height = 32
 
-        bee_stats_rect = pygame.Rect(0, self.top_margin, width, 177)
+        bee_stats_rect = pygame.Rect(0, self.top_margin, width, height)
         self.inspect_button = None
         if not self.bee_button.slot.is_empty() and GUI.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE and not self.bee_button.slot.slot.inspected:
             self.inspect_button = UIButton(pygame.Rect(0, self.top_margin, width - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self.container)
@@ -576,7 +578,7 @@ class ApiaryWindow(UIWindow):
                         if self.cursor.slot.is_empty():
                             self.cursor.slot.put(*self.apiary.take(index))
                         else:
-                            self.game.print("Can't take from slot", out=1)
+                            self.game.print("Can't put into this slot", out=1)
         return super().process_event(event)
 
     def update(self, time_delta):
@@ -1224,7 +1226,8 @@ class GUI(Game):
                 self.print('Saved the game to the disk')
             elif event.ui_element == self.inspect_confirm:
                 self.inspect_bee(self.inspect_confirm.bee_button.slot.slot) #type: ignore
-                self.inspect_confirm.bee_stats.process_inspect() #type: ignore ## added bee_stats and bee_button in INSPECT_BEE elif; refactor?
+                if self.inspect_confirm.bee_button.inspect_popup is not None:
+                    self.inspect_confirm.bee_stats.process_inspect() #type: ignore ## added bee_stats and bee_button in INSPECT_BEE elif; refactor?
                 self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' #type: ignore ## dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:
