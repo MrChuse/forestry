@@ -48,18 +48,18 @@ class InspectPopup(UITooltip):
         super().__init__('', hover_distance, manager, parent_element, object_id, anchors)
         self.container = UIContainer(pygame.Rect(0, 0, -1, -1), manager, starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1, parent_element=self)
         self.bee_button = bee_button
-        if not self.bee_button.slot.is_empty() and not self.bee_button.slot.slot.inspected:
-            width = 170
-            height = 35
-        else:
+        if not bee_button.bee_inspectable:
             width = 318
             height = 177
+        else:
+            width = 170
+            height = 35
         self.top_margin = 4
         self.inspect_button_height = 32
 
         bee_stats_rect = pygame.Rect(0, self.top_margin, width, height)
         self.inspect_button = None
-        if not self.bee_button.slot.is_empty() and GUI.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE and not self.bee_button.slot.slot.inspected:
+        if self.bee_button.is_inspectable and GUI.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE:
             self.inspect_button = UIButton(pygame.Rect(0, self.top_margin, width - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self.container)
             self.inspect_button.set_hold_range((2, 2))
             bee_stats_rect.top += self.inspect_button_height
