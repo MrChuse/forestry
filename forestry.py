@@ -107,9 +107,7 @@ class Genes:
 
     def asdict(self):
         d = dataclasses.asdict(self)
-        for key in d:
-            if d[key] is None:
-                del d[key]
+        d = dict(filter(lambda x: x[1] is not None, d.items()))
         return d
 
     @staticmethod
@@ -332,6 +330,17 @@ class MatingEntry:
     parent1_inspected : bool = False
     parent2_inspected : bool = False
     child_inspected : bool = False
+
+    @staticmethod
+    def from_bees(parent1: Bee, parent2: Bee, child: Bee):
+        return MatingEntry(
+            *parent1.genes.species,
+            *parent2.genes.species,
+            *child.genes.species,
+            parent1.inspected,
+            parent2.inspected,
+            child.inspected
+        )
 
     def set_parent1_inspected(self):
         self.parent1_inspected = True
