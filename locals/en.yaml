@@ -113,6 +113,8 @@ texts:
       This helper window will explain basics of genetics according to Mendelian Inheritance.
       It is not actually needed to win the game but will help if you want to breed bees efficiently.
 
+      The most important fact to remember is that when two bees with <b>different</b> species alleles mate, their offspring may or may not have a mutation chance to transform into the <b>different</b> species.
+
     - |
       First, let's develop an understanding of fundamentals:
       <b>Phenotype</b> is the set of observable characteristics or traits of an organism, i.e. the appearance and behaviour.
@@ -175,6 +177,3 @@ texts:
       Apply mutations
       if their dominance is identical, pick one of them to be active at random
       else pick the dominant one to be active
-
-    - |
-      Oh, by the way, when two bees with different species alleles mate, their offspring may or may not have a mutation chance to transform into the different species
