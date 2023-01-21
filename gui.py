@@ -12,8 +12,8 @@ import pygame_gui
 from pygame import mixer
 from pygame_gui.core import ObjectID, UIContainer
 from pygame_gui.elements import (UIButton, UIHorizontalSlider, UILabel,
-                                 UIPanel, UISelectionList, UITextBox,
-                                 UITooltip, UIWindow)
+                                 UIPanel, UISelectionList, UIStatusBar,
+                                 UITextBox, UITooltip, UIWindow)
 from pygame_gui.windows import UIConfirmationDialog, UIMessageWindow
 
 from forestry import (Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry,
@@ -22,7 +22,7 @@ from forestry import (Apiary, Bee, Drone, Game, Genes, Inventory, MatingEntry,
                       local, mendel_text)
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 from ui import (UIFloatingTextBox, UIGridPanel, UIGridWindow,
-                UINonChangingDropDownMenu, UIRelativeStatusBar)
+                UINonChangingDropDownMenu)
 
 
 def process_cursor_slot_interaction(event, cursor, slot):
@@ -161,7 +161,7 @@ class UIButtonSlot(UIButton):
             r = pygame.Rect(0,0,0,0)
             r.size = 20, 20
             r.topright = self.relative_rect.topright
-            self.inspected_status = UIRelativeStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus', anchors=self.kwargs.get('anchors'))
+            self.inspected_status = UIStatusBar(r, self.ui_manager, container=self.ui_container, object_id='#InspectedStatus', anchors=self.kwargs.get('anchors'))
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
 
         self.highlighted = highlighted
@@ -488,7 +488,7 @@ class ApiaryWindow(UIWindow):
 
         queen_health_rect = pygame.Rect(0, self.princess_button.relative_rect.bottom + 14, self.size[0] - self.side_margin2 * 2, 10)
         queen_health_rect.centerx = self.size[0] / 2 - 16
-        self.queen_health = UIRelativeStatusBar(queen_health_rect, manager, container=self)
+        self.queen_health = UIStatusBar(queen_health_rect, manager, container=self)
         self.queen_health.percent_full = 0
 
         self.margin3 = (self.size[0] - 32 - 3 * self.button_size[0]) / 4
