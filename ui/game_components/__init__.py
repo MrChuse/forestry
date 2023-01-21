@@ -1,0 +1,1 @@
+from .mendel_tutorial_window import MendelTutorialWindow

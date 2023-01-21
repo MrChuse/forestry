@@ -1,10 +1,12 @@
 
-from typing import Callable, List, Tuple, Union, Dict
+from typing import Callable, Dict, List, Tuple, Union
 
 import pygame
 from pygame_gui.core import ObjectID, UIElement
-from pygame_gui.core.interfaces import IUIManagerInterface, IContainerLikeInterface
-from pygame_gui.elements import UIVerticalScrollBar, UIWindow, UIPanel
+from pygame_gui.core.interfaces import (IContainerLikeInterface,
+                                        IUIManagerInterface)
+from pygame_gui.elements import UIPanel, UIVerticalScrollBar, UIWindow
+
 
 class UIGridPanel(UIPanel):
     def __init__(self, relative_rect: pygame.Rect, starting_layer_height: int, manager: IUIManagerInterface, *, element_id: str = 'panel', margins: Dict[str, int] = None, container: Union[IContainerLikeInterface, None] = None, parent_element: UIElement = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None, visible: int = 1, min_marginx: int = 0, min_marginy: int = 0, subelements_function: Callable[['UIGridWindow'], List[UIElement]] = None):
