@@ -76,15 +76,21 @@ class ResourcePanel(UIPanel):
                 if event.text != 'Build':
                     text = event.text
                     index = self.local_build_options.index(text)
-                    building_name = self.original_build_options[index]
+                    building_name = self.known_build_options[index]
                     building = self.game.build(building_name.lower())
                     if isinstance(building, Apiary):
-                        ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
+                        window = ApiaryWindow(self.game, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
+                        self.game.apiary_windows.append(window)
                         self.game.update_windows_list()
                     elif isinstance(building, Inventory):
-                        InventoryWindow(building, self.cursor,
-                        pygame.Rect(0, 0, self.game.apiary_selection_list.rect.left, self.game.window_size[1]),
+                        if self.game.apiary_selection_list is not None:
+                            width = self.game.apiary_selection_list.rect.left
+                        else:
+                            width = self.game.window_size[0]
+                        window = InventoryWindow(building, self.cursor,
+                        pygame.Rect(0, 0, width, self.game.window_size[1]),
                         self.ui_manager, resizable=True)
+                        self.game.inventory_windows.append(window)
                         self.game.update_windows_list()
                     else: #if isinstance(building, Alveary):
                         win_window = UIMessageWindow(pygame.Rect((0,0), self.game.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
