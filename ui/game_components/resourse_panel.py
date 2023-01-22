@@ -32,7 +32,7 @@ class ResourcePanel(UIPanel):
         self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
         self.known_build_options = []
         self.local_build_options = []
-        self.build_dropdown = UINonChangingDropDownMenu(self.local_build_options, local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
+        self.build_dropdown = UINonChangingDropDownMenu([], local['Build'], pygame.Rect(0, 0, rect.size[0]-6, bottom_buttons_height), manager, container=self,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -50,15 +50,6 @@ class ResourcePanel(UIPanel):
             CurrentTutorialStage.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
 
-        available_build_options = self.game.get_available_build_options()
-        if len(available_build_options) > 0:
-            self.build_dropdown.show()
-        for option in available_build_options:
-            if option not in self.known_build_options:
-                self.known_build_options.append(option)
-                self.local_build_options.append(local[option])
-                self.build_dropdown.options_list = self.local_build_options
-
         if self.shown_resources != self.resources:
             self.shown_resources = self.resources.copy()
             text = str(self.resources)
@@ -66,6 +57,14 @@ class ResourcePanel(UIPanel):
                 text = text.replace(*r)
             self.text_box.set_text(text)
 
+            available_build_options = self.game.get_available_build_options()
+            if len(available_build_options) > 0:
+                self.build_dropdown.show()
+            for option in available_build_options:
+                if option not in self.known_build_options:
+                    self.known_build_options.append(option)
+                    self.local_build_options.append(local[option])
+                    self.build_dropdown.add_options([local[option]])
 
     def update(self, time_delta):
         self.update_text_box()
@@ -91,3 +90,8 @@ class ResourcePanel(UIPanel):
                         win_window = UIMessageWindow(pygame.Rect((0,0), self.game.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
                         win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         return super().process_event(event)
+
+    def show(self):
+        super().show()
+        if len(self.game.get_available_build_options()) == 0:
+            self.build_dropdown.hide()

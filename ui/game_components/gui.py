@@ -4,7 +4,7 @@ from typing import Union
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIButton, UISelectionList
+from pygame_gui.elements import UIButton
 from pygame_gui.windows import UIConfirmationDialog, UIMessageWindow
 
 from config import helper_text, local
@@ -12,7 +12,7 @@ from forestry import Game, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
 from ..custom_events import INSPECT_BEE, TUTORIAL_STAGE_CHANGED
-from ..elements import UIFloatingTextBox
+from ..elements import UIFloatingTextBox, UIPickList
 from . import (Cursor, InspectWindow, InventoryWindow, MatingHistoryWindow,
                MendelTutorialWindow, ResourcePanel, SettingsWindow,
                TutorialStage)
@@ -69,7 +69,7 @@ class GUI(Game):
 
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UISelectionList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = UIPickList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
 
         self.load('save')
 
@@ -99,7 +99,7 @@ class GUI(Game):
     def open_apiary_selection_list(self):
         apiary_selection_list_rect = pygame.Rect(0, 0, self.apiary_selection_list_width, self.window_size[1])
         apiary_selection_list_rect.right = 0
-        self.apiary_selection_list = UISelectionList(apiary_selection_list_rect, [], self.ui_manager,
+        self.apiary_selection_list = UIPickList(apiary_selection_list_rect, [], self.ui_manager,
             anchors={
                 'top':'top',
                 'bottom':'bottom',
@@ -198,7 +198,7 @@ class GUI(Game):
             except ValueError:
                 print('Somehow window was closed that wasnt in any list:', event.ui_element)
             else:
-                if isinstance(event.ui_element, (InventoryWindow, ApiaryWindow)):
+                if self.apiary_selection_list is None and isinstance(event.ui_element, (InventoryWindow, ApiaryWindow)):
                     self.open_apiary_selection_list()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:

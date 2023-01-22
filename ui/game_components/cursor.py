@@ -5,13 +5,15 @@ from .ui_button_slot import UIButtonSlot
 
 class Cursor(UIButtonSlot):
     def __init__(self, slot, *args, **kwargs):
+        visible = not slot.is_empty()
+        kwargs['visible'] = visible
         super().__init__(slot, *args, **kwargs)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         return False
 
     def update(self, time_delta: float):
-        pos = pygame.mouse.get_pos()
+        pos = self.ui_manager.get_mouse_position()
         self.relative_rect.topleft = pos
         self.rect.topleft = pos
 
@@ -24,7 +26,14 @@ class Cursor(UIButtonSlot):
             self.hide()
         else:
             self.show()
+
+        if self._too_close_to_border():
+            self.most_specific_combined_id = 'some nonsense' # hack to rebuild
+
         return super().update(time_delta)
+
+    def _too_close_to_border(self):
+        return self.rect.right > self.ui_root_container.get_rect().right or self.rect.bottom > self.ui_root_container.get_rect().bottom
 
     def process_cursor_slot_interaction(self, event, slot):
         if event.mouse_button == pygame.BUTTON_LEFT:
