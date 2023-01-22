@@ -160,7 +160,7 @@ texts:
 
       Let's breed two organisms of F1-generation:
       <font color=#ec3661>AB</font> + <font color=#ec3661>AB</font> -> 25% <font color=#ec3661>AA</font>, 25% <font color=#ec3661>AB</font>, 25% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>BB</font>
-      <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>A</font><font color=#3687ec>c</font> -> 25% <font color=#ec3661>AA</font>, 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 25% <font color=#3687ec>cc</font>
+      <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>A</font><font color=#3687ec>c</font> -> 25% <font color=#ec3661>AA</font>, 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 25% <font color=#3687ec>cc</font>. The first (25%) and the second (50%) offspring look like <font color=#ec3661>A</font> and the third one (25%) looks like <font color=#3687ec>c</font>. This is where 3:1 ratio is observed.
       The second experiment of this group demonstrates the second law.
       Remember that <font color=#ec3661>AB</font> + <font color=#ec3661>AB</font> and <font color=#ec3661>AB</font> + <font color=#ec3661>BA</font> and vise versa will produce the same offsprings.
 
