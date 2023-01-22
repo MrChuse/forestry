@@ -132,7 +132,9 @@ texts:
       <i>Genes of different traits can segregate independently during the formation of gametes.</i>
       This is quite self-explanatory. The offspring will get alleles of different genes independently.
       Consequently, it's enough to demonstrate the breeding of single-gene organisms.
-      I will name their alleles with letters <font color=#ec3661>A</font>, <font color=#ec3661>B</font>, <font color=#3687ec>c</font> and <font color=#3687ec>d</font>.
+      For convenience, I will name their alleles with letters <font color=#ec3661>A</font>, <font color=#ec3661>B</font>, <font color=#3687ec>c</font> and <font color=#3687ec>d</font>.
+      These alleles are represented by the organisms below. The first row shows how the organism is represented in game and the second row shows both active and inactive allele at the same time, once again, for convenience. The second form will be used in the following pages.
+      Shown organisms correspond to the following 8 genotypes: <font color=#ec3661>A</font><font color=#ec3661>A</font>, <font color=#ec3661>B</font><font color=#ec3661>B</font>, <font color=#3687ec>c</font><font color=#3687ec>c</font>, <font color=#3687ec>d</font><font color=#3687ec>d</font>, <font color=#ec3661>A</font><font color=#ec3661>B</font>, <font color=#ec3661>B</font><font color=#ec3661>A</font>, <font color=#3687ec>c</font><font color=#3687ec>d</font>, <font color=#3687ec>d</font><font color=#3687ec>c</font>
 
     - |
       Law of Dominance and Uniformity:
@@ -143,7 +145,7 @@ texts:
       I will now show several examples to demonstrate the laws.
       Note that these examples show you the mechanics of the game and not real world.
       First, let's consider two purebred organisms:
-      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype in the sense that these will produce identical offsprings and different in their phenotype). This example is shown in the first two rows.
+      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype (in the sense that these will produce identical offsprings) and different in their phenotype). This example is shown in the first two rows.
       <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>. This example is shown in the two following rows.
       <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>. This example is shown in the last two rows.
 
@@ -154,11 +156,13 @@ texts:
       Law of segregation:
       <i>During gamete formation, the alleles for each gene segregate from each other so that each gamete carries only one allele for each gene.</i>
       This basically means that alleles only one allele for each gene will be inherited by an offspring and each of the alleles of the parent will be inherited with equal probability.
+      Particularly, when breeding two heterozygous offspring (F1) of the first generation, the resulting organisms are observed to follow a certain ratio: 3:1 for the phenotype and 1:2:1 for the genotype.
 
       Let's breed two organisms of F1-generation:
       <font color=#ec3661>AB</font> + <font color=#ec3661>AB</font> -> 25% <font color=#ec3661>AA</font>, 25% <font color=#ec3661>AB</font>, 25% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>BB</font>
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>A</font><font color=#3687ec>c</font> -> 25% <font color=#ec3661>AA</font>, 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 25% <font color=#3687ec>cc</font>
       The second experiment of this group demonstrates the second law.
+      Remember that <font color=#ec3661>AB</font> + <font color=#ec3661>AB</font> and <font color=#ec3661>AB</font> + <font color=#ec3661>BA</font> and vise versa will produce the same offsprings.
 
     - |
       And some more experiments to highlight useful combinations
@@ -166,8 +170,11 @@ texts:
       <font color=#ec3661>AA</font> + <font color=#ec3661>A</font><font color=#3687ec>c</font> -> 50% <font color=#ec3661>AA</font>, 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#3687ec>cc</font> -> 50% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 50% <font color=#3687ec>cc</font>
 
+    - |
       And finally let's breed radically different organisms:
       <font color=#ec3661>AB</font> + <font color=#3687ec>cd</font> -> 25% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>d</font>
+
+    - |
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>B</font><font color=#3687ec>d</font> -> 12.5% <font color=#ec3661>AB</font> 12.5% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 12.5% <font color=#3687ec>cd</font>, 12.5% <font color=#3687ec>dc</font>
 
     - |
