@@ -139,6 +139,7 @@ class UIButtonSlot(UIButton):
         self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'), anchors=self.kwargs.get('anchors'))
         self.text_box.hide()
         self.saved_amount = 0
+        self.show_was_called_recently = False
 
         self.inspected_status = None
         if not self.slot.is_empty():
@@ -187,7 +188,8 @@ class UIButtonSlot(UIButton):
             self.__init__(self.slot, *self.args, highlighted=self.highlighted, is_inspectable=self._is_inspectable, **self.kwargs)
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
-        if self.slot.amount != self.saved_amount:
+        if self.slot.amount != self.saved_amount or self.show_was_called_recently:
+            self.show_was_called_recently = False
             if self.slot.amount < 2:
                 self.text_box.hide()
             else:
@@ -250,6 +252,7 @@ class UIButtonSlot(UIButton):
                 self.inspected_status.hide()
 
     def show(self):
+        self.show_was_called_recently = True
         if not self.visible:
             super().show()
             if self.slot.amount >= 2:
