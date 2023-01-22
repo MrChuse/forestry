@@ -116,6 +116,16 @@ class InspectPopup(UITooltip):
 class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
     def __init__(self, slot: Slot, *args, highlighted=False, **kwargs):
+        """ # must have params:
+            slot,
+            rect,
+            text, # probably empty
+            ui_manager,
+            container,
+            # optional:
+            highlighted=False,
+            is_inspectable=True
+        """
         self.slot = slot
         self._is_inspectable = kwargs.pop('is_inspectable', True)
         self.args = args
