@@ -11,7 +11,7 @@ from forestry import Bee, Drone, Princess, Queen, Slot
 
 from ..custom_events import INSPECT_BEE
 from .bee_stats import BeeStats
-from .tutorial_stage import TutorialStage, CurrentTutorialStage
+from .tutorial_stage import CurrentTutorialStage, TutorialStage
 
 
 class InspectPopup(UITooltip):

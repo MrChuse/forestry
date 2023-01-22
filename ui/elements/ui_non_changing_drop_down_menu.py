@@ -1,8 +1,9 @@
 import pygame
 import pygame_gui
-from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
-from pygame_gui.elements import UIDropDownMenu, UIButton, UISelectionList
 from pygame_gui.core import ObjectID
+from pygame_gui.elements import UIButton, UIDropDownMenu, UISelectionList
+from pygame_gui.elements.ui_drop_down_menu import UIExpandedDropDownState
+
 
 class UINonChangingExpandedDropDownState(UIExpandedDropDownState):
     def start(self, should_rebuild: bool = True):

@@ -9,7 +9,7 @@ from forestry import Apiary, Inventory
 from ..custom_events import TUTORIAL_STAGE_CHANGED
 from ..elements import UINonChangingDropDownMenu
 from . import ApiaryWindow, Cursor, InventoryWindow
-from .tutorial_stage import TutorialStage, CurrentTutorialStage
+from .tutorial_stage import CurrentTutorialStage, TutorialStage
 
 
 class ResourcePanel(UIPanel):
