@@ -17,6 +17,7 @@ from . import (Cursor, InspectWindow, InventoryWindow, MatingHistoryWindow,
                MendelTutorialWindow, ResourcePanel, SettingsWindow,
                TutorialStage)
 from .apiary_window import ApiaryWindow
+from .tutorial_stage import CurrentTutorialStage
 
 
 class GUI(Game):
@@ -229,8 +230,8 @@ class GUI(Game):
                 self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' #type: ignore ## dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:
-                if GUI.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
-                    GUI.current_tutorial_stage = TutorialStage.NO_RESOURCES # progress the tutorial
+                if CurrentTutorialStage.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
+                    CurrentTutorialStage.current_tutorial_stage = TutorialStage.NO_RESOURCES # progress the tutorial
 
                     self.apiary_windows.append(ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resource_panel_width, 0), (300, 420)), self.ui_manager))
 
@@ -244,20 +245,19 @@ class GUI(Game):
             elif event.ui_element == self.open_inspect_window_button:
                 self.open_inspect_window()
         elif event.type == TUTORIAL_STAGE_CHANGED:
-            if self.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
+            if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
                 self.resource_panel.show()
-                self.resource_panel.build_dropdown.hide()
-            elif self.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
+            elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
                 self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0)) #type: ignore
-            elif self.current_tutorial_stage == TutorialStage.GENE_HELPER_TEXT_CLICKED:
+            elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.GENE_HELPER_TEXT_CLICKED:
                 self.open_mendel_notification()
                 self.add_mendelian_inheritance_to_esc_menu()
 
     def get_state(self):
         state = super().get_state()
         state['front_version'] = CURRENT_FRONT_VERSION
-        state['current_tutorial_stage'] = self.current_tutorial_stage
+        state['current_tutorial_stage'] = CurrentTutorialStage.current_tutorial_stage
         state['apiary_list_opened'] = self.apiary_selection_list is not None
         state['cursor_slot'] = self.cursor.slot
         insp_win = []
@@ -299,7 +299,7 @@ class GUI(Game):
         self.resource_panel.resources = self.resources
         self.cursor.slot = saved['cursor_slot']
 
-        GUI.current_tutorial_stage = saved['current_tutorial_stage']
+        CurrentTutorialStage.current_tutorial_stage = saved['current_tutorial_stage']
         if saved['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
             self.resource_panel.show()
         if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:

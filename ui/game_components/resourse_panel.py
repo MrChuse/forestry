@@ -9,7 +9,7 @@ from forestry import Apiary, Inventory
 from ..custom_events import TUTORIAL_STAGE_CHANGED
 from ..elements import UINonChangingDropDownMenu
 from . import ApiaryWindow, Cursor, InventoryWindow
-from .tutorial_stage import TutorialStage, current_tutorial_stage
+from .tutorial_stage import TutorialStage, CurrentTutorialStage
 
 
 class ResourcePanel(UIPanel):
@@ -43,11 +43,11 @@ class ResourcePanel(UIPanel):
 
     def update_text_box(self):
         global current_tutorial_stage
-        if current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
-            current_tutorial_stage = TutorialStage.RESOURCES_AVAILABLE
+        if CurrentTutorialStage.current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
+            CurrentTutorialStage.current_tutorial_stage = TutorialStage.RESOURCES_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
-        elif current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE and 'honey' in self.resources:
-            current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
+        elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE and 'honey' in self.resources:
+            CurrentTutorialStage.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
 
         available_build_options = self.game.get_available_build_options()

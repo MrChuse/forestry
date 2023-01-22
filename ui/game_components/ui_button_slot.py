@@ -11,7 +11,7 @@ from forestry import Bee, Drone, Princess, Queen, Slot
 
 from ..custom_events import INSPECT_BEE
 from .bee_stats import BeeStats
-from .tutorial_stage import TutorialStage, current_tutorial_stage
+from .tutorial_stage import TutorialStage, CurrentTutorialStage
 
 
 class InspectPopup(UITooltip):
@@ -30,7 +30,7 @@ class InspectPopup(UITooltip):
 
         bee_stats_rect = pygame.Rect(0, self.top_margin, width, height)
         self.inspect_button = None
-        if self.bee_button.is_inspectable and current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE:
+        if self.bee_button.is_inspectable and CurrentTutorialStage.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE:
             self.inspect_button = UIButton(pygame.Rect(0, self.top_margin, width - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self.container)
             self.inspect_button.set_hold_range((2, 2))
             bee_stats_rect.top += self.inspect_button_height

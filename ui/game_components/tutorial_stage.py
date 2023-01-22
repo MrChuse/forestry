@@ -8,4 +8,5 @@ class TutorialStage(IntEnum):
     INSPECT_AVAILABLE = 4
     GENE_HELPER_TEXT_CLICKED = 5
 
-current_tutorial_stage = TutorialStage.BEFORE_FORAGE
+class CurrentTutorialStage:
+    current_tutorial_stage = TutorialStage.BEFORE_FORAGE

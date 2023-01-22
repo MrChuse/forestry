@@ -10,7 +10,7 @@ from config import dominant, local
 from forestry import Bee, dom_local
 
 from ..custom_events import TUTORIAL_STAGE_CHANGED
-from .tutorial_stage import TutorialStage, current_tutorial_stage
+from .tutorial_stage import TutorialStage, CurrentTutorialStage
 
 
 class BeeStats(UITextBox):
@@ -44,9 +44,8 @@ class BeeStats(UITextBox):
         self.set_text('<br>'.join(res))
 
     def open_gene_helper(self, gene):
-        global current_tutorial_stage
-        if current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
-            current_tutorial_stage = TutorialStage.GENE_HELPER_TEXT_CLICKED
+        if CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
+            CurrentTutorialStage.current_tutorial_stage = TutorialStage.GENE_HELPER_TEXT_CLICKED
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
         return UIMessageWindow(pygame.Rect(self.ui_manager.get_mouse_position(), (260, 200)),
                                local[gene+'_helper_text'], self.ui_manager)
