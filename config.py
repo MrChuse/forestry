@@ -1,4 +1,6 @@
+import codecs
 from enum import Enum
+
 import yaml
 
 # from forestry import local, dominant
@@ -59,7 +61,6 @@ for allele_name, prod_dict in products_config.items():
 
 # local
 filename = f'./locals/{config["local"]}.yaml'
-import codecs
 with codecs.open(filename, "r", "utf_8_sig" ) as f:
     local_conf = yaml.safe_load(f)
 
@@ -72,5 +73,5 @@ for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
     for allele_name, allele_local in dict_of_alleles.items():
         local[genes_enums[gene_name][allele_name]] = allele_local
 
-helper_text = local_conf['texts']['helper_text'].replace('\n', '<br>')
-mendel_text = local_conf['texts']['mendel_text'].replace('\n', '<br>')
+helper_text = local_conf['texts']['helper_text']
+mendel_text = local_conf['texts']['mendel_text']

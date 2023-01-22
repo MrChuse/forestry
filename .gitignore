@@ -132,5 +132,7 @@ dmypy.json
 
 # Forestry saves
 *.forestry
+settings
 
 \!promotion/
+assets/music

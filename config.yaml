@@ -54,10 +54,8 @@ mutations:
 
 products:
   FOREST:
-    honey: [1, 0.5]
     wood: [1, 0.5]
   MEADOWS:
-    honey: [1, 0.5]
     flowers: [1, 0.5]
   COMMON:
     honey: [1, 0.75]
