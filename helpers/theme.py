@@ -1,6 +1,6 @@
 import json
 
-from forestry import BeeSpecies
+from config import BeeSpecies
 
 tool_tip_delay = '0.4'
 theme = {
@@ -10,8 +10,18 @@ theme = {
         }
     },
     '@Centered':{
-        'misc':{
+        'misc': {
             'text_horiz_alignment': 'center'
+        }
+    },
+    'label': {
+        'misc': {
+            'text_horiz_alignment': 'left'
+        }
+    },
+    '#restart_label': {
+        'colours': {
+            'normal_text': '#ec3661'
         }
     },
     '#checkbox': {

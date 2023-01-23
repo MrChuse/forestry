@@ -43,6 +43,8 @@ esc_menu:
   Fullscreen: Fullscreen
   Master volume: Master volume
   Click volume: Click volume
+  Language: Language
+  restart_label: Restart the game to apply changes. Don't forget to save your progress.
   Exit: Exit
   Mating History: Mating History
   mendel_notification: "Notification: Mendelian inheritance tutorial is now available in the esc menu."
