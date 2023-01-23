@@ -52,7 +52,7 @@ esc_menu:
   Mating History: Mating History
   mendel_notification: "Notification: Mendelian inheritance tutorial is now available in the esc menu."
   load_confirm: You can lose unsaved progress. Continue?
-  save_confirm: You can lose saved progress. Continue?
+  save_confirm: Previously saved progress will be overwritten. Continue?
 genes_alleles:
   BeeSpecies:
     FOREST: [FOREST]
