@@ -116,13 +116,13 @@ class GUI(Game):
     def render(self):
         pass
 
-    def print(self, *strings, sep=' ', end='\n', flush=False, out=None):
+    def print(self, *strings, sep=' ', end='\n', flush=False, out=None, floating_text_box_time=1.3):
         print(*strings, sep=sep, end=end, flush=flush)
 
         thing = sep.join(map(str, strings)) + end
         if out is not None:
             thing = "<font color='#ED9FA6'>" + thing + "</font>"
-        UIFloatingTextBox(1.3, (0, -50), thing.replace('\n', '<br>'), pygame.Rect(pygame.mouse.get_pos(), (250, -1)), self.cursor_manager)
+        UIFloatingTextBox(floating_text_box_time, (0, -65 // floating_text_box_time), thing.replace('\n', '<br>'), pygame.Rect(pygame.mouse.get_pos(), (250, -1)), self.cursor_manager)
 
     def update_windows_list(self):
         if self.apiary_selection_list is not None:

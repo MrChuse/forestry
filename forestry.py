@@ -270,7 +270,8 @@ class Drone(Bee):
     def __init__(self, genes, inspected: bool = False):
         super().__init__(genes, inspected)
 
-
+class NotEnoughResourcesError(Exception):
+    pass
 class Resources:
     def __init__(self, **kwargs):
         self.res = {}
@@ -311,7 +312,7 @@ class Resources:
             if self[k] - resources[k] < 0:
                 s += f'Not enough {local["resources"][k]}: you have {self.res[k]} but you need {resources[k]}\n'
         if s != '':
-            raise ValueError(s)
+            raise NotEnoughResourcesError(s)
         for k in resources:
             self.res[k] -= resources[k]
 

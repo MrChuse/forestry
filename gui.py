@@ -5,6 +5,7 @@ import pygame_gui
 from pygame import mixer
 
 from config import load_settings
+from forestry import NotEnoughResourcesError
 from ui.custom_events import APPLY_VOLUME_CHANGE
 # keep TutorialStage here because needed for backwards compatibility with pickle.load
 from ui.game_components import GUI, TutorialStage
@@ -76,6 +77,13 @@ def main():
                     consumed = cursor_manager.process_events(event)
                     if not consumed:
                         manager.process_events(event)
+                except NotEnoughResourcesError as e:
+                    if game is not None:
+                        game.print(e, out=1, floating_text_box_time=5)
+                        print_exc()
+                    else:
+                        print(e)
+                        print_exc()
                 except Exception as e:
                     if game is not None:
                         game.print(e, out=1)
@@ -83,9 +91,23 @@ def main():
                     else:
                         print(e)
                         print_exc()
-
-            manager.update(time_delta)
-            cursor_manager.update(time_delta)
+            try:
+                manager.update(time_delta)
+                cursor_manager.update(time_delta)
+            except NotEnoughResourcesError as e:
+                if game is not None:
+                    game.print(e, out=1, floating_text_box_time=5)
+                    print_exc()
+                else:
+                    print(e)
+                    print_exc()
+            except Exception as e:
+                if game is not None:
+                    game.print(e, out=1)
+                    print_exc()
+                else:
+                    print(e)
+                    print_exc()
 
             window_surface.blit(background, (0, 0))
             manager.draw_ui(window_surface)
