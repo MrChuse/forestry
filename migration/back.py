@@ -1,6 +1,6 @@
-from forestry import Drone, MatingHistory, Princess, Queen
+from forestry import ApiaryProblems, Drone, MatingHistory, Princess, Queen
 
-CURRENT_BACK_VERSION = 1
+CURRENT_BACK_VERSION = 2
 
 def update_bee(bee):
     if isinstance(bee, Princess):
@@ -25,7 +25,7 @@ def update_bees_in_state(state):
             state['apiaries'][i].drone.slot = update_bee(apiary.drone.slot)
         for j, slot in enumerate(apiary.inv):
             if not slot.is_empty():
-                state['apiaries'][i][j] = update_bee(slot.slot)
+                state['apiaries'][i].inv[j] = update_bee(slot.slot)
     return state
 
 def update_back_state_0_1(state: dict) -> dict:
@@ -33,5 +33,11 @@ def update_back_state_0_1(state: dict) -> dict:
     state['mating_history'] = state.get('mating_history', MatingHistory())
     return state
 
-update_back_versions = [update_back_state_0_1]
+def update_back_state_1_2(state: dict) -> dict:
+    for i, apiary in enumerate(state['apiaries']):
+        apiary.problem = ApiaryProblems.NO_QUEEN
+        state['apiaries'][i] = apiary
+    return state
+
+update_back_versions = [update_back_state_0_1, update_back_state_1_2]
 update_back_versions.append(update_bees_in_state)

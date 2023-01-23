@@ -1,9 +1,8 @@
 import codecs
 from enum import Enum
+import os
 
 import yaml
-
-# from forestry import local, dominant
 
 class LocalEnum(Enum):
     def __str__(self):
@@ -60,7 +59,24 @@ for allele_name, prod_dict in products_config.items():
         products[BeeSpecies[allele_name]][prod_name] = (amt, prob)
 
 # local
-filename = f'./locals/{config["local"]}.yaml'
+existing_locals = [i[:-5] for i in os.listdir('locals')] # drop .yaml
+
+def load_settings(filename='settings'):
+    settings = {
+        'fullscreen': True,
+        'master_volume': 1,
+        'click_volume': 1,
+        'language': 'en'
+    }
+
+    if os.path.exists(filename):
+        with open(filename, 'r') as f:
+            settings.update(yaml.safe_load(f))
+
+    return settings
+
+language = load_settings()['language']
+filename = f'./locals/{language}.yaml'
 with codecs.open(filename, "r", "utf_8_sig" ) as f:
     local_conf = yaml.safe_load(f)
 

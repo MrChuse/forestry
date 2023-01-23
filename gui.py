@@ -4,9 +4,10 @@ import pygame
 import pygame_gui
 from pygame import mixer
 
+from config import load_settings
 from ui.custom_events import APPLY_VOLUME_CHANGE
 # keep TutorialStage here because needed for backwards compatibility with pickle.load
-from ui.game_components import GUI, SettingsWindow, TutorialStage
+from ui.game_components import GUI, TutorialStage
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
 
         pygame.display.set_caption('Bee Breeding Game')
 
-        settings = SettingsWindow.load_settings()
+        settings = load_settings()
         pygame.event.post(pygame.event.Event(APPLY_VOLUME_CHANGE, {'settings': settings}))
 
 

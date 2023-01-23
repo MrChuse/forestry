@@ -1,17 +1,31 @@
 import json
 
-from forestry import BeeSpecies
+from config import BeeSpecies
+from forestry import ApiaryProblems
 
 tool_tip_delay = '0.4'
 theme = {
-    '#BeeButton':{
+    '#TooltipDelay': {
         'misc':{
             'tool_tip_delay': tool_tip_delay
         }
     },
+    '#BeeButton':{
+        'prototype': f'#TooltipDelay'
+    },
     '@Centered':{
-        'misc':{
+        'misc': {
             'text_horiz_alignment': 'center'
+        }
+    },
+    'label': {
+        'misc': {
+            'text_horiz_alignment': 'left'
+        }
+    },
+    '#restart_label': {
+        'colours': {
+            'normal_text': '#ec3661'
         }
     },
     '#checkbox': {
@@ -80,6 +94,18 @@ theme = {
         }
     }
 }
+
+for problem in ApiaryProblems:
+    theme.update({
+        f'#Apiary_problem_'+problem.name: {
+            'prototype': '#TooltipDelay',
+            'images': {
+                'normal_image': {
+                    'path': f'assets/Apiary_problem_{problem.name}.png'
+                }
+            }
+        }
+    })
 
 for species in BeeSpecies:
     for gender in ['Princess', 'Drone', 'Queen']:
