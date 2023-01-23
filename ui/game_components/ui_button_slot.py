@@ -81,11 +81,11 @@ class InspectPopup(UITooltip):
     def find_valid_position(self, position: pygame.math.Vector2) -> bool:
         window_rect = self.ui_manager.get_root_container().get_rect()
 
-        if not window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
-            self.relative_rect = self.rect.copy()
-            warnings.warn("initial position for tool tip is off screen,"
-                          " unable to find valid position")
-            return False
+        # if not window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
+        #     self.relative_rect = self.rect.copy()
+        #     warnings.warn("initial position for tool tip is off screen,"
+        #                   " unable to find valid position")
+        #     return False
 
         self.rect.left = int(position.x - self.rect.width/2)
         self.rect.top = int(position.y + self.hover_distance_from_target[1] - self.top_margin)
@@ -239,7 +239,7 @@ class UIButtonSlot(UIButton):
     def while_hovering(self, time_delta: float, mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
         if self.inspect_popup is None and self.hover_time > self.tool_tip_delay and not self.slot.is_empty():
             hover_height = int(self.rect.height / 2)
-            self.inspect_popup = InspectPopup(self, (-150, hover_height), self.ui_manager)
+            self.inspect_popup = InspectPopup(self, (0, hover_height), self.ui_manager)
             self.inspect_popup.find_valid_position(pygame.math.Vector2(self.rect.centerx, self.rect.centery))
         super().while_hovering(time_delta, mouse_pos)
 
