@@ -18,6 +18,9 @@ buildings:
   Inventory: Инвентарь
   Sort: Сортировать
   Apiary: Улей
+  Apiary_problem_ALL_OK: Все в порядке
+  Apiary_problem_NO_QUEEN: Нет королевы
+  Apiary_problem_NO_SPACE: Не хватает места для потомства
   Take: Взять все
   Alveary: Алвеарий
   Open Inspect Window: Открыть окно исследования

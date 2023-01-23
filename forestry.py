@@ -598,6 +598,11 @@ def except_print(*exceptions):
     return try_clause_decorator
 
 
+class ApiaryProblems(Enum):
+    ALL_OK = 'all_ok'
+    NO_QUEEN = 'no_queen'
+    NO_SPACE = 'no_space'
+
 class Apiary:
     cost = {'honey': 10, 'wood': 5, 'flowers': 5}
     production_modifier = 1/3
@@ -606,6 +611,7 @@ class Apiary:
         self.princess = Slot()
         self.drone = Slot()
         self.name = name
+        self.problem = ApiaryProblems.NO_QUEEN
         self.add_resources = add_resources
         self.add_mating_entry = add_mating_entry
         super().__init__()
@@ -620,6 +626,9 @@ class Apiary:
         inv_str = textwrap.indent(str(self.inv), '  ')
         res.append(inv_str)
         return '\n'.join(res)
+
+    def get_problem(self):
+        return self.problem
 
     def put_princess(self, bee, amount=1):
         if not isinstance(bee, Princess) and not isinstance(bee, Queen):
@@ -674,6 +683,7 @@ class Apiary:
             try:
                 self.inv.place_bees(self.princess.slot.die())
             except SlotOccupiedError:
+                self.problem = ApiaryProblems.NO_SPACE
                 return False
             queen : Queen = self.princess.take()
 
@@ -698,6 +708,7 @@ class Apiary:
         if isinstance(self.princess.slot, Queen):
             queen_died = self.try_queen_die()
             if not queen_died and self.princess.slot.remaining_lifespan > 0:
+                self.problem = ApiaryProblems.ALL_OK
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
                 if res is not None:
@@ -711,6 +722,8 @@ class Apiary:
                     self.add_resources(resources_to_add)
                 else:
                     assert False, 'Should be unreachable'
+        else:
+            self.problem = ApiaryProblems.NO_QUEEN
 
 class Alveary(Apiary):
     cost = {'honey': 100, 'royal jelly': 25, 'pollen cluster': 25}
@@ -868,8 +881,8 @@ class Game:
             CURRENT_BACK_VERSION, update_back_versions)
 
         if saved.get('back_version', 0) < CURRENT_BACK_VERSION:
-            for update_front_func in update_back_versions[saved.get('back_version', 0):]:
-                saved = update_front_func(saved)
+            for update_back_func in update_back_versions[saved.get('back_version', 0):]:
+                saved = update_back_func(saved)
 
         self.resources = saved['resources']
         self.inventories = saved['inventories']

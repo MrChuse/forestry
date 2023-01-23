@@ -1,8 +1,11 @@
 {
-  "#BeeButton": {
+  "#TooltipDelay": {
     "misc": {
       "tool_tip_delay": "0.4"
     }
+  },
+  "#BeeButton": {
+    "prototype": "#TooltipDelay"
   },
   "@Centered": {
     "misc": {
@@ -81,6 +84,30 @@
     "images": {
       "normal_image": {
         "path": "assets/mating_history_plus.png"
+      }
+    }
+  },
+  "#Apiary_problem_ALL_OK": {
+    "prototype": "#TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/Apiary_problem_ALL_OK.png"
+      }
+    }
+  },
+  "#Apiary_problem_NO_QUEEN": {
+    "prototype": "#TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/Apiary_problem_NO_QUEEN.png"
+      }
+    }
+  },
+  "#Apiary_problem_NO_SPACE": {
+    "prototype": "#TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/Apiary_problem_NO_SPACE.png"
       }
     }
   },

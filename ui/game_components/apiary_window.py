@@ -36,6 +36,10 @@ class ApiaryWindow(UIWindow):
         self.queen_health = UIStatusBar(queen_health_rect, manager, container=self)
         self.queen_health.percent_full = 0
 
+        self.problem = 'NO_QUEEN'
+        self.problems_indicator = None
+        self.create_problems_indicator()
+
         self.margin3 = (self.size[0] - 32 - 3 * self.button_size[0]) / 4
         radius = self.margin3 + self.button_size[0]
         center_rect = pygame.Rect((0, 0), self.button_size)
@@ -60,6 +64,26 @@ class ApiaryWindow(UIWindow):
                 'bottom': 'bottom',
                 'top_target': self.buttons[3]
             })
+
+    def create_problems_indicator(self, problem='NO_QUEEN'):
+        if self.problems_indicator is not None:
+            self.problems_indicator.kill()
+
+        self.problems_indicator = UIButton(pygame.Rect(6, -23, 36, 36), '', self.ui_manager, container=self, tool_tip_text=local['Apiary_problem_'+problem],object_id='#Apiary_problem_'+problem,
+            anchors={
+                'left': 'left',
+                'right': 'left',
+                'top': 'top',
+                'bottom': 'top',
+                'left_target': self.queen_health,
+                'top_target': self.queen_health
+            })
+
+    def update_problems_indicator(self):
+        problem = self.apiary.get_problem().name
+        if problem != self.problem:
+            self.problem = problem
+            self.create_problems_indicator(problem)
 
     def update_health_bar(self):
         bee = self.apiary.princess.slot
@@ -128,4 +152,5 @@ class ApiaryWindow(UIWindow):
 
     def update(self, time_delta):
         self.update_health_bar()
+        self.update_problems_indicator()
         super().update(time_delta)
