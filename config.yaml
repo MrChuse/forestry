@@ -52,6 +52,7 @@ mutations:
     - [CULTIVATED, DILIGENT, UNWEARY, 0.08]
     - [UNWEARY, DILIGENT, INDUSTRIOUS, 0.08]
 
+production_modifier: 10
 products:
   FOREST:
     wood: [1, 0.5]

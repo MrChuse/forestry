@@ -1,8 +1,9 @@
 import codecs
-from enum import Enum
 import os
+from enum import Enum
 
 import yaml
+
 
 class LocalEnum(Enum):
     def __str__(self):
@@ -48,6 +49,8 @@ for k in mutations:
     mutations[k][1].append(1 - sum(mutations[k][1]))
 
 # products
+config_production_modifier = config['production_modifier']
+
 products_config = config['products']
 products = {}
 for allele_name, prod_dict in products_config.items():

@@ -14,8 +14,9 @@ from enum import Enum, IntEnum, auto
 from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
 
-from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed, dominant,
-                    helper_text, local, mendel_text, mutations, products)
+from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
+                    config_production_modifier, dominant, helper_text, local,
+                    mendel_text, mutations, products)
 
 
 def weighted_if(weight, out1, out2):
@@ -309,12 +310,13 @@ class Resources:
     def remove_resources(self, resources):
         s = ''
         for k in resources:
-            if self[k] - resources[k] < 0:
-                s += f'Not enough {local["resources"][k]}: you have {self.res[k]} but you need {resources[k]}\n'
+            need_resources = resources[k] * config_production_modifier
+            if self[k] - need_resources < 0:
+                s += f'Not enough {local["resources"][k]}: you have {self.res[k]} but you need {need_resources}\n'
         if s != '':
             raise NotEnoughResourcesError(s)
         for k in resources:
-            self.res[k] -= resources[k]
+            self.res[k] -= resources[k] * config_production_modifier
 
     def check_enough(self, resources):
         for k in resources:
@@ -713,13 +715,16 @@ class Apiary:
                 self.princess.slot.remaining_lifespan -= 1
                 res = products.get(self.princess.slot.genes.species[0])
                 if res is not None:
-                    resources_to_add = dict()
+                    resources_to_add = defaultdict(int)
                     for res_name in res:
                         amt, prob = res[res_name]
-                        probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * (prob)
+                        probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * config_production_modifier * (prob)
                         # print(self.princess.slot.genes.speed[0], prob, probability)
+                        if probability > 1:
+                            resources_to_add[res_name] = int(probability)
+                            probability -= int(probability)
                         if random.random() < probability:
-                            resources_to_add[res_name] = amt
+                            resources_to_add[res_name] += 1
                     self.add_resources(resources_to_add)
                 else:
                     assert False, 'Should be unreachable'

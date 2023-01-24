@@ -26,7 +26,7 @@ buildings:
   Open Inspect Window: Open Inspect Window
   Inspect Window: Inspect Window
   Inspect: Inspect # left side bar button
-  Inspection popup: Inspection costs 1 honey to perform
+  Inspection popup: Inspection costs {} honey to perform
 resources:
   RESOURCES: RESOURCES
   honey: honey

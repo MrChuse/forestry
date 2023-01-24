@@ -7,7 +7,7 @@ import pygame_gui
 from pygame_gui.elements import UIButton
 from pygame_gui.windows import UIConfirmationDialog, UIMessageWindow
 
-from config import helper_text, local
+from config import helper_text, local, config_production_modifier
 from forestry import Game, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
@@ -209,7 +209,7 @@ class GUI(Game):
         elif event.type == INSPECT_BEE:
             if self.total_inspections == 0:
                 r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
-                self.inspect_confirm = UIConfirmationDialog(r, local['Inspection popup'], self.ui_manager)
+                self.inspect_confirm = UIConfirmationDialog(r, local['Inspection popup'].format(config_production_modifier), self.ui_manager)
                 self.inspect_confirm.bee_button = event.bee_button #type: ignore
                 self.inspect_confirm.bee_stats = event.bee_stats #type: ignore
             else:
