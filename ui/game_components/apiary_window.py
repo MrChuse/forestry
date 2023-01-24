@@ -77,7 +77,7 @@ class ApiaryWindow(UIWindow):
                 'bottom': 'top',
                 'left_target': self.queen_health,
                 'top_target': self.queen_health
-            })
+            }, generate_click_events_from=[])
 
     def update_problems_indicator(self):
         problem = self.apiary.get_problem().name
