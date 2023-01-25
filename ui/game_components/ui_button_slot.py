@@ -35,7 +35,7 @@ class InspectPopup(UITooltip):
             self.inspect_button.set_hold_range((2, 2))
             bee_stats_rect.top += self.inspect_button_height
 
-        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, manager, container=self.container)
+        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, manager, container=self.container, parent_element=self)
 
         self.pin_button_unpinned = UIButton(pygame.Rect(width - self.inspect_button_height,
                                                         self.top_margin,
@@ -136,7 +136,7 @@ class UIButtonSlot(UIButton):
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
-        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered'), anchors=self.kwargs.get('anchors'))
+        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered', object_id='#button_slot_text_box'), anchors=self.kwargs.get('anchors'))
         self.text_box.hide()
         self.saved_amount = 0
         self.show_was_called_recently = False
