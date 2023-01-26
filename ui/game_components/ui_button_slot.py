@@ -15,19 +15,19 @@ from .tutorial_stage import CurrentTutorialStage, TutorialStage
 
 
 class InspectPopup(UITooltip):
-    def __init__(self, bee_button: 'UIButtonSlot', hover_distance: Tuple[int, int], manager, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None):
+    def __init__(self, bee_button: 'UIButtonSlot', hover_distance: Tuple[int, int], manager=None, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None):
         super().__init__('', hover_distance, manager, parent_element, object_id, anchors)
-        self.container = UIContainer(pygame.Rect(0, 0, -1, -1), manager, starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1, parent_element=self)
         self.bee_button = bee_button
         if not bee_button.bee_inspectable:
             width = 318
             height = 177
         else:
             width = 170
-            height = 35
+            height = 40
         self.top_margin = 4
         self.inspect_button_height = 32
 
+        self.container = UIContainer(pygame.Rect(0, 0, width, height), manager, starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1, parent_element=self)
         bee_stats_rect = pygame.Rect(0, self.top_margin, width, height)
         self.inspect_button = None
         if self.bee_button.is_inspectable and CurrentTutorialStage.current_tutorial_stage >= TutorialStage.INSPECT_AVAILABLE:
@@ -35,7 +35,7 @@ class InspectPopup(UITooltip):
             self.inspect_button.set_hold_range((2, 2))
             bee_stats_rect.top += self.inspect_button_height
 
-        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, manager, container=self.container, parent_element=self)
+        self.bee_stats = BeeStats(self.bee_button.slot.slot, bee_stats_rect, container=self.container, parent_element=self, resizable=True)
 
         self.pin_button_unpinned = UIButton(pygame.Rect(width - self.inspect_button_height,
                                                         self.top_margin,
@@ -61,8 +61,7 @@ class InspectPopup(UITooltip):
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.inspect_button:
-                event_data = {'bee_button': self.bee_button,
-                              'bee_stats': self.bee_stats}
+                event_data = {'ui_element': self}
                 pygame.event.post(pygame.event.Event(INSPECT_BEE, event_data))
             elif event.ui_element == self.pin_button_unpinned:
                 self.pinned = True

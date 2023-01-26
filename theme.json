@@ -1,34 +1,47 @@
 {
-  "#TooltipDelay": {
-    "misc": {
-      "tool_tip_delay": "0.4"
-    }
-  },
-  "#BeeButton": {
-    "prototype": "#TooltipDelay"
-  },
   "@Centered": {
     "misc": {
       "text_horiz_alignment": "center"
     }
   },
-  "#button_slot_text_box": {
-    "font": {
-      "name": "fira_code",
-      "size": 14
-    }
-  },
-  "@font": {
+  "@Font": {
     "font": {
       "name": "fira_code",
       "size": 20
     }
   },
+  "@SmallFont": {
+    "font": {
+      "name": "fira_code",
+      "size": 14
+    }
+  },
+  "@TooltipDelay": {
+    "misc": {
+      "tool_tip_delay": "0.4"
+    }
+  },
+  "@Dominant": {
+    "colours": {
+      "normal_text": "#ec3661"
+    }
+  },
+  "@Recessive": {
+    "colours": {
+      "normal_text": "#3687ec"
+    }
+  },
+  "#BeeButton": {
+    "prototype": "@TooltipDelay"
+  },
+  "#button_slot_text_box": {
+    "prototype": "@SmallFont"
+  },
   "text_box": {
-    "prototype": "@font"
+    "prototype": "@Font"
   },
   "label": {
-    "prototype": "@font",
+    "prototype": "@Font",
     "misc": {
       "text_horiz_alignment": "left"
     }
@@ -40,9 +53,7 @@
     }
   },
   "#restart_label": {
-    "colours": {
-      "normal_text": "#ec3661"
-    }
+    "prototype": "@Dominant"
   },
   "#checkbox": {
     "misc": {
@@ -110,7 +121,7 @@
     }
   },
   "#Apiary_problem_ALL_OK": {
-    "prototype": "#TooltipDelay",
+    "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
         "path": "assets/Apiary_problem_ALL_OK.png"
@@ -118,7 +129,7 @@
     }
   },
   "#Apiary_problem_NO_QUEEN": {
-    "prototype": "#TooltipDelay",
+    "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
         "path": "assets/Apiary_problem_NO_QUEEN.png"
@@ -126,7 +137,7 @@
     }
   },
   "#Apiary_problem_NO_SPACE": {
-    "prototype": "#TooltipDelay",
+    "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
         "path": "assets/Apiary_problem_NO_SPACE.png"

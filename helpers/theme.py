@@ -5,36 +5,49 @@ from forestry import ApiaryProblems
 
 tool_tip_delay = '0.4'
 theme = {
-    '#TooltipDelay': {
-        'misc':{
-            'tool_tip_delay': tool_tip_delay
-        }
-    },
-    '#BeeButton':{
-        'prototype': f'#TooltipDelay'
-    },
     '@Centered':{
         'misc': {
             'text_horiz_alignment': 'center'
         }
     },
-    '#button_slot_text_box':{
-        'font': {
-            'name': 'fira_code',
-            'size': 14
-        }
-    },
-    '@font':{
+    '@Font':{
         'font': {
             'name': 'fira_code',
             'size': 20
         },
     },
+    '@SmallFont': {
+        'font': {
+            'name': 'fira_code',
+            'size': 14
+        }
+    },
+    '@TooltipDelay': {
+        'misc':{
+            'tool_tip_delay': tool_tip_delay
+        }
+    },
+    '@Dominant':{
+        'colours': {
+            'normal_text': '#ec3661'
+        }
+    },
+    '@Recessive': {
+        'colours': {
+            'normal_text': '#3687ec'
+        }
+    },
+    '#BeeButton':{
+        'prototype': f'@TooltipDelay'
+    },
+    '#button_slot_text_box':{
+        'prototype': '@SmallFont'
+    },
     'text_box':{
-        'prototype': '@font'
+        'prototype': '@Font'
     },
     'label': {
-        'prototype': '@font',
+        'prototype': '@Font',
         'misc': {
             'text_horiz_alignment': 'left'
         }
@@ -46,9 +59,7 @@ theme = {
         }
     },
     '#restart_label': {
-        'colours': {
-            'normal_text': '#ec3661'
-        }
+        'prototype': '@Dominant'
     },
     '#checkbox': {
         'misc': {
@@ -120,7 +131,7 @@ theme = {
 for problem in ApiaryProblems:
     theme.update({
         f'#Apiary_problem_'+problem.name: {
-            'prototype': '#TooltipDelay',
+            'prototype': '@TooltipDelay',
             'images': {
                 'normal_image': {
                     'path': f'assets/Apiary_problem_{problem.name}.png'

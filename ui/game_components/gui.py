@@ -210,12 +210,12 @@ class GUI(Game):
             if self.total_inspections == 0:
                 r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
                 self.inspect_confirm = UIConfirmationDialog(r, local['Inspection popup'].format(config_production_modifier), self.ui_manager)
-                self.inspect_confirm.bee_button = event.bee_button #type: ignore
-                self.inspect_confirm.bee_stats = event.bee_stats #type: ignore
+                self.inspect_confirm.bee_button = event.ui_element.bee_button #type: ignore
+                self.inspect_confirm.bee_stats = event.ui_element.bee_stats #type: ignore
             else:
-                self.inspect_bee(event.bee_button.slot.slot)
-                event.bee_stats.process_inspect()
-                event.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+                self.inspect_bee(event.ui_element.bee_button.slot.slot)
+                event.ui_element.bee_stats.process_inspect()
+                event.ui_element.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.load_confirm:
                 self.load('save')
@@ -224,10 +224,10 @@ class GUI(Game):
                 self.save('save')
                 self.print('Saved the game to the disk')
             elif event.ui_element == self.inspect_confirm:
-                self.inspect_bee(self.inspect_confirm.bee_button.slot.slot) #type: ignore
+                self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
                 if self.inspect_confirm.bee_button.inspect_popup is not None:
-                    self.inspect_confirm.bee_stats.process_inspect() #type: ignore ## added bee_stats and bee_button in INSPECT_BEE elif; refactor?
-                self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' #type: ignore ## dirty hack to make the button refresh inspect status
+                    self.inspect_confirm.bee_stats.process_inspect() ## added bee_stats and bee_button in INSPECT_BEE elif; refactor?
+                self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' ## dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:
                 if CurrentTutorialStage.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
