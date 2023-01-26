@@ -18,22 +18,25 @@ class BeeStats(UIPanel):
         self.bee = bee
         self.resizable = resizable
         self.table_contents : Optional[List[List[UIElement]]] = None
+        self.original_rect = relative_rect
         super().__init__(relative_rect, layer_starting_height, manager, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
         self.rebuild()
 
     def rebuild(self):
         super().rebuild()
 
-        if self.bee is None:
-            return
-        if not hasattr(self, 'panel_container'):
-            # has not __init__ed yet, skipping
-            return
-
         if self.table_contents is not None:
             for row in self.table_contents:
                 for element in row:
                     element.kill()
+
+        if self.bee is None:
+            if hasattr(self, 'panel_container'):
+                self.set_dimensions(self.original_rect.size)
+            return
+        if not hasattr(self, 'panel_container'):
+            # has not __init__ed yet, skipping
+            return
 
         def create_uilabel(text='', is_local=False, object_id=None, visible=True):
             return UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
