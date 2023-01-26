@@ -17,6 +17,7 @@ class InspectWindow(UIWindow):
         self.game = game
         self.cursor = cursor
         rect = pygame.Rect(rect.left, rect.top, 350, 300)
+        self.bee_stats = None
         super().__init__(rect, manager, local['Inspect Window'], element_id, object_id, resizable=False, visible=1)
         inspect_button_height = 64
         self.inspect_button = UIButton(pygame.Rect(0, 0, self.get_container().get_size()[0] - inspect_button_height, inspect_button_height), local['Inspect'], manager, self)
@@ -38,9 +39,13 @@ class InspectWindow(UIWindow):
             if event.ui_element == self.bee_button:
                 self.cursor.slot.swap(self.bee_button.slot)
                 self.bee_stats.bee = self.bee_button.slot.slot
-                self.bee_stats.process_inspect()
+                self.bee_stats.rebuild()
             elif event.ui_element == self.inspect_button:
-                event_data = {'bee_button': self.bee_button,
-                              'bee_stats': self.bee_stats}
+                event_data = {'ui_element': self}
                 pygame.event.post(pygame.event.Event(INSPECT_BEE, event_data))
         return super().process_event(event)
+
+    def rebuild(self):
+        super().rebuild()
+        if self.bee_stats is not None:
+            self.bee_stats.rebuild()
