@@ -12,6 +12,10 @@ class LocalEnum(Enum):
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
 
+# some ui stuff
+UI_MESSAGE_SIZE = (500, 300)
+
+
 # load all the genes and their alleles
 genes_conf = config['genes_alleles']
 genes_enums = {}

@@ -7,7 +7,7 @@ import pygame_gui
 from pygame_gui.elements import UIButton
 from pygame_gui.windows import UIConfirmationDialog, UIMessageWindow
 
-from config import helper_text, local, config_production_modifier
+from config import helper_text, local, config_production_modifier, UI_MESSAGE_SIZE
 from forestry import Game, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
@@ -110,7 +110,7 @@ class GUI(Game):
 
     def open_mendel_notification(self):
         mouse_pos = self.ui_manager.get_mouse_position()
-        r = pygame.Rect((mouse_pos[0]+260, mouse_pos[1]), (260, 200))
+        r = pygame.Rect((mouse_pos[0] + UI_MESSAGE_SIZE[0], mouse_pos[1]), UI_MESSAGE_SIZE)
         return UIMessageWindow(r, local['mendel_notification'], self.ui_manager)
 
     def render(self):
@@ -163,11 +163,11 @@ class GUI(Game):
                 if event.text == local['Exit']:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 elif event.text == local['Load']:
-                    r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
+                    r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
                     self.load_confirm = UIConfirmationDialog(r, local['load_confirm'], self.cursor_manager)
                 elif event.text == local['Save']:
                     if os.path.exists('save.forestry'):
-                        r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
+                        r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
                         self.save_confirm = UIConfirmationDialog(r, local['save_confirm'], self.cursor_manager)
                     else:
                         self.save('save')
@@ -208,7 +208,7 @@ class GUI(Game):
                     self.esc_menu.show()
         elif event.type == INSPECT_BEE:
             if self.total_inspections == 0:
-                r = pygame.Rect((pygame.mouse.get_pos()), (260, 200))
+                r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
                 self.inspect_confirm = UIConfirmationDialog(r, local['Inspection popup'].format(config_production_modifier), self.ui_manager)
                 self.inspect_confirm.bee_button = event.ui_element.bee_button #type: ignore
                 self.inspect_confirm.bee_stats = event.ui_element.bee_stats #type: ignore
