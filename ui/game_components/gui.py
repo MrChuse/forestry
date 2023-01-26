@@ -227,7 +227,7 @@ class GUI(Game):
             elif event.ui_element == self.inspect_confirm:
                 self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
                 if isinstance(self.inspect_confirm.ui_element, InspectWindow):
-                    self.inspect_confirm.bee_stats.rebuild() ## added bee_stats and bee_button in INSPECT_BEE elif; refactor?
+                    self.inspect_confirm.ui_element.reshape_according_to_bee_stats()
                 self.inspect_confirm.bee_button.most_specific_combined_id = 'some nonsense' ## dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.forage_button:

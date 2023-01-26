@@ -19,20 +19,25 @@ class InspectWindow(UIWindow):
         rect = pygame.Rect(rect.left, rect.top, 350, 300)
         self.bee_stats = None
         super().__init__(rect, manager, local['Inspect Window'], element_id, object_id, resizable=False, visible=1)
-        inspect_button_height = 64
-        self.inspect_button = UIButton(pygame.Rect(0, 0, self.get_container().get_size()[0] - inspect_button_height, inspect_button_height), local['Inspect'], manager, self)
-        bee_button_rect = pygame.Rect(0, 0, inspect_button_height, inspect_button_height)
+        self.inspect_button_height = 64
+        bee_button_rect = pygame.Rect(-self.inspect_button_height, 0, self.inspect_button_height, self.inspect_button_height)
         self.bee_button = UIButtonSlot(Slot(), bee_button_rect, '', manager, self,
             anchors={
-                'left': 'left',
+                'left': 'right',
                 'right': 'right',
-                'bottom': 'bottom',
+                'bottom': 'top',
                 'top': 'top',
-                'left_target': self.inspect_button
+            }
+        )
+        self.inspect_button = UIButton(pygame.Rect(0, 0, self.get_container().get_size()[0] - self.inspect_button_height, self.inspect_button_height), local['Inspect'], manager, self,
+            anchors={
+                'left':'left',
+                'right': 'right',
+                'right_target': self.bee_button
             }
         )
         self.bee_button.empty_object_id = '#DroneEmpty'
-        self.bee_stats = BeeStats(None, pygame.Rect(0, inspect_button_height, self.get_container().get_rect().width, self.get_container().get_rect().height-inspect_button_height), manager, container=self)
+        self.bee_stats = BeeStats(None, pygame.Rect(0, self.inspect_button_height, self.get_container().get_rect().width, self.get_container().get_rect().height-self.inspect_button_height), manager, container=self, resizable=True)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
@@ -49,3 +54,12 @@ class InspectWindow(UIWindow):
         super().rebuild()
         if self.bee_stats is not None:
             self.bee_stats.rebuild()
+            self.reshape_according_to_bee_stats()
+
+    def reshape_according_to_bee_stats(self):
+        self.set_dimensions(self.ui_container.get_size())
+        self.bee_stats.rebuild()
+        bee_stats_size_x, bee_stats_size_y = self.bee_stats.get_abs_rect().size
+        new_dimensions = (bee_stats_size_x + (2 * self.shadow_width) + self.bee_stats.shadow_width,
+                          bee_stats_size_y + self.title_bar_height + self.inspect_button_height + (2 * self.shadow_width) + self.bee_stats.shadow_width)
+        self.set_dimensions(new_dimensions)
