@@ -20,7 +20,7 @@ class SettingsWindow(UIWindow):
         super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible)
         self.settings = load_settings()
         self.label_width = 160
-        self.full_screen_checkbox = UICheckbox(pygame.Rect(20, 20, 20, 20), self.settings['fullscreen'], manager, self)
+        self.full_screen_checkbox = UICheckbox(pygame.Rect(20, 20, 20, 20), self.settings['fullscreen'], container=self)
         self.full_screen_label = UILabel(pygame.Rect(0,-20,self.label_width,20), local['Fullscreen'], manager, container=self,
             anchors={
                 'left': 'left',
