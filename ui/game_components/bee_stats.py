@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 import pygame
 import pygame_gui
 from pygame_gui.core import ObjectID, UIElement
-from pygame_gui.elements import UILabel, UIPanel, UITextBox
+from pygame_gui.elements import UIButton, UILabel, UIPanel
 from pygame_gui.windows import UIMessageWindow
 
 from config import dominant, local
@@ -19,25 +19,33 @@ class BeeStats(UIPanel):
         self.resizable = resizable
         self.table_contents : Optional[List[List[UIElement]]] = None
         super().__init__(relative_rect, layer_starting_height, manager, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
-        self.process_inspect()
+        self.rebuild()
 
-    def process_inspect(self):
+    def rebuild(self):
+        super().rebuild()
+
+        if self.bee is None:
+            return
+        if not hasattr(self, 'panel_container'):
+            # has not __init__ed yet, skipping
+            return
+
         if self.table_contents is not None:
             for row in self.table_contents:
                 for element in row:
                     element.kill()
+
         def create_uilabel(text='', is_local=False, object_id=None, visible=True):
             return UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
-
-        if self.bee is None:
-            return
+        def create_button(text='?', is_local=False, object_id=None, visible=True):
+            return UIButton(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
         self.table_contents = []
         if not self.bee.inspected:
             self.table_contents.append([create_uilabel(self.bee.small_str())])
         else:
             name, bee_species_index = local[self.bee.type_str]
-            self.table_contents.append([create_uilabel(name), create_uilabel('', visible=True), create_uilabel('', visible=True)])
-            self.table_contents.append([create_uilabel('trait', True), create_uilabel('active', True), create_uilabel('inactive', True)])
+            self.table_contents.append([create_uilabel(name), create_uilabel('', visible=False), create_uilabel('', visible=False), create_uilabel('', visible=False)])
+            self.table_contents.append([create_uilabel('trait', True), create_uilabel(visible=False), create_uilabel('active', True), create_uilabel('inactive', True)])
             genes = self.bee.genes.asdict()
             for key in genes:
                 try:
@@ -49,8 +57,10 @@ class BeeStats(UIPanel):
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
                 self.table_contents.append([create_uilabel(key, True),
-                            create_uilabel(dom_local(allele0, dom0), False, '@Dominant' if dom0 else '@Recessive'),
-                            create_uilabel(dom_local(allele1, dom1), False, '@Dominant' if dom1 else '@Recessive')])
+                                            create_button(),
+                                            create_uilabel(dom_local(allele0, dom0), False, '@Dominant' if dom0 else '@Recessive'),
+                                            create_uilabel(dom_local(allele1, dom1), False, '@Dominant' if dom1 else '@Recessive')])
+                self.table_contents[-1][1]._gene_name = key
 
         top_margin = 2
         heights = [max(map(lambda x: x.get_abs_rect().height, row)) + top_margin for row in self.table_contents]
@@ -89,11 +99,17 @@ class BeeStats(UIPanel):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         consumed = super().process_event(event)
-        if event.type == pygame_gui.UI_TEXT_BOX_LINK_CLICKED:
-            if event.ui_element == self:
-                try:
-                    self.open_gene_helper(event.link_target)
-                    consumed = True
-                except KeyError:
-                    pass
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if self.table_contents is None:
+                return
+            for row in self.table_contents:
+                if len(row) < 2:
+                    continue
+                button = row[1]
+                if event.ui_element == button:
+                    try:
+                        self.open_gene_helper(button._gene_name)
+                        consumed = True
+                    except KeyError:
+                        pass
         return consumed
