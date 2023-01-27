@@ -316,6 +316,8 @@ class GUI(Game):
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in saved['inspect_windows']]
         for window, slot in zip(self.inspect_windows, saved['inspect_slots']):
             window.bee_button.slot = slot
+            window.bee_stats.bee = slot.slot # TODO: some stupid initialization here, rework?
+            window.reshape_according_to_bee_stats()
         self.inventory_windows = [InventoryWindow(inv, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
         self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in saved['apiary_windows']]
         if self.mating_history_window is not None:
