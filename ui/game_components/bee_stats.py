@@ -4,12 +4,12 @@ import pygame
 import pygame_gui
 from pygame_gui.core import ObjectID, UIElement
 from pygame_gui.elements import UIButton, UILabel, UIPanel
-from pygame_gui.windows import UIMessageWindow
 
-from config import dominant, local
+from config import UI_MESSAGE_SIZE, dominant, local
 from forestry import Bee, dom_local
 
 from ..custom_events import TUTORIAL_STAGE_CHANGED
+from ..elements import UILocationFindingMessageWindow
 from .tutorial_stage import CurrentTutorialStage, TutorialStage
 
 
@@ -97,7 +97,7 @@ class BeeStats(UIPanel):
         if CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
             CurrentTutorialStage.current_tutorial_stage = TutorialStage.GENE_HELPER_TEXT_CLICKED
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
-        return UIMessageWindow(pygame.Rect(self.ui_manager.get_mouse_position(), (260, 200)),
+        return UILocationFindingMessageWindow(pygame.Rect(self.ui_manager.get_mouse_position(), UI_MESSAGE_SIZE),
                                local[gene+'_helper_text'], self.ui_manager)
 
     def process_event(self, event: pygame.event.Event) -> bool:
