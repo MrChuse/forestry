@@ -36,8 +36,8 @@ def main():
         background = pygame.Surface(window_size)
         background.fill(pygame.Color('#000000'))
 
-        manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False)
-        cursor_manager = pygame_gui.UIManager(window_size, 'theme.json')
+        manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False, starting_language=settings['language'])
+        cursor_manager = pygame_gui.UIManager(window_size, 'theme.json', starting_language=settings['language'])
 
         game = GUI(window_size, manager, cursor_manager)
 
