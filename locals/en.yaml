@@ -6,6 +6,8 @@ genes:
   trait: Gene
   active: active
   inactive: inactive
+  inactive_allele_helper_text: This column represents an inactive allele. They can be inherited by offspring but will the queen bee will not display their effect.
+  active_allele_helper_text: This column represents an active allele. The queen bee will display the effect of the active allele, for example, appearance or lifespan.
   species: Species
   species_helper_text: Species of this bee. Active allele of this gene identifies unique appearance of this bee and the resources the queen produces while alive.
   fertility: Fertility
