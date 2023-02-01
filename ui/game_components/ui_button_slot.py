@@ -121,7 +121,7 @@ class InspectPopup(UITooltip):
 
 class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
-    def __init__(self, slot: Slot, *args, highlighted=False, **kwargs):
+    def __init__(self, slot: Slot, *args, highlighted=False, is_inspectable=True, allow_popup=True, **kwargs):
         """ # must have params:
             slot,
             rect,
@@ -133,7 +133,8 @@ class UIButtonSlot(UIButton):
             is_inspectable=True
         """
         self.slot = slot
-        self._is_inspectable = kwargs.pop('is_inspectable', True)
+        self._is_inspectable = is_inspectable
+        self.allow_popup = allow_popup
         self.args = args
         self.kwargs = kwargs
         self.kwargs['generate_click_events_from'] = [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT]
@@ -191,7 +192,7 @@ class UIButtonSlot(UIButton):
             self.kill()
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
-            self.__init__(self.slot, *self.args, highlighted=self.highlighted, is_inspectable=self._is_inspectable, **self.kwargs) # rewrite using rebuild
+            self.__init__(self.slot, *self.args, highlighted=self.highlighted, is_inspectable=self._is_inspectable, allow_popup=self.allow_popup, **self.kwargs) # rewrite using rebuild
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount or self.show_was_called_recently:
@@ -243,7 +244,7 @@ class UIButtonSlot(UIButton):
         return super().kill()
 
     def while_hovering(self, time_delta: float, mouse_pos: Union[pygame.math.Vector2, Tuple[int, int], Tuple[float, float]]):
-        if self.inspect_popup is None and self.hover_time > self.tool_tip_delay and not self.slot.is_empty():
+        if self.allow_popup and self.inspect_popup is None and self.hover_time > self.tool_tip_delay and not self.slot.is_empty():
             hover_height = int(self.rect.height / 2)
             self.inspect_popup = InspectPopup(self, (0, hover_height), self.ui_manager)
             self.inspect_popup.find_valid_position(pygame.math.Vector2(self.rect.centerx, self.rect.centery))
