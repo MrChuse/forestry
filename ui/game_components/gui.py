@@ -216,10 +216,7 @@ class GUI(Game):
                 self.inspect_confirm.ui_element = event.ui_element
             else:
                 self.inspect_bee(event.ui_element.bee_button.slot.slot)
-                if isinstance(self.inspect_confirm.ui_element, InspectWindow):
-                    self.inspect_confirm.ui_element.reshape_according_to_bee_stats()
-                else:
-                    event.ui_element.bee_stats.rebuild()
+                event.ui_element.rebuild()
                 event.ui_element.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
         elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.load_confirm:
