@@ -19,6 +19,7 @@ class BeeStats(UIPanel):
         self.resizable = resizable
         self.table_contents : Optional[List[List[UIElement]]] = None
         self.original_rect = relative_rect
+        self.buttons = []
         super().__init__(relative_rect, layer_starting_height, manager, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
         self.rebuild()
 
@@ -41,13 +42,17 @@ class BeeStats(UIPanel):
         def create_uilabel(text='', is_local=False, object_id=None, visible=True):
             return UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
         def create_button(text='?', is_local=False, object_id=None, visible=True):
-            return UIButton(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
+            b = UIButton(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
+            self.buttons.append(b)
+            return b
         self.table_contents = []
         if not self.bee.inspected:
             self.table_contents.append([create_uilabel(self.bee.small_str())])
         else:
             name, bee_species_index = local[self.bee.type_str]
-            self.table_contents.append([create_uilabel(name), create_uilabel('', visible=False), create_uilabel('', visible=False), create_uilabel('', visible=False)])
+            self.table_contents.append([create_uilabel(name), create_uilabel('', visible=False), create_button(), create_button()])
+            self.table_contents[-1][-1]._gene_name = 'inactive_allele'
+            self.table_contents[-1][-2]._gene_name = 'active_allele'
             self.table_contents.append([create_uilabel('trait', True), create_uilabel(visible=False), create_uilabel('active', True), create_uilabel('inactive', True)])
             genes = self.bee.genes.asdict()
             for key in genes:
@@ -105,10 +110,7 @@ class BeeStats(UIPanel):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if self.table_contents is None:
                 return
-            for row in self.table_contents:
-                if len(row) < 2:
-                    continue
-                button = row[1]
+            for button in self.buttons:
                 if event.ui_element == button:
                     try:
                         self.open_gene_helper(button._gene_name)
