@@ -131,8 +131,12 @@ texts:
       A <b>purebred</b> organism is the organism all of whose genes consist of identical alleles.
 
     - |
-      Now we are ready to build upon this foundation.
-      Gregor Mendel is the Moravian Augustinian monk who founded the modern science of genetics and, as this game is about genetics, it's quite useful to understand Mendelian Inheritance.
+      The algorithm used to create offspring is as follows:
+      Pick one allele of the first parent at random
+      Pick one allele of the second parent at random
+      Apply mutations
+      if their dominance is identical, pick one of them to be active at random
+      else pick the dominant one to be active
 
     - |
       Law of independent assortment:
@@ -183,11 +187,3 @@ texts:
 
     - |
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>B</font><font color=#3687ec>d</font> -> 12.5% <font color=#ec3661>AB</font> 12.5% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 12.5% <font color=#3687ec>cd</font>, 12.5% <font color=#3687ec>dc</font>
-
-    - |
-      The actual algorithm used in game is as follows:
-      Pick one allele of the first parent at random
-      Pick one allele of the second parent at random
-      Apply mutations
-      if their dominance is identical, pick one of them to be active at random
-      else pick the dominant one to be active
