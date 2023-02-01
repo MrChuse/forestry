@@ -1,3 +1,5 @@
+from typing import Tuple, Union
+
 import pygame
 import pygame_gui
 from pygame_gui.elements import UIPanel, UITextBox
@@ -23,7 +25,7 @@ class ResourcePanel(UIPanel):
         super().__init__(rect, starting_layer_height, manager, *args, **kwargs)
         bottom_buttons_height = 40
 
-        r = pygame.Rect((0, 0), (rect.size[0]-6, rect.size[1] - 400))
+        r = pygame.Rect((0, 0), (rect.size[0]-6, rect.size[1] - 440))
         self.text_box = UITextBox(str(self.resources),
             r,
             manager,
@@ -42,7 +44,6 @@ class ResourcePanel(UIPanel):
             }, visible=False)
 
     def update_text_box(self):
-        global current_tutorial_stage
         if CurrentTutorialStage.current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
             CurrentTutorialStage.current_tutorial_stage = TutorialStage.RESOURCES_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
