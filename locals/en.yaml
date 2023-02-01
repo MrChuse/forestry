@@ -33,6 +33,7 @@ buildings:
   Inspect Window: Inspect Window
   Inspect: Inspect # left side bar button
   Inspection popup: Inspection costs {} honey to perform
+  Menu: Menu
 resources:
   RESOURCES: RESOURCES
   honey: honey

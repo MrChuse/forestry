@@ -40,7 +40,7 @@ class GUI(Game):
         resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
         self.resource_panel = ResourcePanel(self, self.cursor, resource_panel_rect, 0, manager, visible=False)
 
-        self.forage_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], manager, container=None,
+        self.forage_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -49,7 +49,7 @@ class GUI(Game):
                 'top_target': self.resource_panel.build_dropdown
             }
         )
-        self.open_inspect_window_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], manager, container=None,
+        self.open_inspect_window_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -58,6 +58,14 @@ class GUI(Game):
                 'top_target': self.forage_button
             },
             visible=False)
+        self.menu_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, -43, resource_panel_rect.size[0]-6, 40), local['Menu'], container=None,
+            anchors={
+                'top':'bottom',
+                'bottom':'bottom',
+                'left':'left',
+                'right':'left',
+            },
+            visible=True)
         self.apiary_windows = []
         self.inventory_windows = []
 
@@ -113,6 +121,12 @@ class GUI(Game):
         mouse_pos = self.ui_manager.get_mouse_position()
         r = pygame.Rect((mouse_pos[0] + UI_MESSAGE_SIZE[0], mouse_pos[1]), UI_MESSAGE_SIZE)
         return UILocationFindingMessageWindow(r, local['mendel_notification'], self.ui_manager)
+
+    def toggle_esc_menu(self):
+        if self.esc_menu.visible:
+            self.esc_menu.hide()
+        else:
+            self.esc_menu.show()
 
     def render(self):
         pass
@@ -203,10 +217,7 @@ class GUI(Game):
                     self.open_apiary_selection_list()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                if self.esc_menu.visible:
-                    self.esc_menu.hide()
-                else:
-                    self.esc_menu.show()
+                self.toggle_esc_menu()
         elif event.type == INSPECT_BEE:
             if self.total_inspections == 0:
                 r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
@@ -246,6 +257,8 @@ class GUI(Game):
                 self.forage(self.most_recent_inventory)
             elif event.ui_element == self.open_inspect_window_button:
                 self.open_inspect_window()
+            elif event.ui_element == self.menu_button:
+                self.toggle_esc_menu()
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
                 self.resource_panel.show()
