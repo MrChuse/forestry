@@ -327,7 +327,7 @@ class GUI(Game):
                         win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
-                self.resource_panel.show()
+                self.resources_text_box.show()
             elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
                 self.open_inspect_window(rect=pygame.Rect(-10, self.open_inspect_window_button.rect.bottom-13, 0, 0)) #type: ignore
