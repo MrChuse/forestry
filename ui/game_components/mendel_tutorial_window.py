@@ -434,7 +434,7 @@ class MendelTutorialWindow(UIWindow):
             auto_counter.value += 1
             return ret
 
-        setup_bee_highlights(auto_counter(3)) # this is to hide code in the editor
+        setup_bee_highlights(auto_counter(3)) # the functions are used to hide code in the editor
         setup_dominance_and_uniformity(auto_counter())
         setup_segregation(auto_counter())
         setup_purebred_and_F1(auto_counter())

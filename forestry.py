@@ -738,7 +738,7 @@ class Game:
     def __init__(self):
         self.resources = Resources()
         self.mating_history = MatingHistory()
-        self.inventories = []
+        self.inventories : List[Inventory] = []
         self.inv = Inventory(49, '0')
         self.inventories.append(self.inv)
         self.apiaries = [Apiary('0', self.resources.add_resources, self.mating_history.append)]
