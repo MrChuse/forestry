@@ -45,7 +45,7 @@ class GUI(Game):
 
         resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
         r = pygame.Rect((0, 0), (resource_panel_rect.size[0]-6, resource_panel_rect.size[1] - 440))
-        self.resources_text_box = UITextBox(str(self.resources), r)
+        self.resources_text_box = UITextBox(str(self.resources), r, visible=False)
 
         self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
         self.known_build_options = []
