@@ -6,8 +6,8 @@ import pygame
 import pygame_gui
 from pygame_gui.elements import UIButton
 
-from config import (UI_MESSAGE_SIZE, config_production_modifier, helper_text,
-                    local)
+from config import (INVENTORY_WINDOW_SIZE, UI_MESSAGE_SIZE,
+                    config_production_modifier, helper_text, local)
 from forestry import Game, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
@@ -22,7 +22,7 @@ from .tutorial_stage import CurrentTutorialStage
 
 
 class GUI(Game):
-    def __init__(self, window_size, manager, cursor_manager):
+    def __init__(self, window_size, manager: pygame_gui.UIManager, cursor_manager):
         self.command_out = 1
         super().__init__()
         Slot.empty_str = ''
@@ -164,14 +164,16 @@ class GUI(Game):
             if event.ui_element == self.apiary_selection_list:
                 if event.text.startswith(local['Apiary']):
                     index = int(event.text.split()[-1])
+                    mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
                     self.apiary_windows.append(
-                        ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
+                        ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), (300, 420)), self.ui_manager)
                     )
                 else:
                     index = int(event.text.split()[-1])
+                    mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
                     self.inventory_windows.append(
                         InventoryWindow(self.inventories[index], self.cursor,
-                            pygame.Rect(0, 0, self.apiary_selection_list.rect.left, self.window_size[1]), #type: ignore
+                            pygame.Rect((mouse_pos_x - 486, mouse_pos_y), INVENTORY_WINDOW_SIZE), #type: ignore
                             self.ui_manager, resizable=True)
                         )
             elif event.ui_element == self.esc_menu:
@@ -249,7 +251,7 @@ class GUI(Game):
                     self.apiary_windows.append(ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resource_panel_width, 0), (300, 420)), self.ui_manager))
 
                     self.inv_window = InventoryWindow(self.inv, self.cursor,
-                        pygame.Rect(self.apiary_windows[0].rect.right, 0, self.window_size[0] - self.apiary_selection_list_width - self.apiary_windows[0].rect.right, self.window_size[1]),
+                        pygame.Rect((self.apiary_windows[0].rect.right, 0), INVENTORY_WINDOW_SIZE),
                         self.ui_manager, resizable=True)
                     self.inventory_windows.append(self.inv_window)
                     self.most_recent_inventory = self.inv

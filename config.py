@@ -14,7 +14,7 @@ with open('config.yaml') as f:
 
 # some ui stuff
 UI_MESSAGE_SIZE = (500, 300)
-
+INVENTORY_WINDOW_SIZE = (486, 513)
 
 # load all the genes and their alleles
 genes_conf = config['genes_alleles']
