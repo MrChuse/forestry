@@ -17,8 +17,7 @@ from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UINonChangingDropDownMenu, UIPickList)
 from . import (Cursor, InspectWindow, InventoryWindow, MatingHistoryWindow,
-               MendelTutorialWindow, ResourcePanel, SettingsWindow,
-               TutorialStage)
+               MendelTutorialWindow, SettingsWindow, TutorialStage)
 from .apiary_window import ApiaryWindow
 from .tutorial_stage import CurrentTutorialStage
 
