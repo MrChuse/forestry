@@ -4,16 +4,18 @@ from typing import Union
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIButton
+from pygame_gui.elements import UIButton, UITextBox
+from pygame_gui.windows import UIMessageWindow
 
 from config import (INVENTORY_WINDOW_SIZE, UI_MESSAGE_SIZE,
                     config_production_modifier, helper_text, local)
-from forestry import Game, Slot
+from forestry import Apiary, Game, Inventory, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
 from ..custom_events import INSPECT_BEE, TUTORIAL_STAGE_CHANGED
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
-                        UILocationFindingMessageWindow, UIPickList)
+                        UILocationFindingMessageWindow,
+                        UINonChangingDropDownMenu, UIPickList)
 from . import (Cursor, InspectWindow, InventoryWindow, MatingHistoryWindow,
                MendelTutorialWindow, ResourcePanel, SettingsWindow,
                TutorialStage)
@@ -37,19 +39,39 @@ class GUI(Game):
         self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', cursor_manager)
         self.inspect_windows = []
         self.resource_panel_width = 330
-        resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
-        self.resource_panel = ResourcePanel(self, self.cursor, resource_panel_rect, 0, manager, visible=False)
 
-        self.forage_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], container=None,
+        bottom_buttons_height = 40
+
+        self.shown_resources = None
+
+        resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
+        r = pygame.Rect((0, 0), (resource_panel_rect.size[0]-6, resource_panel_rect.size[1] - 440))
+        self.resources_text_box = UITextBox(str(self.resources), r)
+
+        self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
+        self.known_build_options = []
+        self.local_build_options = []
+        self.build_dropdown = UINonChangingDropDownMenu([], local['Build'], pygame.Rect(0, 0, resource_panel_rect.size[0]-6, bottom_buttons_height),
             anchors={
                 'top':'top',
                 'bottom':'top',
                 'left':'left',
                 'right':'left',
-                'top_target': self.resource_panel.build_dropdown
+                'top_target': self.resources_text_box
+            }, visible=False)
+
+        #self.resource_panel = ResourcePanel(self, self.cursor, resource_panel_rect, 0, manager, visible=False)
+
+        self.forage_button = UIButton(pygame.Rect(0, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], container=None,
+            anchors={
+                'top':'top',
+                'bottom':'top',
+                'left':'left',
+                'right':'left',
+                'top_target': self.build_dropdown
             }
         )
-        self.open_inspect_window_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], container=None,
+        self.open_inspect_window_button = UIButton(pygame.Rect(0, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -58,7 +80,7 @@ class GUI(Game):
                 'top_target': self.forage_button
             },
             visible=False)
-        self.menu_button = UIButton(pygame.Rect(self.resource_panel.panel_container.get_rect().left, -43, resource_panel_rect.size[0]-6, 40), local['Menu'], container=None,
+        self.menu_button = UIButton(pygame.Rect(0, -40, resource_panel_rect.size[0]-6, 40), local['Menu'], container=None,
             anchors={
                 'top':'bottom',
                 'bottom':'bottom',
@@ -146,6 +168,30 @@ class GUI(Game):
                 [local['Apiary'] + ' ' + a.name for a in self.apiaries]
             )
 
+    def update_resources_text_box(self):
+        if CurrentTutorialStage.current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
+            CurrentTutorialStage.current_tutorial_stage = TutorialStage.RESOURCES_AVAILABLE
+            pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
+        elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE and 'honey' in self.resources:
+            CurrentTutorialStage.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
+            pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
+
+        if self.shown_resources != self.resources:
+            self.shown_resources = self.resources.copy()
+            text = str(self.resources)
+            for r in local['resources'].items():
+                text = text.replace(*r)
+            self.resources_text_box.set_text(text)
+
+            available_build_options = self.get_available_build_options()
+            if len(available_build_options) > 0:
+                self.build_dropdown.show()
+            for option in available_build_options:
+                if option not in self.known_build_options:
+                    self.known_build_options.append(option)
+                    self.local_build_options.append(local[option])
+                    self.build_dropdown.add_options([local[option]])
+
     def add_mendelian_inheritance_to_esc_menu(self):
         self.esc_menu.set_item_list([local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']])
 
@@ -154,8 +200,6 @@ class GUI(Game):
         esc_menu_rect = pygame.Rect(0, 0, 200, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
         self.esc_menu.set_relative_position(esc_menu_rect.topleft)
-        if self.resource_panel is not None:
-            self.resource_panel.set_dimensions((self.resource_panel_width, size[1]))
         if self.apiary_selection_list is not None:
             self.apiary_selection_list.set_dimensions((self.apiary_selection_list_width, size[1]))
 
@@ -261,6 +305,26 @@ class GUI(Game):
                 self.open_inspect_window()
             elif event.ui_element == self.menu_button:
                 self.toggle_esc_menu()
+        elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+            if event.ui_element == self.build_dropdown:
+                if event.text != 'Build':
+                    text = event.text
+                    index = self.local_build_options.index(text)
+                    building_name = self.known_build_options[index]
+                    building = self.build(building_name.lower())
+                    if isinstance(building, Apiary):
+                        window = ApiaryWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
+                        self.apiary_windows.append(window)
+                        self.update_windows_list()
+                    elif isinstance(building, Inventory):
+                        window = InventoryWindow(building, self.cursor,
+                        pygame.Rect(self.ui_manager.get_mouse_position(), INVENTORY_WINDOW_SIZE),
+                        self.ui_manager, resizable=True)
+                        self.inventory_windows.append(window)
+                        self.update_windows_list()
+                    else: #if isinstance(building, Alveary):
+                        win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
+                        win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
                 self.resource_panel.show()
@@ -270,6 +334,9 @@ class GUI(Game):
             elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.GENE_HELPER_TEXT_CLICKED:
                 self.open_mendel_notification()
                 self.add_mendelian_inheritance_to_esc_menu()
+
+    def update(self, time_delta):
+        self.update_resources_text_box()
 
     def get_state(self):
         state = super().get_state()
@@ -313,12 +380,11 @@ class GUI(Game):
         if self.apiary_selection_list is not None:
             self.apiary_selection_list.kill()
 
-        self.resource_panel.resources = self.resources
         self.cursor.slot = saved['cursor_slot']
 
         CurrentTutorialStage.current_tutorial_stage = saved['current_tutorial_stage']
         if saved['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
-            self.resource_panel.show()
+            self.resources_text_box.show()
         if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
             self.open_inspect_window_button.show()
         if saved['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:

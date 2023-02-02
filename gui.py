@@ -94,6 +94,8 @@ def main():
             try:
                 manager.update(time_delta)
                 cursor_manager.update(time_delta)
+                if game is not None:
+                    game.update(time_delta)
             except NotEnoughResourcesError as e:
                 if game is not None:
                     game.print(e, out=1, floating_text_box_time=5)

@@ -128,7 +128,7 @@ class UINonChangingExpandedDropDownState(UIExpandedDropDownState):
         return False  # don't consume any events
 
 class UINonChangingDropDownMenu(UIDropDownMenu):
-    def __init__(self, options_list, starting_option: str, relative_rect: pygame.Rect, manager, container=None, parent_element=None, object_id=None, expansion_height_limit=None, anchors=None, visible: int = 1):
+    def __init__(self, options_list, starting_option: str, relative_rect: pygame.Rect, manager=None, container=None, parent_element=None, object_id=None, expansion_height_limit=None, anchors=None, visible: int = 1):
         super().__init__(options_list, starting_option, relative_rect, manager, container, parent_element, object_id, expansion_height_limit, anchors, visible)
         self.menu_states['expanded'] = UINonChangingExpandedDropDownState(
             self,
