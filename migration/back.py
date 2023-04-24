@@ -1,7 +1,8 @@
 from config import config_production_modifier
-from forestry import ApiaryProblems, Drone, MatingHistory, Princess, Queen
+from forestry import (ApiaryProblems, Bestiary, Drone, MatingHistory, Princess,
+                      Queen)
 
-CURRENT_BACK_VERSION = 3
+CURRENT_BACK_VERSION = 4
 
 def update_bee(bee):
     if isinstance(bee, Princess):
@@ -45,5 +46,12 @@ def update_back_state_2_3(state: dict) -> dict:
         state['resources'].res[k] *= config_production_modifier
     return state
 
-update_back_versions = [update_back_state_0_1, update_back_state_1_2, update_back_state_2_3]
+def update_back_state_3_4(state: dict) -> dict:
+    state['bestiary'] = state.get('bestiary', Bestiary())
+    for i, apiary in enumerate(state['apiaries']):
+        apiary.bestiary = state['bestiary']
+        state['apiaries'][i] = apiary
+    return state
+
+update_back_versions = [update_back_state_0_1, update_back_state_1_2, update_back_state_2_3, update_back_state_3_4]
 update_back_versions.append(update_bees_in_state)
