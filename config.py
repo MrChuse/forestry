@@ -18,8 +18,8 @@ INVENTORY_WINDOW_SIZE = (486, 513)
 
 # load all the genes and their alleles
 genes_conf = config['genes_alleles']
-genes_enums = {}
-dominant = {}
+genes_enums : dict[str, LocalEnum] = {}
+dominant : dict[LocalEnum, bool] = {}
 for gene_name, list_of_alleles in genes_conf.items():
     enum_dict = []
     for allele_name, allele_value, _ in list_of_alleles:
