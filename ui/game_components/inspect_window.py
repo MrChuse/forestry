@@ -38,7 +38,7 @@ class InspectWindow(UIWindow):
             }
         )
         self.bee_button.empty_object_id = '#DroneEmpty'
-        self.bee_stats = BeeStats(None, pygame.Rect(0, self.inspect_button_height, self.get_container().get_rect().width, self.get_container().get_rect().height-self.inspect_button_height), manager, container=self, resizable=True)
+        self.bee_stats = BeeStats(None, pygame.Rect(0, self.inspect_button_height, self.get_container().get_rect().width, self.get_container().get_rect().height-self.inspect_button_height), container=self, resizable=True)
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
