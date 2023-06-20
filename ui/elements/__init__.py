@@ -7,3 +7,4 @@ from .ui_location_finding_windows import (UILocationFindingConfirmationDialog,
 from .ui_non_changing_drop_down_menu import UINonChangingDropDownMenu
 from .ui_pick_list import UIPickList
 from .ui_window_no_x import UIWindowNoX
+from .ui_table import UITable
