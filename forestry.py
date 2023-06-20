@@ -104,9 +104,9 @@ Gene = Tuple[Allele, Allele]
 @dataclass(eq=True, frozen=True)
 class Genes:
     species: Gene
-    fertility: Gene
-    lifespan: Gene
-    speed: Gene
+    fertility: Gene = None
+    lifespan: Gene = None
+    speed: Gene = None
 
     def asdict(self):
         d = dataclasses.asdict(self)
