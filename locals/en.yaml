@@ -22,7 +22,7 @@ buildings:
   Forage: Forage # left side bar button
   Build: Build # left side bar button
   Inventory: Inventory
-  Sort: Sort # sort button
+  Sort: Squeeze # sort button
   Apiary: Apiary
   Apiary_problem_ALL_OK: All ok
   Apiary_problem_NO_QUEEN: No queen present
@@ -46,6 +46,7 @@ resources:
 esc_menu:
   Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance
+  Bestiary: Bestiary
   Save: Save
   Load: Load
   Cancel: Cancel
@@ -58,6 +59,9 @@ esc_menu:
   Exit: Exit
   Mating History: Mating History
   mendel_notification: "Notification: Mendelian inheritance tutorial is now available in the esc menu."
+  bestiary_notification: "Notification: Bestiary is now available in the esc menu."
+  produced: Produced
+  resource: Resource
   load_confirm: You can lose unsaved progress. Continue?
   save_confirm: Previously saved progress will be overwritten. Continue?
 genes_alleles:

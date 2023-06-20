@@ -23,7 +23,7 @@ buildings:
   Forage: Собирать пчел
   Build: Построить
   Inventory: Инвентарь
-  Sort: Сортировать
+  Sort: Ужать
   Apiary: Улей
   Apiary_problem_ALL_OK: Все в порядке
   Apiary_problem_NO_QUEEN: Нет королевы
@@ -47,6 +47,7 @@ resources:
 esc_menu:
   Greetings Window: Окно Приветствия
   Mendelian Inheritance: Законы Менделя
+  Bestiary: Бестиарий
   Save: Сохранить
   Load: Загрузить
   Cancel: Отмана
@@ -59,6 +60,9 @@ esc_menu:
   Exit: Выйти из игры
   Mating History: История скрещивания
   mendel_notification: "Уведомление: Обучение законам Менделя теперь доступно в меню (Escape)."
+  bestiary_notification: "Уведомление: Бестиарий теперь доступно в меню (Escape)."
+  produced: Произведено
+  resource: Ресурс
   load_confirm: Несохраненный прогресс может быть потерян. Продолжить?
   save_confirm: Предыдущее сохранение будет перезаписано. Продолжить?
 genes_alleles:
