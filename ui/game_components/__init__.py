@@ -2,6 +2,7 @@ from .ui_button_slot import UIButtonSlot
 from .cursor import Cursor
 from .apiary_window import ApiaryWindow
 from .bee_stats import BeeStats
+from .bestiary_window import BestiaryWindow
 from .inspect_window import InspectWindow
 from .inventory_window import InventoryWindow
 from .mating_entry_panel import MatingEntryPanel
