@@ -886,8 +886,7 @@ class Game:
             self.state_updated()
 
     def state_updated(self):
-        print(self.bestiary.known_bees)
-        print(self.bestiary.produced_resources)
+        pass
 
     def get_state(self) -> dict:
         from migration import \
