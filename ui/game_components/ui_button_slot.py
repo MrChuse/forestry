@@ -192,7 +192,7 @@ class UIButtonSlot(UIButton):
             self.kill()
             self.args = (pygame.Rect(pos, size),) + self.args[1:]
             self.kwargs['object_id'] = obj_id
-            self.__init__(self.slot, *self.args, highlighted=self.highlighted, is_inspectable=self._is_inspectable, allow_popup=self.allow_popup, **self.kwargs) # rewrite using rebuild
+            self.__init__(self.slot, *self.args, highlighted=self.highlighted, is_inspectable=self._is_inspectable, allow_popup=self.allow_popup, **self.kwargs) # rewrite using rebuild # TODO: rewrite bestiary window to not kill the button on the second frame
         if self.inspected_status is not None and self.inspected_status.percent_full != int(self.slot.slot.inspected):
             self.inspected_status.percent_full = int(self.slot.slot.inspected)
         if self.slot.amount != self.saved_amount or self.show_was_called_recently:
