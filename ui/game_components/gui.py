@@ -17,7 +17,7 @@ from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UINonChangingDropDownMenu, UIPickList)
 from . import (Cursor, InspectWindow, InventoryWindow, MatingHistoryWindow,
-               MendelTutorialWindow, SettingsWindow, TutorialStage)
+               MendelTutorialWindow, SettingsWindow, TutorialStage, BestiaryWindow)
 from .apiary_window import ApiaryWindow
 from .tutorial_stage import CurrentTutorialStage
 
@@ -93,6 +93,7 @@ class GUI(Game):
         self.apiary_selection_list_width = 100
         self.apiary_selection_list = None
 
+        self.bestiary_window = None
         self.mating_history_window = None
         self.load_confirm = None
         self.save_confirm = None
@@ -111,7 +112,12 @@ class GUI(Game):
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return UILocationFindingMessageWindow(r, helper_text[0], self.ui_manager)
 
-    def mendel_window(self):
+    def open_bestiary_window(self):
+        r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
+        r.center = (self.window_size[0]/2, self.window_size[1]/2)
+        return BestiaryWindow(self.bestiary, r, self.ui_manager, local['Bestiary'])
+
+    def open_mendel_window(self):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return MendelTutorialWindow(r, self.ui_manager)
@@ -137,6 +143,11 @@ class GUI(Game):
                 'right':'right',
             })
         self.update_windows_list()
+
+    def open_bestiary_notification(self):
+        mouse_pos = self.ui_manager.get_mouse_position()
+        r = pygame.Rect(mouse_pos, UI_MESSAGE_SIZE)
+        return UILocationFindingMessageWindow(r, local['bestiary_notification'], self.ui_manager)
 
     def open_mendel_notification(self):
         mouse_pos = self.ui_manager.get_mouse_position()
@@ -191,8 +202,13 @@ class GUI(Game):
                     self.local_build_options.append(local[option])
                     self.build_dropdown.add_options([local[option]])
 
+    def add_bestiary_to_esc_menu(self):
+        self.esc_menu._raw_item_list.insert(1, local['Bestiary'])
+        self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
+
     def add_mendelian_inheritance_to_esc_menu(self):
-        self.esc_menu.set_item_list([local['Greetings Window'], local['Mendelian Inheritance'], local['Mating History'], local['Settings'], local['Load'], local['Save'], local['Exit']])
+        self.esc_menu._raw_item_list.insert(2, local['Mendelian Inheritance'])
+        self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
 
     def set_dimensions(self, size):
         self.window_size = size
@@ -234,8 +250,10 @@ class GUI(Game):
                         self.print('Saved the game to the disk')
                 elif event.text == local['Settings']:
                     self.settings_window()
+                elif event.text == local['Bestiary']:
+                    self.bestiary_window = self.open_bestiary_window()
                 elif event.text == local['Mendelian Inheritance']:
-                    self.mendel_window()
+                    self.open_mendel_window()
                 elif event.text == local['Greetings Window']:
                     self.help_window()
                 elif event.text == local['Mating History']:
@@ -253,6 +271,8 @@ class GUI(Game):
                     self.apiary_windows.remove(event.ui_element)
                 elif isinstance(event.ui_element, MatingHistoryWindow):
                     self.mating_history_window = None
+                elif isinstance(event.ui_element, BestiaryWindow):
+                    self.bestiary_window = None
                 elif isinstance(event.ui_element, InspectWindow):
                     self.inspect_windows.remove(event.ui_element)
             except ValueError:
@@ -326,6 +346,8 @@ class GUI(Game):
                         win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
+                self.open_bestiary_notification()
+                self.add_bestiary_to_esc_menu()
                 self.resources_text_box.show()
             elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
@@ -383,6 +405,7 @@ class GUI(Game):
 
         CurrentTutorialStage.current_tutorial_stage = saved['current_tutorial_stage']
         if saved['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
+            self.add_bestiary_to_esc_menu()
             self.resources_text_box.show()
         if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
             self.open_inspect_window_button.show()
