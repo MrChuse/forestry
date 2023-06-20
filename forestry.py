@@ -326,15 +326,26 @@ class Resources:
 
 class Bestiary:
     def __init__(self):
-        self.produced_resources = {species: {} for species in BeeSpecies}
-        self.known_bees = {}
+        self.produced_resources = {species: defaultdict(int) for species in BeeSpecies}
+        self.known_bees = defaultdict(int)
 
     def add_produced_resources(self, bee_species, resources):
         for res in resources:
-            self.produced_resources[bee_species][res] = self.produced_resources[bee_species].get(res, 0) + resources[res]
+            self.produced_resources[bee_species][res] += resources[res]
 
-    def add_offspring(self, bee_species, amount=1):
-        self.known_bees[bee_species] = self.known_bees.get(bee_species, 0) + amount
+    def add_offspring(self, bee_species: BeeSpecies, amount=1):
+        self.known_bees[bee_species] += amount
+
+    def copy(self):
+        new_bestiary = Bestiary()
+        new_bestiary.produced_resources = {species: d.copy() for species, d in self.produced_resources.items()}
+        new_bestiary.known_bees = self.known_bees.copy()
+        return new_bestiary
+
+    def __eq__(self, other: 'Bestiary') -> bool:
+        if not isinstance(other, Bestiary):
+            return False
+        return self.produced_resources == other.produced_resources and self.known_bees == other.known_bees
 
 
 
