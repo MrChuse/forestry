@@ -967,7 +967,8 @@ class Game:
             'apiaries': self.apiaries,
             'total_inspections': self.total_inspections,
             'mating_history': self.mating_history,
-            'bestiary': self.bestiary
+            'bestiary': self.bestiary,
+            'achievements': self.achievement_manager.achievements,
         }
 
     def save(self, name):
@@ -991,4 +992,6 @@ class Game:
         self.total_inspections = state['total_inspections']
         self.mating_history = state['mating_history']
         self.bestiary = state['bestiary']
+        if 'achievements' in state:
+            self.achievement_manager.achievements = state['achievements']
         return state
