@@ -68,7 +68,7 @@ for allele_name, prod_dict in products_config.items():
 # local
 existing_locals = [i[:-5] for i in os.listdir('locals')] # drop .yaml
 
-def load_settings(filename='settings'):
+def load_settings(filename='settings.yaml'):
     settings = {
         'fullscreen': True,
         'master_volume': 1,

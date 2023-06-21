@@ -145,7 +145,7 @@ class SettingsWindow(UIWindow):
                 self.click_volume_value_label.set_text(str(int(self.click_volume_slider.current_value)))
         return consume
 
-    def persist_settings(self, filename='settings'):
+    def persist_settings(self, filename='settings.yaml'):
         settings = {}
         settings['fullscreen'] = self.full_screen_checkbox.is_selected
         settings['click_volume'] = self.click_volume_slider.current_value / 100

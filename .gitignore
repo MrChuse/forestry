@@ -1,3 +1,11 @@
+# Forestry saves
+*.forestry
+settings*
+
+\!promotion/
+assets/music
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -127,11 +135,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-
-# Forestry saves
-*.forestry
-settings
-
-\!promotion/
-assets/music
