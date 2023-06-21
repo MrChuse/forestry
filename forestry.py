@@ -377,6 +377,14 @@ class ProducedProducts(Achievement):
     def reward(self, game: 'Game'):
         game.resources.add_resources(self.reward_resources)
 
+class BredSpecies(Achievement):
+    def __init__(self, species: BeeSpecies, text: str, achieved: bool = False):
+        self.species = species
+        super().__init__(text, achieved)
+
+    def check(self, game: 'Game'):
+        return self.species in game.bestiary.known_bees
+
 class AchievementManager:
     def __init__(self, game: 'Game', achievements: List[Achievement], notify: Callable[[Achievement], None]):
         self.game = game
@@ -818,15 +826,27 @@ class Game:
         self.build('apiary', free=True)
         self.total_inspections = 0
 
+        product_achievements = [
+            ProducedProducts({'flowers': 10, 'wood': 10}, {'honey': 5}, local['produce10flowers10wood']),
+            ProducedProducts({'honey': 1}, {'honey': 5}, local['produce1honey']),
+            ProducedProducts({'honey': 50}, {'pollen cluster': 1, 'royal jelly': 1}, local['produce50honey']),
+            ProducedProducts({'pollen cluster': 1}, {'pollen cluster': 5}, local['produce1pollencluster']),
+            ProducedProducts({'royal jelly': 1}, {'royal jelly': 5}, local['produce1royaljelly']),
+        ]
+        achievement_species = [
+            (BeeSpecies.COMMON, 'breedCOMMON'),
+            (BeeSpecies.CULTIVATED, 'breedCULTIVATED'),
+            (BeeSpecies.NOBLE, 'breedNOBLE'),
+            (BeeSpecies.MAJESTIC, 'breedMAJESTIC'),
+            (BeeSpecies.IMPERIAL, 'breedIMPERIAL'),
+            (BeeSpecies.DILIGENT, 'breedDILIGENT'),
+            (BeeSpecies.UNWEARY, 'breedUNWEARY'),
+            (BeeSpecies.INDUSTRIOUS, 'breedINDUSTRIOUS'),
+        ]
+        species_achievements = [BredSpecies(species, local[text]) for species, text in achievement_species]
         self.achievement_manager = AchievementManager(
             self,
-            [
-                ProducedProducts({'flowers': 10, 'wood': 10}, {'honey': 5}, local['produce10flowers10wood']),
-                ProducedProducts({'honey': 1}, {'honey': 5}, local['produce1honey']),
-                ProducedProducts({'honey': 50}, {'pollen cluster': 1, 'royal jelly': 1}, local['produce50honey']),
-                ProducedProducts({'pollen cluster': 1}, {'pollen cluster': 5}, local['produce1pollencluster']),
-                ProducedProducts({'royal jelly': 1}, {'royal jelly': 5}, local['produce1royaljelly']),
-            ],
+            product_achievements + species_achievements,
             self.notify_achievement
         )
 
