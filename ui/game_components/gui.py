@@ -372,26 +372,19 @@ class GUI(Game):
             insp_slots.append(window.bee_button.slot)
         state['inspect_windows'] = insp_win
         state['inspect_slots'] = insp_slots
-        api_win = []
-        for window in self.apiary_windows:
-            api_win.append((window.apiary, window.relative_rect))
-        state['apiary_windows'] = api_win
-        inv_win = []
-        for window in self.inventory_windows:
-            inv_win.append((window.inv, window.relative_rect))
-        state['inventory_windows'] = inv_win
+        state['apiary_windows'] = [(window.apiary, window.relative_rect) for window in self.apiary_windows]
+        state['inventory_windows'] = [(window.inv, window.relative_rect) for window in self.inventory_windows]
         return state
 
     def load(self, name):
         try:
-            saved = super().load(name)
+            state = super().load(name)
         except FileNotFoundError:
             return
 
-        if saved.get('front_version', 0) < CURRENT_FRONT_VERSION:
-            for update_front_func in update_front_versions[saved.get('front_version', 0):]:
-                saved = update_front_func(saved)
-
+        if state.get('front_version', 0) < CURRENT_FRONT_VERSION:
+            for update_front_func in update_front_versions[state.get('front_version', 0):]:
+                state = update_front_func(state)
         for window in self.apiary_windows:
             window.kill()
         for window in self.inventory_windows:
@@ -401,26 +394,26 @@ class GUI(Game):
         if self.apiary_selection_list is not None:
             self.apiary_selection_list.kill()
 
-        self.cursor.slot = saved['cursor_slot']
+        self.cursor.slot = state['cursor_slot']
 
-        CurrentTutorialStage.current_tutorial_stage = saved['current_tutorial_stage']
-        if saved['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
+        CurrentTutorialStage.current_tutorial_stage = state['current_tutorial_stage']
+        if state['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
             self.add_bestiary_to_esc_menu()
             self.resources_text_box.show()
-        if saved['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
+        if state['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
             self.open_inspect_window_button.show()
-        if saved['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
+        if state['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
             self.add_mendelian_inheritance_to_esc_menu()
-        if saved['apiary_list_opened']:
+        if state['apiary_list_opened']:
             self.open_apiary_selection_list()
-        self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in saved['inspect_windows']]
-        for window, slot in zip(self.inspect_windows, saved['inspect_slots']):
+        self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in state['inspect_windows']]
+        for window, slot in zip(self.inspect_windows, state['inspect_slots']):
             window.bee_button.slot = slot
             window.bee_stats.bee = slot.slot # TODO: some stupid initialization here, rework?
             window.reshape_according_to_bee_stats()
-        self.inventory_windows = [InventoryWindow(inv, self.cursor, rect, self.ui_manager) for inv, rect in saved['inventory_windows']]
-        self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in saved['apiary_windows']]
+        self.inventory_windows = [InventoryWindow(inv, self.cursor, rect, self.ui_manager) for inv, rect in state['inventory_windows']]
+        self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in state['apiary_windows']]
         if self.mating_history_window is not None:
             self.mating_history_window.mating_history = self.mating_history
             self.mating_history.something_changed = True
-        return saved
+        return state

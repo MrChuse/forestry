@@ -1,33 +1,41 @@
 from config import config_production_modifier
-from forestry import (ApiaryProblems, Bestiary, Drone, MatingHistory, Princess,
-                      Queen)
+from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
+                      Queen, Slot)
 
-CURRENT_BACK_VERSION = 4
+CURRENT_BACK_VERSION = 5
 
-def update_bee(bee):
+def update_bee(slot: Slot):
+    bee, amount = slot.take_all()
     if isinstance(bee, Princess):
-        return Princess(bee.genes, bee.inspected)
+        bee = Princess(bee.genes, bee.inspected)
     elif isinstance(bee, Drone):
-        return Drone(bee.genes, bee.inspected)
+        bee = Drone(bee.genes, bee.inspected)
     elif isinstance(bee, Queen):
-        return Queen(bee.parent1, bee.parent2, bee.inspected)
+        bee = Queen(bee.parent1, bee.parent2, bee.inspected)
     else:
         raise TypeError(f'Update failed, bee was not a Princess, Drone or Queen but {type(bee)}')
+    slot.put(bee, amount)
 
-def update_bees_in_state(state):
+def update_bees_in_inventory(inventory: Inventory):
+    for j, slot in enumerate(inventory.storage):
+        if not slot.is_empty():
+            update_bee(slot)
+
+def update_bees_in_apiary(apiary: Apiary):
+    if not apiary.princess.is_empty():
+        update_bee(apiary.princess)
+    if not apiary.drone.is_empty():
+        update_bee(apiary.drone)
+    for j, slot in enumerate(apiary.inv):
+        if not slot.is_empty():
+            update_bee(slot)
+
+def update_bees_in_state(state: dict) -> dict:
     for i, inventory in enumerate(state['inventories']):
-        for j, slot in enumerate(inventory):
-            if not slot.is_empty():
-                state['inventories'][i][j].slot = update_bee(slot.slot)
+        update_bees_in_inventory(inventory)
     for i, apiary in enumerate(state['apiaries']):
         apiary.add_mating_entry = state['mating_history'].append
-        if not apiary.princess.is_empty():
-            state['apiaries'][i].princess.slot = update_bee(apiary.princess.slot)
-        if not apiary.drone.is_empty():
-            state['apiaries'][i].drone.slot = update_bee(apiary.drone.slot)
-        for j, slot in enumerate(apiary.inv):
-            if not slot.is_empty():
-                state['apiaries'][i].inv[j] = update_bee(slot.slot)
+        update_bees_in_apiary(apiary)
     return state
 
 def update_back_state_0_1(state: dict) -> dict:
@@ -53,5 +61,4 @@ def update_back_state_3_4(state: dict) -> dict:
         state['apiaries'][i] = apiary
     return state
 
-update_back_versions = [update_back_state_0_1, update_back_state_1_2, update_back_state_2_3, update_back_state_3_4]
-update_back_versions.append(update_bees_in_state)
+update_back_versions = [update_back_state_0_1, update_back_state_1_2, update_back_state_2_3, update_back_state_3_4, update_bees_in_state]

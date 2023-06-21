@@ -236,9 +236,10 @@ class Bee:
 
 class Queen(Bee):
     type_str = 'Queen'
-    def __init__(self, parent1: Bee, parent2: Bee, inspected: bool = False):
+    def __init__(self, parent1: 'Princess', parent2: 'Drone', inspected: bool = False):
         self.parent1 = parent1
         self.parent2 = parent2
+        self.generation = self.parent1.generation
         super().__init__(parent1.genes, inspected)
         self.lifespan = parent1.genes.lifespan[0].value
         self.remaining_lifespan = self.lifespan
@@ -249,7 +250,7 @@ class Queen(Bee):
 
     def die(self):
         if self.children is None:
-            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes))] + [
+            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes), generation=self.generation+1)] + [
                 Drone(self.parent1.genes.crossingover(self.parent2.genes)) for i in range(self.genes.fertility[0].value)
             ]
         return self.children
@@ -257,7 +258,8 @@ class Queen(Bee):
 
 class Princess(Bee):
     type_str = 'Princess'
-    def __init__(self, genes, inspected: bool = False):
+    def __init__(self, genes, inspected: bool = False, generation: int = 0):
+        self.generation = generation
         super().__init__(genes, inspected)
 
     def mate(self, other: 'Drone') -> Queen:
@@ -918,19 +920,19 @@ class Game:
 
     def load(self, name) -> dict:
         with open(name + '.forestry', 'rb') as f:
-            saved : dict = pickle.load(f)
+            state : dict = pickle.load(f)
 
         from migration import (  # import here to avoid circular imports
             CURRENT_BACK_VERSION, update_back_versions)
 
-        if saved.get('back_version', 0) < CURRENT_BACK_VERSION:
-            for update_back_func in update_back_versions[saved.get('back_version', 0):]:
-                saved = update_back_func(saved)
+        if state.get('back_version', 0) < CURRENT_BACK_VERSION:
+            for update_back_func in update_back_versions[state.get('back_version', 0):]:
+                state = update_back_func(state)
 
-        self.resources = saved['resources']
-        self.inventories = saved['inventories']
-        self.apiaries = saved['apiaries']
-        self.total_inspections = saved['total_inspections']
-        self.mating_history = saved['mating_history']
-        self.bestiary = saved['bestiary']
-        return saved
+        self.resources = state['resources']
+        self.inventories = state['inventories']
+        self.apiaries = state['apiaries']
+        self.total_inspections = state['total_inspections']
+        self.mating_history = state['mating_history']
+        self.bestiary = state['bestiary']
+        return state

@@ -7,7 +7,7 @@ from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterf
 from pygame_gui.elements import UIButton, UILabel, UIPanel
 
 from config import UI_MESSAGE_SIZE, dominant, genes_enums, local
-from forestry import Bee, dom_local
+from forestry import Bee, Princess, Queen, dom_local
 
 from ..custom_events import TUTORIAL_STAGE_CHANGED
 from ..elements import UILocationFindingMessageWindow, UITable
@@ -47,6 +47,8 @@ class BeeStats(UITable):
 
         if not self.bee.inspected:
             self.table_contents.append([create_uilabel(self.bee.small_str())])
+            if isinstance(self.bee, (Queen, Princess)):
+                self.table_contents.append([create_uilabel(f'{local["generations"]}: {self.bee.generation}', False)])
         else:
             name, bee_species_index = local[self.bee.type_str]
             self.table_contents.append([create_uilabel(name), create_uilabel(visible=False), create_button('active_allele'), create_button('inactive_allele')])
