@@ -38,6 +38,7 @@ buildings:
   Menu: Меню
 resources:
   RESOURCES: РЕСУРСЫ
+  notenough: "Не хватает `{}`: у вас есть {}, но нужно {}"
   honey: мед
   wood: дерево
   flowers: цветы
@@ -198,3 +199,13 @@ texts:
 
     - |
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>B</font><font color=#3687ec>d</font> -> 12.5% <font color=#ec3661>AB</font> 12.5% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 12.5% <font color=#3687ec>cd</font>, 12.5% <font color=#3687ec>dc</font>
+
+achievements:
+  unlocked: Достижение получено
+  produce1flower: "Произвести цветок.<br>Награда: второй цветок."
+  produce1wood: 'Произвести кусок дерева.<br>Награда: еще один кусок.'
+  produce10flowers10wood: 'Произвести 10 цветков и 10 дерева.<br>Награда: 5 мёда. Класс.'
+  produce1honey: 'Произвести 1 мёд.<br>Награда: 5 мёда. Половина стоимости изучения, между прочим.'
+  produce50honey: 'Произвести 50 мёда.<br>Награда: 1 скопление пыльцы and 1 маточное молочко. Попробуйте произвести эти сложные в получении ресурсы. Потребуются различные пчелы!'
+  produce1pollencluster: 'Произвести 1 скопление пыльцы.<br>Награда: 5 скоплений пыльцы. Разработчик игры признателен'
+  produce1royaljelly: 'Произвести 1 маточное молочко.<br>Награда: 5 единиц маточного молочка. Разработчик игры восхищен'

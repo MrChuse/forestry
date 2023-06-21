@@ -314,7 +314,7 @@ class Resources:
         for k in resources:
             need_resources = resources[k] * config_production_modifier
             if self[k] - need_resources < 0:
-                s += f'Not enough {local["resources"][k]}: you have {self.res[k]} but you need {need_resources}\n'
+                s += local['notenough'].format(local["resources"][k], self.res[k], need_resources) + '\n'
         if s != '':
             raise NotEnoughResourcesError(s)
         for k in resources:
@@ -349,8 +349,47 @@ class Bestiary:
             return False
         return self.produced_resources == other.produced_resources and self.known_bees == other.known_bees
 
+class Achievement:
+    string = ''
+    def __init__(self, text: str, achieved: bool = False):
+        self.text = text
+        self.achieved = achieved
 
+    def check(self, game: 'Game'):
+        return False
 
+    def reward(self, game: 'Game'):
+        pass
+
+class ProducedProducts(Achievement):
+    def __init__(self, products, reward_resources, text, achieved: bool = False):
+        self.products = products
+        self.reward_resources = reward_resources
+        super().__init__(text, achieved)
+
+    def check(self, game: 'Game'):
+        per_product = []
+        for product, n in self.products.items():
+            b = sum(map(lambda x: x.get(product, 0), game.bestiary.produced_resources.values())) >= n
+            per_product.append(b)
+        return all(per_product)
+
+    def reward(self, game: 'Game'):
+        game.resources.add_resources(self.reward_resources)
+
+class AchievementManager:
+    def __init__(self, game: 'Game', achievements: List[Achievement], notify: Callable[[Achievement], None]):
+        self.game = game
+        self.achievements = achievements
+        self.notify = notify
+
+    def check_achievements(self):
+        for achievement in self.achievements:
+            if not achievement.achieved:
+                if achievement.check(self.game):
+                    achievement.achieved = True
+                    achievement.reward(self.game)
+                    self.notify(achievement)
 
 @dataclass
 class MatingEntry:
@@ -779,10 +818,25 @@ class Game:
         self.build('apiary', free=True)
         self.total_inspections = 0
 
+        self.achievement_manager = AchievementManager(
+            self,
+            [
+                ProducedProducts({'flowers': 10, 'wood': 10}, {'honey': 5}, local['produce10flowers10wood']),
+                ProducedProducts({'honey': 1}, {'honey': 5}, local['produce1honey']),
+                ProducedProducts({'honey': 50}, {'pollen cluster': 1, 'royal jelly': 1}, local['produce50honey']),
+                ProducedProducts({'pollen cluster': 1}, {'pollen cluster': 5}, local['produce1pollencluster']),
+                ProducedProducts({'royal jelly': 1}, {'royal jelly': 5}, local['produce1royaljelly']),
+            ],
+            self.notify_achievement
+        )
+
         self.exit_event = threading.Event()
 
         self.inner_state_thread = threading.Thread(target=self.update_state)
         self.inner_state_thread.start()
+
+    def notify_achievement(self, achievement: Achievement):
+        self.print(local['unlocked'] + ':\n' + achievement.text)
 
     def exit(self):  # tested
         self.exit_event.set()
@@ -895,6 +949,8 @@ class Game:
 
             for apiary in self.apiaries:
                 apiary.update()
+
+            self.achievement_manager.check_achievements()
 
             self.state_updated()
 

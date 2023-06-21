@@ -37,6 +37,7 @@ buildings:
   Menu: Menu
 resources:
   RESOURCES: RESOURCES
+  notenough: "Not enough {}: you have {} but you need {}"
   honey: honey
   wood: wood
   flowers: flowers
@@ -100,6 +101,16 @@ genes_alleles:
     SLOW: [SLOW]
     SLOWER: [SLOWER]
     SLOWEST: [SLOWEST]
+
+'achievements':
+  unlocked: "Achievement unlocked"
+  produce1flower: "Produce a flower.<br>Reward: another flower."
+  produce1wood: 'Produce a piece of wood.<br>Reward: one more piece of wood.'
+  produce10flowers10wood: 'Produce 10 flowers and 10 wood.<br>Reward: 5 honey. Nice.'
+  produce1honey: 'Produce 1 honey.<br>Reward: 5 honey. Almost a free inspection for you.'
+  produce50honey: 'Produce 50 honey.<br>Reward: 1 pollen cluster and 1 royal jelly. Try to produce these difficult to obtain resources. Different bees required!'
+  produce1pollencluster: "Produce 1 pollen cluster.<br>Reward: 5 pollen clusters and game developer's appreciation"
+  produce1royaljelly: "Produce 1 royal jelly.<br>Reward: 5 royal jelly and game developer's admiration"
 
 texts:
   helper_text:

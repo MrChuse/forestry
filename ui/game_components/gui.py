@@ -9,7 +9,7 @@ from pygame_gui.windows import UIMessageWindow
 
 from config import (INVENTORY_WINDOW_SIZE, UI_MESSAGE_SIZE,
                     config_production_modifier, helper_text, local)
-from forestry import Apiary, Game, Inventory, Slot
+from forestry import Achievement, Apiary, Game, Inventory, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
 from ..custom_events import INSPECT_BEE, TUTORIAL_STAGE_CHANGED
@@ -162,6 +162,9 @@ class GUI(Game):
 
     def render(self):
         pass
+
+    def notify_achievement(self, achievement: Achievement):
+        self.print(local['unlocked'] + ':<br>' + achievement.text, floating_text_box_time=7)
 
     def print(self, *strings, sep=' ', end='\n', flush=False, out=None, floating_text_box_time=1.3):
         print(*strings, sep=sep, end=end, flush=flush)
