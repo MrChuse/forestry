@@ -80,7 +80,7 @@ def update_inventories(invs):
 
 def update_back_state_6_7(state: dict) -> dict:
     r = {'pollen cluster': 'POLLEN_CLUSTER', 'royal jelly': 'ROYAL_JELLY'}
-    state['resources'].res = {r.get(res, res.upper()): amt for res, amt in state['resources'].res}
+    state['resources'].res = {ResourceTypes[r.get(res, res.upper())]: amt for res, amt in state['resources'].items()}
     return state
 
 update_back_versions = [update_back_state_0_1,
