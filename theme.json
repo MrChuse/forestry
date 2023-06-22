@@ -743,5 +743,61 @@
         "path": "assets/INDUSTRIOUS_Queen.png"
       }
     }
+  },
+  "#WOOD": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/WOOD.png"
+      }
+    }
+  },
+  "#FLOWERS": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/FLOWERS.png"
+      }
+    }
+  },
+  "#HONEY": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/HONEY.png"
+      }
+    }
+  },
+  "#GOLD": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/GOLD.png"
+      }
+    }
+  },
+  "#STRING": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/STRING.png"
+      }
+    }
+  },
+  "#ROYAL_JELLY": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/ROYAL_JELLY.png"
+      }
+    }
+  },
+  "#POLLEN_CLUSTER": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/POLLEN_CLUSTER.png"
+      }
+    }
   }
 }

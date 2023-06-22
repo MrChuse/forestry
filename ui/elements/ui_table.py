@@ -14,15 +14,19 @@ class UITable(UIPanel):
         super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
         self.rebuild()
 
-    def rebuild(self):
-        super().rebuild()
+    def populate_table_contents(self):
+        if self.table_contents is not None:
+            for row in self.table_contents:
+                for element in row:
+                    element.kill()
+        self.table_contents = []
 
-        if not hasattr(self, 'panel_container'):
-            # has not __init__ed yet, skipping
-            return
+    def rebuild(self):
+        if hasattr(self, 'panel_container'):
+            self.populate_table_contents()
+
+        super().rebuild()
         if self.table_contents == []:
-            if hasattr(self, 'panel_container'): # revert to original size
-                self.set_dimensions(self.original_rect.size)
             return
 
         sizes2 = list(map(len, self.table_contents))

@@ -8,6 +8,9 @@ import yaml
 class LocalEnum(Enum):
     def __str__(self):
         return local[self].upper() if dominant[self] else local[self].lower()
+class NameEnum(Enum):
+    def __str__(self):
+        return self.name
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
@@ -52,7 +55,9 @@ for k in mutations:
     mutations[k][0].append(None)
     mutations[k][1].append(1 - sum(mutations[k][1]))
 
-# products
+# resources and products
+ResourceTypes = NameEnum('ResourceTypes', zip(config['resources'], range(len(config['resources']))))
+
 config_production_modifier = config['production_modifier']
 
 products_config = config['products']
@@ -63,6 +68,11 @@ for allele_name, prod_dict in products_config.items():
     else:
         raise RuntimeError('Encountered repeating alleles in products in config file')
     for prod_name, (amt, prob) in prod_dict.items():
+        try:
+            prod_name = ResourceTypes[prod_name]
+        except KeyError as e:
+            print('prod_name was not listed in the `resources` section')
+            raise e
         products[BeeSpecies[allele_name]][prod_name] = (amt, prob)
 
 # local
@@ -91,7 +101,12 @@ local = {}
 straight = ['genes', 'bee_genders', 'buildings', 'esc_menu', 'achievements']
 for thing in straight:
     local.update(local_conf[thing])
-local['resources'] = local_conf['resources']
+for res, translation in local_conf['resources'].items():
+    try:
+        res = ResourceTypes[res]
+    except KeyError:
+        pass
+    local[res] = translation
 local['notenough'] = local_conf['resources']['notenough']
 for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
     for allele_name, allele_local in dict_of_alleles.items():

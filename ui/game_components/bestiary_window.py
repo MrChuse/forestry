@@ -42,6 +42,9 @@ class BestiaryWindow(UIWindow):
                 UIButtonSlot(Slot(Drone(Genes((known_bee_species, known_bee_species))), 1), pygame.Rect(0, 0, 64, 64), '', is_inspectable=False, container=self.table),
                 UILabel(pygame.Rect(0, 0, 132, 30), str(self.bestiary.known_bees[known_bee_species]), container=self.table, object_id='@Centered')
             ] + product_labels)
+        def f():
+            return
+        self.table.populate_table_contents = f # hack to disable clearing UITable
         self.table.rebuild()
 
     def update(self, time_delta: float):

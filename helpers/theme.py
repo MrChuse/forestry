@@ -1,6 +1,6 @@
 import json
 
-from config import BeeSpecies
+from config import BeeSpecies, ResourceTypes
 from forestry import ApiaryProblems
 
 tool_tip_delay = '0.4'
@@ -164,6 +164,18 @@ for species in BeeSpecies:
                     }
                 }
             }})
+
+for resource in ResourceTypes:
+    theme.update(
+        {f'#{resource.name}': {
+            'prototype': f'@TooltipDelay',
+            'images':{
+                'normal_image': {
+                    'path': f'assets/{resource}.png'
+                }
+            }
+        }})
+
 print(json.dumps(theme, indent=2))
 with open('theme.json', 'w') as f:
     json.dump(theme, f, indent=2)

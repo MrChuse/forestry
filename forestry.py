@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-
 import dataclasses
 import pickle
 import random
@@ -15,7 +11,7 @@ from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
 from traceback import print_exc
 
-from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
+from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed, ResourceTypes,
                     config_production_modifier, dominant, helper_text, local,
                     mendel_text, mutations, products)
 
@@ -277,9 +273,9 @@ class Drone(Bee):
 class NotEnoughResourcesError(Exception):
     pass
 class Resources:
-    def __init__(self, **kwargs):
+    def __init__(self, dictlike={}):
         self.res = {}
-        self.res.update(kwargs)
+        self.res.update(dictlike)
         super().__init__()
 
     def __contains__(self, key):
@@ -304,7 +300,7 @@ class Resources:
         return __o.res == self.res
 
     def copy(self):
-        return Resources(**self.res)
+        return Resources(self.res)
 
     def add_resources(self, resources):
         for k in resources:
@@ -315,7 +311,7 @@ class Resources:
         for k in resources:
             need_resources = resources[k] * config_production_modifier
             if self[k] - need_resources < 0:
-                s += local['notenough'].format(local["resources"][k], self.res[k], need_resources) + '\n'
+                s += local['notenough'].format(local[k], self.res[k], need_resources) + '\n'
         if s != '':
             raise NotEnoughResourcesError(s)
         for k in resources:
@@ -326,6 +322,9 @@ class Resources:
             if k not in self:
                 return False
         return True
+
+    def items(self):
+        return self.res.items()
 
 class Bestiary:
     def __init__(self):
@@ -551,7 +550,7 @@ class Slot:
 
 
 class Inventory:
-    cost = {'wood': 5, 'flowers': 5}
+    cost = {ResourceTypes.WOOD: 5, ResourceTypes.FLOWERS: 5}
     def __init__(self, capacity=None, name=''):
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
@@ -687,7 +686,7 @@ class ApiaryProblems(Enum):
     NO_SPACE = 'no_space'
 
 class Apiary:
-    cost = {'honey': 10, 'wood': 5, 'flowers': 5}
+    cost = {ResourceTypes.HONEY: 10, ResourceTypes.WOOD: 5, ResourceTypes.FLOWERS: 5}
     production_modifier = 1/3
     def __init__(self, name, add_resources, add_mating_entry, bestiary: Bestiary):
         self.inv = Inventory(7)
@@ -817,7 +816,7 @@ class Apiary:
             self.problem = ApiaryProblems.NO_QUEEN
 
 class Alveary(Apiary):
-    cost = {'honey': 100, 'royal jelly': 25, 'pollen cluster': 25}
+    cost = {ResourceTypes.HONEY: 100, ResourceTypes.ROYAL_JELLY: 25, ResourceTypes.POLLEN_CLUSTER: 25}
 
 class Game:
     def __init__(self):
@@ -832,11 +831,11 @@ class Game:
         self.total_inspections = 0
 
         product_achievements = [
-            ProducedProducts({'flowers': 10, 'wood': 10}, {'honey': 5}, local['produce10flowers10wood']),
-            ProducedProducts({'honey': 1}, {'honey': 5}, local['produce1honey']),
-            ProducedProducts({'honey': 50}, {'pollen cluster': 1, 'royal jelly': 1}, local['produce50honey']),
-            ProducedProducts({'pollen cluster': 1}, {'pollen cluster': 5}, local['produce1pollencluster']),
-            ProducedProducts({'royal jelly': 1}, {'royal jelly': 5}, local['produce1royaljelly']),
+            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, local['produce10flowers10wood']),
+            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, local['produce1honey']),
+            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, local['produce50honey']),
+            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, local['produce1pollencluster']),
+            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, local['produce1royaljelly']),
         ]
         achievement_species = [
             (BeeSpecies.COMMON, 'breedCOMMON'),
@@ -935,7 +934,7 @@ class Game:
 
     def inspect_bee(self, bee):
         if bee is not None and not bee.inspected:
-            self.resources.remove_resources({'honey': 1})
+            self.resources.remove_resources({ResourceTypes.HONEY: 1})
             bee.inspect()
             self.total_inspections += 1
 

@@ -11,3 +11,4 @@ from .mendel_tutorial_window import MendelTutorialWindow
 from .settings_window import SettingsWindow
 from .tutorial_stage import TutorialStage, CurrentTutorialStage
 from .gui import GUI
+from .resources_panel import ResourcesPanel

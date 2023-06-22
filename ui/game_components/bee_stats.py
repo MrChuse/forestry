@@ -28,10 +28,7 @@ class BeeStats(UITable):
         self.rebuild()
 
     def populate_table_contents(self):
-        if self.table_contents is not None:
-            for row in self.table_contents:
-                for element in row:
-                    element.kill()
+        super().populate_table_contents()
 
         def create_uilabel(text='', is_local=False, object_id=None, visible=True):
             return UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
@@ -41,7 +38,6 @@ class BeeStats(UITable):
             self.buttons.append(b)
             return b
 
-        self.table_contents = []
         if self.bee is None:
             return # set table contents to []
 

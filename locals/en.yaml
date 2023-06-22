@@ -39,13 +39,13 @@ buildings:
 resources:
   RESOURCES: RESOURCES
   notenough: "Not enough {}: you have {} but you need {}"
-  honey: honey
-  wood: wood
-  flowers: flowers
-  gold: gold
-  royal jelly: royal jelly
-  string: string
-  pollen cluster: pollen cluster
+  HONEY: Honey
+  WOOD: Wood
+  FLOWERS: Flowers
+  GOLD: Gold
+  ROYAL_JELLY: Royal jelly
+  STRING: String
+  POLLEN_CLUSTER: Pollen cluster
 esc_menu:
   Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance

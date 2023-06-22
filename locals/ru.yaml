@@ -40,13 +40,13 @@ buildings:
 resources:
   RESOURCES: РЕСУРСЫ
   notenough: "Не хватает `{}`: у вас есть {}, но нужно {}"
-  honey: мед
-  wood: дерево
-  flowers: цветы
-  gold: золото
-  royal jelly: маточное молочко
-  string: нить
-  pollen cluster: скопление пыльцы
+  HONEY: Мед
+  WOOD: Дерево
+  FLOWERS: Цветы
+  GOLD: Золото
+  ROYAL_JELLY: Маточное молочко
+  STRING: Нить
+  POLLEN_CLUSTER: Скопление пыльцы
 esc_menu:
   Greetings Window: Окно Приветствия
   Mendelian Inheritance: Законы Менделя

@@ -1,8 +1,8 @@
-from config import config_production_modifier
+from config import config_production_modifier, ResourceTypes
 from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
                       Queen, Slot)
 
-CURRENT_BACK_VERSION = 6
+CURRENT_BACK_VERSION = 7
 
 def update_bee(slot: Slot):
     bee, amount = slot.take_all()
@@ -78,9 +78,15 @@ def update_inventories(invs):
         new_invs.append(new_inv)
     return new_invs
 
+def update_back_state_6_7(state: dict) -> dict:
+    r = {'pollen cluster': 'POLLEN_CLUSTER', 'royal jelly': 'ROYAL_JELLY'}
+    state['resources'].res = {r.get(res, res.upper()): amt for res, amt in state['resources'].res}
+    return state
+
 update_back_versions = [update_back_state_0_1,
                         update_back_state_1_2,
                         update_back_state_2_3,
                         update_back_state_3_4,
                         update_bees_in_state,
-                        update_back_state_5_6]
+                        update_back_state_5_6,
+                        update_back_state_6_7]
