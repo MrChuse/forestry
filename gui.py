@@ -55,7 +55,7 @@ def main():
                 elif event.type == pygame_gui.UI_BUTTON_PRESSED:
                     sounds['click_end'].play()
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE and pygame.key.get_mods() & pygame.KMOD_ALT:
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
                 elif event.type == APPLY_VOLUME_CHANGE:
