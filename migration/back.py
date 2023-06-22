@@ -2,7 +2,7 @@ from config import config_production_modifier
 from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
                       Queen, Slot)
 
-CURRENT_BACK_VERSION = 5
+CURRENT_BACK_VERSION = 6
 
 def update_bee(slot: Slot):
     bee, amount = slot.take_all()
@@ -61,4 +61,26 @@ def update_back_state_3_4(state: dict) -> dict:
         state['apiaries'][i] = apiary
     return state
 
-update_back_versions = [update_back_state_0_1, update_back_state_1_2, update_back_state_2_3, update_back_state_3_4, update_bees_in_state]
+def update_back_state_5_6(state: dict) -> dict:
+    if not isinstance(state['inventories'], list):
+        raise ValueError(f'State update cancelled: inventories was not a list, but {type(state["inventories"])}')
+    state['inventories'] = update_inventories(state['inventories'])
+    state['inventories'] = {
+        inv.name: inv for inv in state['inventories']
+    }
+    return state
+
+def update_inventories(invs):
+    new_invs = []
+    for inv in invs:
+        new_inv = Inventory(inv.capacity, inv.name)
+        new_inv.place_bees(inv.storage)
+        new_invs.append(new_inv)
+    return new_invs
+
+update_back_versions = [update_back_state_0_1,
+                        update_back_state_1_2,
+                        update_back_state_2_3,
+                        update_back_state_3_4,
+                        update_bees_in_state,
+                        update_back_state_5_6]

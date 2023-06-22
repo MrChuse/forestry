@@ -13,6 +13,7 @@ from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
 from typing import Any, Callable, List, Tuple, Union
+from traceback import print_exc
 
 from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
                     config_production_modifier, dominant, helper_text, local,
@@ -586,7 +587,7 @@ class Inventory:
         return self.storage[index].take_all()
 
     def empty_slots(self):
-        return sum([el.is_empty() for el in self.storage])
+        return sum(el.is_empty() for el in self.storage)
 
     def swap(self, i1, i2):
         self.storage[i1], self.storage[i2] = self.storage[i2], self.storage[i1]
@@ -606,6 +607,8 @@ class Inventory:
                 bee = thing.slot
             else:
                 bee = thing
+            if bee is None:
+                continue
             while index < self.capacity:
                 if self.storage[index].is_empty(): # this slot is empty, we are handling empty slots later
                     index += 1
@@ -630,6 +633,8 @@ class Inventory:
             elif isinstance(thing, Bee):
                 bee = thing
                 amt = 1
+            if bee is None:
+                continue
             while index < self.capacity:
                 if self.storage[index].is_empty():
                     index += 1
@@ -819,9 +824,9 @@ class Game:
         self.resources = Resources()
         self.bestiary = Bestiary()
         self.mating_history = MatingHistory()
-        self.inventories : List[Inventory] = []
+        self.inventories : dict[str, Inventory] = {}
         self.build('inventory', free=True)
-        self.inv = self.inventories[-1]
+        self.inv = self.inventories[local['Inventory'] + ' 1']
         self.apiaries : List[Apiary] = []
         self.build('apiary', free=True)
         self.total_inspections = 0
@@ -944,12 +949,22 @@ class Game:
         elif params[0] in ['inventory', 'inv', 'i']:
             if not free:
                 self.resources.remove_resources(Inventory.cost)
-            self.inventories.append(Inventory(49, str(len(self.inventories))))
-            return self.inventories[-1]
+            name = local['Inventory'] +' ' + str(len(self.inventories)+1)
+            self.inventories[name] = (Inventory(49, name))
+            return self.inventories[name]
         elif params[0] == 'alveary':
             if not free:
                 self.resources.remove_resources(Alveary.cost)
             self.print('You won the demo!', out=self.command_out, flush=True)
+
+    def rename_inventory(self, from_str, to_str):
+        if from_str == to_str:
+            return
+        if to_str in self.inventories:
+            raise RuntimeError('This name is already in use')
+        inv = self.inventories.pop(from_str)
+        self.inventories[to_str] = inv
+        inv.name = to_str
 
     def get_available_build_options(self):
         options = []
@@ -1002,9 +1017,13 @@ class Game:
         from migration import (  # import here to avoid circular imports
             CURRENT_BACK_VERSION, update_back_versions)
 
-        if state.get('back_version', 0) < CURRENT_BACK_VERSION:
-            for update_back_func in update_back_versions[state.get('back_version', 0):]:
-                state = update_back_func(state)
+        try:
+            if state.get('back_version', 0) < CURRENT_BACK_VERSION:
+                for update_back_func in update_back_versions[state.get('back_version', 0):]:
+                    state = update_back_func(state)
+        except Exception as e:
+            self.exit()
+            print_exc()
 
         self.resources = state['resources']
         self.inventories = state['inventories']

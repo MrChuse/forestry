@@ -1,6 +1,7 @@
 import os
 from enum import IntEnum
 from typing import Union
+from traceback import print_exc
 
 import pygame
 import pygame_gui
@@ -12,7 +13,7 @@ from config import (INVENTORY_WINDOW_SIZE, UI_MESSAGE_SIZE,
 from forestry import Achievement, Apiary, Game, Inventory, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
-from ..custom_events import INSPECT_BEE, TUTORIAL_STAGE_CHANGED
+from ..custom_events import INSPECT_BEE, INVENTORY_RENAMED, TUTORIAL_STAGE_CHANGED
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UINonChangingDropDownMenu, UIPickList)
@@ -177,7 +178,7 @@ class GUI(Game):
     def update_windows_list(self):
         if self.apiary_selection_list is not None:
             self.apiary_selection_list.set_item_list(
-                [local['Inventory'] + ' ' + i.name for i in self.inventories] +\
+                [i.name for i in self.inventories.values()] +\
                 [local['Apiary'] + ' ' + a.name for a in self.apiaries]
             )
 
@@ -231,7 +232,7 @@ class GUI(Game):
                         ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), (300, 420)), self.ui_manager)
                     )
                 else:
-                    index = int(event.text.split()[-1])
+                    index = event.text
                     mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
                     self.inventory_windows.append(
                         InventoryWindow(self.inventories[index], self.cursor,
@@ -297,6 +298,9 @@ class GUI(Game):
                 self.inspect_bee(event.ui_element.bee_button.slot.slot)
                 event.ui_element.rebuild()
                 event.ui_element.bee_button.most_specific_combined_id = 'some nonsense' # dirty hack to make the button refresh inspect status
+        elif event.type == INVENTORY_RENAMED:
+            self.rename_inventory(event.old_name, event.new_name)
+            self.update_windows_list()
         elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.load_confirm:
                 self.load('save')
@@ -376,7 +380,7 @@ class GUI(Game):
         state['inspect_windows'] = insp_win
         state['inspect_slots'] = insp_slots
         state['apiary_windows'] = [(window.apiary, window.relative_rect) for window in self.apiary_windows]
-        state['inventory_windows'] = [(window.inv, window.relative_rect) for window in self.inventory_windows]
+        state['inventory_windows'] = [(window.inv.name, window.relative_rect) for window in self.inventory_windows]
         return state
 
     def load(self, name):
@@ -385,9 +389,13 @@ class GUI(Game):
         except FileNotFoundError:
             return
 
-        if state.get('front_version', 0) < CURRENT_FRONT_VERSION:
-            for update_front_func in update_front_versions[state.get('front_version', 0):]:
-                state = update_front_func(state)
+        try:
+            if state.get('front_version', 0) < CURRENT_FRONT_VERSION:
+                for update_front_func in update_front_versions[state.get('front_version', 0):]:
+                    state = update_front_func(state)
+        except Exception:
+            print_exc()
+            self.exit()
         for window in self.apiary_windows:
             window.kill()
         for window in self.inventory_windows:
@@ -414,7 +422,7 @@ class GUI(Game):
             window.bee_button.slot = slot
             window.bee_stats.bee = slot.slot # TODO: some stupid initialization here, rework?
             window.reshape_according_to_bee_stats()
-        self.inventory_windows = [InventoryWindow(inv, self.cursor, rect, self.ui_manager) for inv, rect in state['inventory_windows']]
+        self.inventory_windows = [InventoryWindow(state['inventories'][inv_name], self.cursor, rect, self.ui_manager) for inv_name, rect in state['inventory_windows']]
         self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in state['apiary_windows']]
         if self.mating_history_window is not None:
             self.mating_history_window.mating_history = self.mating_history
