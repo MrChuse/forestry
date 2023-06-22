@@ -958,10 +958,12 @@ class Game:
             self.print('You won the demo!', out=self.command_out, flush=True)
 
     def rename_inventory(self, from_str, to_str):
+        if to_str == '':
+            raise ValueError('Cannot save empty inventory name')
         if from_str == to_str:
             return
         if to_str in self.inventories:
-            raise RuntimeError('This name is already in use')
+            raise ValueError('This name is already in use')
         inv = self.inventories.pop(from_str)
         self.inventories[to_str] = inv
         inv.name = to_str

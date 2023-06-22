@@ -23,6 +23,7 @@ buildings:
   Forage: Forage # left side bar button
   Build: Build # left side bar button
   Inventory: Inventory
+  entertosave: "`Enter` to save"
   Sort: Squeeze # sort button
   Apiary: Apiary
   Apiary_problem_ALL_OK: All ok

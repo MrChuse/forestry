@@ -34,13 +34,13 @@ class InventoryWindow(UICustomTitleBarWindow, UIGridWindow):
         """
         if self.entry_line is None:
             self.entry_line = UITextEntryLine(
-                pygame.Rect(0, 0, self.title_bar_entry_line_width, self.title_bar_height),
+                pygame.Rect(1, 1, self.title_bar_entry_line_width, self.title_bar_height+1),
                 manager=self.ui_manager,
                 container=self._window_root_container,
                 parent_element=self,
                 object_id='#rename_entry_line',
                 anchors={'top': 'top', 'bottom': 'top',
-                        'left': 'left', 'right': 'right'},
+                        'left': 'left', 'right': 'left'},
                 initial_text=self.window_display_title,
             )
         if self.title_bar is not None:
@@ -129,10 +129,21 @@ class InventoryWindow(UICustomTitleBarWindow, UIGridWindow):
                         else:
                             self.cursor.process_cursor_slot_interaction(event, self.inv[index])
                         return True
-        if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
-            event_data = {'ui_element': self,
-                          'ui_object_id': self.most_specific_combined_id,
-                          'old_name': self.inv.name,
-                          'new_name': event.text}
-            pygame.event.post(pygame.event.Event(INVENTORY_RENAMED, event_data))
+        elif event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
+            if event.ui_element == self.entry_line:
+                if self.title_bar is not None:
+                    self.title_bar.set_text(local['entertosave'])
+        elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+            if event.ui_element == self.entry_line:
+                if self.title_bar is not None:
+                    self.title_bar.set_text('')
+                event_data = {'ui_element': self,
+                            'ui_object_id': self.most_specific_combined_id,
+                            'inventory': self.inv,
+                            'old_name': self.inv.name,
+                            'new_name': event.text}
+                pygame.event.post(pygame.event.Event(INVENTORY_RENAMED, event_data))
+        elif event.type == INVENTORY_RENAMED:
+            if event.ui_element != self and event.inventory == self.inv:
+                self.entry_line.set_text(event.new_name)
         return super().process_event(event)

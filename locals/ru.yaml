@@ -24,6 +24,7 @@ buildings:
   Forage: Собирать пчел
   Build: Построить
   Inventory: Инвентарь
+  entertosave: "`Enter` для сохранения"
   Sort: Ужать
   Apiary: Улей
   Apiary_problem_ALL_OK: Все в порядке
