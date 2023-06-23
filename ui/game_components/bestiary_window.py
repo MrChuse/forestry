@@ -33,7 +33,7 @@ class BestiaryWindow(UIWindow):
         for known_bee_species in self.bestiary.known_bees:
             product_labels = [] # these are added in the tail of the row
             for product, amount in self.bestiary.produced_resources[known_bee_species].items():
-                product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), local['resources'][product], container=self.table, object_id='@Centered'))
+                product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), local[product], container=self.table, object_id='@Centered'))
                 product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), str(amount), container=self.table, object_id='@Centered'))
             needed = max(2 - len(product_labels), row_length - 2 * len(self.bestiary.produced_resources[known_bee_species])) # should be at least 4 to match first row (and 2 is already present, so max 2-len)
             for _ in range(needed):
