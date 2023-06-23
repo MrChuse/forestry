@@ -102,7 +102,6 @@ class GUI(Game):
         self.inspect_windows = []
 
         if self.apiary_selection_list is not None:
-            print('killed apiary selection')
             self.apiary_selection_list.kill()
 
         if self.bestiary_window is not None:
@@ -183,9 +182,8 @@ class GUI(Game):
 
         super().__init__()
 
-        # if not new_game:
-        #     self.load_last()
-        self.open_mendel_window()
+        if not new_game:
+            self.load_last()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
