@@ -53,6 +53,7 @@ esc_menu:
   Bestiary: Бестиарий
   Save: Сохранить
   Load: Загрузить
+  New game: Новая игра
   Cancel: Отмана
   Master volume: Общая громкость
   Click volume: Громкость кликов
@@ -68,6 +69,7 @@ esc_menu:
   resource: Ресурс
   load_confirm: Несохраненный прогресс может быть потерян. Продолжить?
   save_confirm: Предыдущее сохранение будет перезаписано. Продолжить?
+  new_game_confirm: Несохраненный прогресс может быть потерян. Продолжить?
 genes_alleles:
   BeeSpecies:
     FOREST: [ЛЕСНОЙ, ЛЕСНАЯ]

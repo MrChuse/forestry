@@ -24,34 +24,27 @@ from .tutorial_stage import CurrentTutorialStage
 
 
 class GUI(Game):
-    def __init__(self, window_size, manager: pygame_gui.UIManager, cursor_manager):
-        self.command_out = 1
-        super().__init__()
-        Slot.empty_str = ''
-        Slot.str_amount = lambda x: '' # type: ignore
+    def restart_game(self):
+        super().restart_game()
 
-        self.window_size = window_size
-        self.ui_manager = manager
-        if len(list(filter(lambda x: x.endswith('.forestry'), os.listdir('saves')))) == 0:
+        CurrentTutorialStage.current_tutorial_stage = TutorialStage.BEFORE_FORAGE
+        if self.new_game or not os.path.exists('saves') or len(list(filter(lambda x: x.endswith('.forestry'), os.listdir('saves')))) == 0:
             self.help_window()
 
-        self.cursor_manager = cursor_manager
-        self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', cursor_manager)
-        self.inspect_windows = []
-        self.resource_panel_width = 330
+        self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', self.cursor_manager)
 
-        bottom_buttons_height = 40
-
-        self.shown_resources = None
-
-        resource_panel_rect = pygame.Rect(0, 0, self.resource_panel_width, window_size[1])
-        r = pygame.Rect(0, 0, resource_panel_rect.size[0]-6, 44)
+        if self.resources_panel is not None:
+            self.resources_panel.kill()
+            self.resources_panel = None
+        resources_panel_rect = pygame.Rect(0, 0, self.resources_panel_width, self.window_size[1])
+        r = pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 44)
         self.resources_panel = ResourcesPanel(self.resources, r, visible=False)
 
-        self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
-        self.known_build_options = []
-        self.local_build_options = []
-        self.build_dropdown = UINonChangingDropDownMenu([], local['Build'], pygame.Rect(0, 0, resource_panel_rect.size[0]-6, bottom_buttons_height),
+        if self.build_dropdown is not None:
+            self.build_dropdown.kill()
+            self.build_dropdown = None
+        bottom_buttons_height = 40
+        self.build_dropdown = UINonChangingDropDownMenu([], local['Build'], pygame.Rect(0, 0, resources_panel_rect.size[0]-6, bottom_buttons_height),
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -60,7 +53,10 @@ class GUI(Game):
                 'top_target': self.resources_panel
             }, visible=False)
 
-        self.forage_button = UIButton(pygame.Rect(0, 0, resource_panel_rect.size[0]-6, 40), local['Forage'], container=None,
+        if self.forage_button is not None:
+            self.forage_button.kill()
+            self.forage_button = None
+        self.forage_button = UIButton(pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 40), local['Forage'], container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -69,7 +65,11 @@ class GUI(Game):
                 'top_target': self.build_dropdown
             }
         )
-        self.open_inspect_window_button = UIButton(pygame.Rect(0, 0, resource_panel_rect.size[0]-6, 40), local['Open Inspect Window'], container=None,
+
+        if self.open_inspect_window_button is not None:
+            self.open_inspect_window_button.kill()
+            self.open_inspect_window_button = None
+        self.open_inspect_window_button = UIButton(pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 40), local['Open Inspect Window'], container=None,
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -78,7 +78,11 @@ class GUI(Game):
                 'top_target': self.forage_button
             },
             visible=False)
-        self.menu_button = UIButton(pygame.Rect(0, -40, resource_panel_rect.size[0]-6, 40), local['Menu'], container=None,
+
+        if self.menu_button is not None:
+            self.menu_button.kill()
+            self.menu_button = None
+        self.menu_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Menu'], container=None,
             anchors={
                 'top':'bottom',
                 'bottom':'bottom',
@@ -86,8 +90,81 @@ class GUI(Game):
                 'right':'left',
             },
             visible=True)
+
+        for w in self.apiary_windows:
+            w.kill()
+        for w in self.inventory_windows:
+            w.kill()
+        for w in self.inspect_windows:
+            w.kill()
         self.apiary_windows = []
         self.inventory_windows = []
+        self.inspect_windows = []
+
+        if self.apiary_selection_list is not None:
+            print('killed apiary selection')
+            self.apiary_selection_list.kill()
+
+        if self.bestiary_window is not None:
+            self.bestiary_window.kill()
+            self.bestiary_window = None
+        if self.mating_history_window is not None:
+            self.mating_history_window.kill()
+            self.mating_history_window = None
+        if self.load_confirm is not None:
+            self.load_confirm.kill()
+            self.load_confirm = None
+        if self.save_confirm is not None:
+            self.save_confirm.kill()
+            self.save_confirm = None
+        if self.new_game_confirm is not None:
+            self.new_game_confirm.kill()
+            self.new_game_confirm = None
+
+        if self.esc_menu is not None:
+            self.esc_menu.kill()
+            self.esc_menu = None
+        esc_menu_rect = pygame.Rect(0, 0, self.esc_menu_width, 500)
+        esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
+        self.esc_menu = UIPickList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['New game'], local['Exit']], self.cursor_manager, visible=False, starting_height=30)
+
+        if self.load_file_selection_list is not None:
+            self.load_file_selection_list.kill()
+            self.load_file_selection_list = None
+        if self.filename_entry is not None:
+            self.filename_entry.kill()
+            self.filename_entry = None
+        if self.save_file_selection_list is not None:
+            self.save_file_selection_list.kill()
+            self.save_file_selection_list = None
+
+    def __init__(self, window_size, manager: pygame_gui.UIManager, cursor_manager: pygame_gui.UIManager, new_game: bool = False):
+        self.command_out = 1
+        Slot.empty_str = ''
+        Slot.str_amount = lambda x: '' # type: ignore
+
+        self.window_size = window_size
+        self.ui_manager = manager
+        self.cursor_manager = cursor_manager
+        self.new_game = new_game
+
+        self.resources_panel_width = 330
+
+        self.shown_resources = None
+        self.resources_panel = None
+
+        self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
+        self.known_build_options = []
+        self.local_build_options = []
+        self.build_dropdown = None
+
+        self.forage_button = None
+        self.open_inspect_window_button = None
+        self.menu_button = None
+
+        self.apiary_windows = []
+        self.inventory_windows = []
+        self.inspect_windows = []
 
         self.apiary_selection_list_width = 100
         self.apiary_selection_list = None
@@ -96,16 +173,18 @@ class GUI(Game):
         self.mating_history_window = None
         self.load_confirm = None
         self.save_confirm = None
+        self.new_game_confirm = None
 
         self.esc_menu_width = 200
-        esc_menu_rect = pygame.Rect(0, 0, self.esc_menu_width, 500)
-        esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
-        self.esc_menu = UIPickList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.esc_menu = None
         self.load_file_selection_list = None
         self.filename_entry = None
         self.save_file_selection_list = None
 
-        self.load_last()
+        super().__init__()
+
+        if not new_game:
+            self.load_last()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -136,6 +215,7 @@ class GUI(Game):
         self.inspect_windows.append(InspectWindow(self, self.cursor, rect, self.ui_manager))
 
     def open_apiary_selection_list(self):
+        print('opened apiary selection')
         apiary_selection_list_rect = pygame.Rect(0, 0, self.apiary_selection_list_width, self.window_size[1])
         apiary_selection_list_rect.right = 0
         self.apiary_selection_list = UIPickList(apiary_selection_list_rect, [], self.ui_manager,
@@ -281,6 +361,9 @@ class GUI(Game):
                     if self.load_file_selection_list is not None:
                         self.load_file_selection_list.kill()
                         self.load_file_selection_list = None
+                elif event.text == local['New game']:
+                    r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
+                    self.new_game_confirm = UILocationFindingConfirmationDialog(r, local['new_game_confirm'], self.cursor_manager)
                 elif event.text == local['Settings']:
                     self.settings_window()
                     self.toggle_esc_menu()
@@ -361,6 +444,8 @@ class GUI(Game):
                 self.save(self.save_confirm.filename)
                 self.print('Saved the game to the disk')
                 self.toggle_esc_menu()
+            elif event.ui_element == self.new_game_confirm:
+                self.restart_game()
             elif event.ui_element == self.inspect_confirm:
                 self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
                 if isinstance(self.inspect_confirm.ui_element, InspectWindow):
@@ -371,7 +456,7 @@ class GUI(Game):
                 if CurrentTutorialStage.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
                     CurrentTutorialStage.current_tutorial_stage = TutorialStage.NO_RESOURCES # progress the tutorial
 
-                    self.apiary_windows.append(ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resource_panel_width, 0), (300, 420)), self.ui_manager))
+                    self.apiary_windows.append(ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resources_panel_width, 0), (300, 420)), self.ui_manager))
 
                     self.inv_window = InventoryWindow(self.inv, self.cursor,
                         pygame.Rect((self.apiary_windows[0].rect.right, 0), INVENTORY_WINDOW_SIZE),
@@ -467,6 +552,7 @@ class GUI(Game):
         if state['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
             self.add_mendelian_inheritance_to_esc_menu()
         if state['apiary_list_opened']:
+            print(' in load apiary_list_opened')
             self.open_apiary_selection_list()
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in state['inspect_windows']]
         for window, slot in zip(self.inspect_windows, state['inspect_slots']):

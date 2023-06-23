@@ -52,6 +52,7 @@ esc_menu:
   Bestiary: Bestiary
   Save: Save
   Load: Load
+  New game: New game
   Cancel: Cancel
   Settings: Settings
   Fullscreen: Fullscreen
@@ -67,6 +68,7 @@ esc_menu:
   resource: Resource
   load_confirm: You can lose unsaved progress. Continue?
   save_confirm: Previously saved progress will be overwritten. Continue?
+  new_game_confirm: You can lose unsaved progress. Continue?
 genes_alleles:
   BeeSpecies:
     FOREST: [FOREST]

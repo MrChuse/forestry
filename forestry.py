@@ -821,6 +821,11 @@ class Alveary(Apiary):
 
 class Game:
     def __init__(self):
+        self.exit_event = threading.Event()
+        self.inner_state_thread = None
+        self.restart_game()
+
+    def restart_game(self):
         self.resources = Resources()
         self.bestiary = Bestiary()
         self.mating_history = MatingHistory()
@@ -855,8 +860,11 @@ class Game:
             self.notify_achievement
         )
 
-        self.exit_event = threading.Event()
-
+        if self.inner_state_thread is not None:
+            self.exit_event.set()
+            self.inner_state_thread.join()
+            self.inner_state_thread = None
+        self.exit_event.clear()
         self.inner_state_thread = threading.Thread(target=self.update_state)
         self.inner_state_thread.start()
 
@@ -1015,11 +1023,15 @@ class Game:
             pickle.dump(self.get_state(), f)
 
     def get_save_names_list(self):
-        return [x.replace('.forestry', '') for x in os.listdir('saves') if x.endswith('forestry')]
+        if not os.path.exists('saves'):
+            return []
+        return [x.replace('.forestry', '') for x in os.listdir('saves') if x.endswith('.forestry')]
 
     def load_last(self):
-        d = {path: os.path.getmtime('saves/' + path) for path in os.listdir('saves') if path.endswith('.forestry')}
-        latest = max(d, key=d.get).replace('.forestry', '')
+        d = {name: os.path.getmtime('saves/' + name + '.forestry') for name in self.get_save_names_list()}
+        if len(d) == 0:
+            return
+        latest = max(d, key=d.get)
         print(latest)
         self.load(latest)
 
