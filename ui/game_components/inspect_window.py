@@ -62,3 +62,7 @@ class InspectWindow(UIWindow):
         new_dimensions = (bee_stats_size_x + (2 * self.shadow_width) + self.bee_stats.shadow_width,
                           bee_stats_size_y + self.title_bar_height + self.inspect_button_height + (2 * self.shadow_width) + self.bee_stats.shadow_width)
         self.set_dimensions(new_dimensions)
+
+    def on_close_window_button_pressed(self):
+        if self.bee_button.slot.is_empty():
+            self.kill()
