@@ -785,8 +785,7 @@ class Apiary:
                 queen.parent2.mating_entries.append(entry.set_parent2_inspected)
                 child.mating_entries.append(entry.set_child_inspected)
 
-                if child.genes.species[0] == child.genes.species[1]:
-                    self.bestiary.add_offspring(child.genes.species[0])
+                self.bestiary.add_offspring(child.genes.species[0])
             return True
         return False
 
