@@ -1,26 +1,59 @@
 {
-  "#TooltipDelay": {
-    "misc": {
-      "tool_tip_delay": "0.4"
-    }
-  },
-  "#BeeButton": {
-    "prototype": "#TooltipDelay"
-  },
   "@Centered": {
     "misc": {
       "text_horiz_alignment": "center"
     }
   },
+  "@Font": {
+    "font": {
+      "name": "fira_code",
+      "size": 20
+    }
+  },
+  "@SmallFont": {
+    "font": {
+      "name": "fira_code",
+      "size": 14
+    }
+  },
+  "@TooltipDelay": {
+    "misc": {
+      "tool_tip_delay": "0.4"
+    }
+  },
+  "@Dominant": {
+    "colours": {
+      "normal_text": "#ec3661"
+    }
+  },
+  "@Recessive": {
+    "colours": {
+      "normal_text": "#3687ec"
+    }
+  },
+  "#BeeButton": {
+    "prototype": "@TooltipDelay"
+  },
+  "#button_slot_text_box": {
+    "prototype": "@SmallFont"
+  },
+  "text_box": {
+    "prototype": "@Font"
+  },
   "label": {
+    "prototype": "@Font",
     "misc": {
       "text_horiz_alignment": "left"
     }
   },
-  "#restart_label": {
-    "colours": {
-      "normal_text": "#ec3661"
+  "tool_tip.text_box": {
+    "font": {
+      "name": "fira_code",
+      "size": 14
     }
+  },
+  "#restart_label": {
+    "prototype": "@Dominant"
   },
   "#checkbox": {
     "misc": {
@@ -88,7 +121,7 @@
     }
   },
   "#Apiary_problem_ALL_OK": {
-    "prototype": "#TooltipDelay",
+    "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
         "path": "assets/Apiary_problem_ALL_OK.png"
@@ -96,7 +129,7 @@
     }
   },
   "#Apiary_problem_NO_QUEEN": {
-    "prototype": "#TooltipDelay",
+    "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
         "path": "assets/Apiary_problem_NO_QUEEN.png"
@@ -104,7 +137,7 @@
     }
   },
   "#Apiary_problem_NO_SPACE": {
-    "prototype": "#TooltipDelay",
+    "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
         "path": "assets/Apiary_problem_NO_SPACE.png"
@@ -708,6 +741,62 @@
     "images": {
       "normal_image": {
         "path": "assets/INDUSTRIOUS_Queen.png"
+      }
+    }
+  },
+  "#WOOD": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/WOOD.png"
+      }
+    }
+  },
+  "#FLOWERS": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/FLOWERS.png"
+      }
+    }
+  },
+  "#HONEY": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/HONEY.png"
+      }
+    }
+  },
+  "#GOLD": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/GOLD.png"
+      }
+    }
+  },
+  "#STRING": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/STRING.png"
+      }
+    }
+  },
+  "#ROYAL_JELLY": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/ROYAL_JELLY.png"
+      }
+    }
+  },
+  "#POLLEN_CLUSTER": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/POLLEN_CLUSTER.png"
       }
     }
   }

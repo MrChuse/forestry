@@ -52,32 +52,41 @@ mutations:
     - [CULTIVATED, DILIGENT, UNWEARY, 0.08]
     - [UNWEARY, DILIGENT, INDUSTRIOUS, 0.08]
 
+production_modifier: 10
+resources:
+  - WOOD
+  - FLOWERS
+  - HONEY
+  - GOLD
+  - STRING
+  - ROYAL_JELLY
+  - POLLEN_CLUSTER
 products:
   FOREST:
-    wood: [1, 0.5]
+    WOOD: [1, 0.5]
   MEADOWS:
-    flowers: [1, 0.5]
+    FLOWERS: [1, 0.5]
   COMMON:
-    honey: [1, 0.75]
+    HONEY: [1, 0.75]
   CULTIVATED:
-    honey: [1, 1]
+    HONEY: [1, 1]
   NOBLE:
-    honey: [1, 0.25]
-    gold: [1, 0.1]
+    HONEY: [1, 0.25]
+    GOLD: [1, 0.1]
   MAJESTIC:
-    honey: [1, 0.25]
-    gold: [1, 0.15]
+    HONEY: [1, 0.25]
+    GOLD: [1, 0.15]
   IMPERIAL:
-    honey: [1, 0.25]
-    gold: [1, 0.1]
-    royal jelly: [1, 0.1]
+    HONEY: [1, 0.25]
+    GOLD: [1, 0.1]
+    ROYAL_JELLY: [1, 0.1]
   DILIGENT:
-    honey: [1, 0.25]
-    string: [1, 0.1]
+    HONEY: [1, 0.25]
+    STRING: [1, 0.1]
   UNWEARY:
-    honey: [1, 0.25]
-    string: [1, 0.15]
+    HONEY: [1, 0.25]
+    STRING: [1, 0.15]
   INDUSTRIOUS:
-    honey: [1, 0.25]
-    string: [1, 0.1]
-    pollen cluster: [1, 0.1]
+    HONEY: [1, 0.25]
+    STRING: [1, 0.1]
+    POLLEN_CLUSTER: [1, 0.1]

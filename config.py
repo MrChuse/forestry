@@ -1,20 +1,28 @@
 import codecs
-from enum import Enum
 import os
+from enum import Enum
 
 import yaml
+
 
 class LocalEnum(Enum):
     def __str__(self):
         return local[self].upper() if dominant[self] else local[self].lower()
+class NameEnum(Enum):
+    def __str__(self):
+        return self.name
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
 
+# some ui stuff
+UI_MESSAGE_SIZE = (500, 300)
+INVENTORY_WINDOW_SIZE = (486, 513)
+
 # load all the genes and their alleles
 genes_conf = config['genes_alleles']
-genes_enums = {}
-dominant = {}
+genes_enums : dict[str, LocalEnum] = {}
+dominant : dict[LocalEnum, bool] = {}
 for gene_name, list_of_alleles in genes_conf.items():
     enum_dict = []
     for allele_name, allele_value, _ in list_of_alleles:
@@ -47,7 +55,11 @@ for k in mutations:
     mutations[k][0].append(None)
     mutations[k][1].append(1 - sum(mutations[k][1]))
 
-# products
+# resources and products
+ResourceTypes = NameEnum('ResourceTypes', zip(config['resources'], range(len(config['resources']))))
+
+config_production_modifier = config['production_modifier']
+
 products_config = config['products']
 products = {}
 for allele_name, prod_dict in products_config.items():
@@ -56,12 +68,17 @@ for allele_name, prod_dict in products_config.items():
     else:
         raise RuntimeError('Encountered repeating alleles in products in config file')
     for prod_name, (amt, prob) in prod_dict.items():
+        try:
+            prod_name = ResourceTypes[prod_name]
+        except KeyError as e:
+            print('prod_name was not listed in the `resources` section')
+            raise e
         products[BeeSpecies[allele_name]][prod_name] = (amt, prob)
 
 # local
 existing_locals = [i[:-5] for i in os.listdir('locals')] # drop .yaml
 
-def load_settings(filename='settings'):
+def load_settings(filename='settings.yaml'):
     settings = {
         'fullscreen': True,
         'master_volume': 1,
@@ -81,10 +98,16 @@ with codecs.open(filename, "r", "utf_8_sig" ) as f:
     local_conf = yaml.safe_load(f)
 
 local = {}
-straight = ['genes', 'bee_genders', 'buildings', 'esc_menu']
+straight = ['genes', 'bee_genders', 'buildings', 'esc_menu', 'achievements', 'mendel_text_additionals']
 for thing in straight:
-    local = {**local, **local_conf[thing]}
-local['resources'] = local_conf['resources']
+    local.update(local_conf[thing])
+for res, translation in local_conf['resources'].items():
+    try:
+        res = ResourceTypes[res]
+    except KeyError:
+        pass
+    local[res] = translation
+local['notenough'] = local_conf['resources']['notenough']
 for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
     for allele_name, allele_local in dict_of_alleles.items():
         local[genes_enums[gene_name][allele_name]] = allele_local

@@ -3,20 +3,28 @@ bee_genders:
   Drone: [Drone, 0]
   Queen: [Queen, 0]
 genes:
-  trait: "Trait : active, inactive"
-  species: species
+  trait: Gene
+  active: active
+  inactive: inactive
+  dominance_helper_text: Each of the four genes contains two alleles. <font color=#ec3661>Dominant</font> alleles are shown in <font color=#ec3661>red</font> color and are capitalized. <font color=#3687ec>Recessive</font> alleles are shown in <font color=#3687ec>blue</font> color. If a gene has at least one dominant allele, one of them will be selected to be an active allele.
+  inactive_allele_helper_text: This column represents an inactive allele. They can be inherited by offspring but will the queen bee will not display their effect.
+  active_allele_helper_text: This column represents an active allele. The queen bee will display the effect of the active allele, for example, appearance or lifespan.
+  species: Species
   species_helper_text: Species of this bee. Active allele of this gene identifies unique appearance of this bee and the resources the queen produces while alive.
-  fertility: fertility
+  fertility: Fertility
   fertility_helper_text: Fertility is the number of <b>drones</b> the queen will spawn after dying. Queen always spawns 1 <b>princess</b> and <i>fertility</i> <b>drones</b>.
-  lifespan: lifespan
+  lifespan: Lifespan
   lifespan_helper_text: "Lifespan is the number of ticks the queen will live for. The queen has a chance to produce resources on each tick except the last one: it dies without producing anything."
-  speed: speed
+  speed: Speed
   speed_helper_text: Speed is the multiplier for the chances of producing resources while queen is alive. Mind that bees of different species may produce the same resource with different production rates even if the active speed allele is the same.
+  gene_can_be_alleles: "This gene can be represented by these alleles:"
+  generations: Generations in captivity
 buildings:
   Forage: Forage # left side bar button
   Build: Build # left side bar button
   Inventory: Inventory
-  Sort: Sort # sort button
+  entertosave: "`Enter` to save"
+  Sort: Squeeze # sort button
   Apiary: Apiary
   Apiary_problem_ALL_OK: All ok
   Apiary_problem_NO_QUEEN: No queen present
@@ -26,21 +34,25 @@ buildings:
   Open Inspect Window: Open Inspect Window
   Inspect Window: Inspect Window
   Inspect: Inspect # left side bar button
-  Inspection popup: Inspection costs 1 honey to perform
+  Inspection popup: Inspection costs {} honey to perform
+  Menu: Menu
 resources:
   RESOURCES: RESOURCES
-  honey: honey
-  wood: wood
-  flowers: flowers
-  gold: gold
-  royal jelly: royal jelly
-  string: string
-  pollen cluster: pollen cluster
+  notenough: "Not enough {}: you have {} but you need {}"
+  HONEY: Honey
+  WOOD: Wood
+  FLOWERS: Flowers
+  GOLD: Gold
+  ROYAL_JELLY: Royal jelly
+  STRING: String
+  POLLEN_CLUSTER: Pollen cluster
 esc_menu:
   Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance
+  Bestiary: Bestiary
   Save: Save
   Load: Load
+  New game: New game
   Cancel: Cancel
   Settings: Settings
   Fullscreen: Fullscreen
@@ -51,8 +63,12 @@ esc_menu:
   Exit: Exit
   Mating History: Mating History
   mendel_notification: "Notification: Mendelian inheritance tutorial is now available in the esc menu."
+  bestiary_notification: "Notification: Bestiary is now available in the esc menu."
+  produced: Produced
+  resource: Resource
   load_confirm: You can lose unsaved progress. Continue?
-  save_confirm: You can lose saved progress. Continue?
+  save_confirm: Previously saved progress will be overwritten. Continue?
+  new_game_confirm: You can lose unsaved progress. Continue?
 genes_alleles:
   BeeSpecies:
     FOREST: [FOREST]
@@ -89,6 +105,28 @@ genes_alleles:
     SLOWER: [SLOWER]
     SLOWEST: [SLOWEST]
 
+achievements:
+  unlocked: "Achievement unlocked"
+  produce10flowers10wood: 'Produce 10 flowers and 10 wood.<br>Reward: 5 honey. Nice.'
+  produce1honey: 'Produce 1 honey.<br>Reward: 5 honey. Almost a free inspection for you.'
+  produce50honey: 'Produce 50 honey.<br>Reward: 1 pollen cluster and 1 royal jelly. Try to produce these difficult to obtain resources. Different bees required!'
+  produce1pollencluster: "Produce 1 pollen cluster.<br>Reward: 5 pollen clusters and game developer's appreciation"
+  produce1royaljelly: "Produce 1 royal jelly.<br>Reward: 5 royal jelly and game developer's admiration"
+  breedCOMMON: Breed COMMON species
+  breedCULTIVATED: Breed CULTIVATED species
+  breedNOBLE: Breed NOBLE species
+  breedMAJESTIC: Breed MAJESTIC species
+  breedIMPERIAL: Breed IMPERIAL species
+  breedDILIGENT: Breed DILIGENT species
+  breedUNWEARY: Breed UNWEARY species
+  breedINDUSTRIOUS: Breed INDUSTRIOUS species
+
+mendel_text_additionals:
+  Phenotype: Phenotype
+  Genotype: Genotype
+  Allele: Allele
+  Purebred: Purebred
+
 texts:
   helper_text:
     - |
@@ -118,7 +156,7 @@ texts:
       This helper window will explain basics of genetics according to Mendelian Inheritance.
       It is not actually needed to win the game but will help if you want to breed bees efficiently.
 
-      The most important fact to remember is that when two bees with <b>different</b> species alleles mate, their offspring may or may not have a mutation chance to transform into the <b>different</b> species.
+      The most important fact to remember is that when two bees with <b>different</b> species alleles mate, their offspring may have a mutation chance to transform into the <b>different</b> species.
 
     - |
       First, let's develop an understanding of fundamentals:
@@ -129,8 +167,12 @@ texts:
       A <b>purebred</b> organism is the organism all of whose genes consist of identical alleles.
 
     - |
-      Now we are ready to build upon this foundation.
-      Gregor Mendel is the Moravian Augustinian monk who founded the modern science of genetics and, as this game is about genetics, it's quite useful to understand Mendelian Inheritance.
+      The algorithm used to create offspring is as follows:
+      Pick one allele of the first parent at random
+      Pick one allele of the second parent at random
+      Apply mutations
+      if their dominance is identical, pick one of them to be active at random
+      else pick the dominant one to be active
 
     - |
       Law of independent assortment:
@@ -146,16 +188,15 @@ texts:
       <i>Some alleles are <font color=#ec3661>dominant</font> while others are <font color=#3687ec>recessive</font>; an organism with at least one <font color=#ec3661>dominant</font> allele will display the effect of the <font color=#ec3661>dominant</font> allele.</i>
       I will refer to an allele which will display its effect as the active allele. Active alleles are located in the left column of the inspection window.
       If the child has two <font color=#ec3661>dominant</font> or two <font color=#3687ec>recessive</font> alleles, one of them will be chosen to be active at random.
-
-      I will now show several examples to demonstrate the laws.
+    - |
+      I will now show several examples to demonstrate this law.
       Note that these examples show you the mechanics of the game and not real world.
       First, let's consider two purebred organisms:
-      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype (in the sense that these will produce identical offsprings) and different in their phenotype). This example is shown in the first two rows.
-      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>. This example is shown in the two following rows.
-      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>. This example is shown in the last two rows.
-
+      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font>. The order of alleles is chosen randomly as these alleles are both <font color=#ec3661>dominant</font>. This example is shown in the first two rows.
+      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>. The order of alleles is chosen randomly as these alleles are both <font color=#3687ec>recessive</font>. This example is shown in the next two rows.
+      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>. All the offspring become <font color=#ec3661>A</font><font color=#3687ec>c</font> because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>. This example is shown in the last two rows.
       These offspring are called F1-generation.
-      The second experiment of this group demonstrates the first law.
+      The last experiment of this group demonstrates the first law. As the law states, all the offspring are identical.
 
     - |
       Law of segregation:
@@ -181,11 +222,3 @@ texts:
 
     - |
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>B</font><font color=#3687ec>d</font> -> 12.5% <font color=#ec3661>AB</font> 12.5% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 12.5% <font color=#3687ec>cd</font>, 12.5% <font color=#3687ec>dc</font>
-
-    - |
-      The actual algorithm used in game is as follows:
-      Pick one allele of the first parent at random
-      Pick one allele of the second parent at random
-      Apply mutations
-      if their dominance is identical, pick one of them to be active at random
-      else pick the dominant one to be active

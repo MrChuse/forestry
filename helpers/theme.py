@@ -1,32 +1,65 @@
 import json
 
-from config import BeeSpecies
+from config import BeeSpecies, ResourceTypes
 from forestry import ApiaryProblems
 
 tool_tip_delay = '0.4'
 theme = {
-    '#TooltipDelay': {
-        'misc':{
-            'tool_tip_delay': tool_tip_delay
-        }
-    },
-    '#BeeButton':{
-        'prototype': f'#TooltipDelay'
-    },
     '@Centered':{
         'misc': {
             'text_horiz_alignment': 'center'
         }
     },
+    '@Font':{
+        'font': {
+            'name': 'fira_code',
+            'size': 20
+        },
+    },
+    '@SmallFont': {
+        'font': {
+            'name': 'fira_code',
+            'size': 14
+        }
+    },
+    '@TooltipDelay': {
+        'misc':{
+            'tool_tip_delay': tool_tip_delay
+        }
+    },
+    '@Dominant':{
+        'colours': {
+            'normal_text': '#ec3661'
+        }
+    },
+    '@Recessive': {
+        'colours': {
+            'normal_text': '#3687ec'
+        }
+    },
+    '#BeeButton':{
+        'prototype': f'@TooltipDelay'
+    },
+    '#button_slot_text_box':{
+        'prototype': '@SmallFont'
+    },
+    'text_box':{
+        'prototype': '@Font'
+    },
     'label': {
+        'prototype': '@Font',
         'misc': {
             'text_horiz_alignment': 'left'
         }
     },
-    '#restart_label': {
-        'colours': {
-            'normal_text': '#ec3661'
+    'tool_tip.text_box': {
+        'font': {
+            'name': 'fira_code',
+            'size': 14
         }
+    },
+    '#restart_label': {
+        'prototype': '@Dominant'
     },
     '#checkbox': {
         'misc': {
@@ -98,7 +131,7 @@ theme = {
 for problem in ApiaryProblems:
     theme.update({
         f'#Apiary_problem_'+problem.name: {
-            'prototype': '#TooltipDelay',
+            'prototype': '@TooltipDelay',
             'images': {
                 'normal_image': {
                     'path': f'assets/Apiary_problem_{problem.name}.png'
@@ -131,6 +164,18 @@ for species in BeeSpecies:
                     }
                 }
             }})
+
+for resource in ResourceTypes:
+    theme.update(
+        {f'#{resource.name}': {
+            'prototype': f'@TooltipDelay',
+            'images':{
+                'normal_image': {
+                    'path': f'assets/{resource}.png'
+                }
+            }
+        }})
+
 print(json.dumps(theme, indent=2))
 with open('theme.json', 'w') as f:
     json.dump(theme, f, indent=2)

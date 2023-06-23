@@ -77,7 +77,7 @@ class ApiaryWindow(UIWindow):
                 'bottom': 'top',
                 'left_target': self.queen_health,
                 'top_target': self.queen_health
-            })
+            }, generate_click_events_from=[])
 
     def update_problems_indicator(self):
         problem = self.apiary.get_problem().name
@@ -144,10 +144,7 @@ class ApiaryWindow(UIWindow):
                         bee, amt = self.apiary.take(index)
                         self.game.most_recent_inventory.place_bees([bee]*amt)
                     else:
-                        if self.cursor.slot.is_empty():
-                            self.cursor.slot.put(*self.apiary.take(index))
-                        else:
-                            self.game.print("Can't put into this slot", out=1)
+                        self.cursor.process_cursor_slot_interaction(event, b.slot)
         return super().process_event(event)
 
     def update(self, time_delta):

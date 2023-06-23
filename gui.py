@@ -5,6 +5,7 @@ import pygame_gui
 from pygame import mixer
 
 from config import load_settings
+from forestry import NotEnoughResourcesError
 from ui.custom_events import APPLY_VOLUME_CHANGE
 # keep TutorialStage here because needed for backwards compatibility with pickle.load
 from ui.game_components import GUI, TutorialStage
@@ -35,8 +36,8 @@ def main():
         background = pygame.Surface(window_size)
         background.fill(pygame.Color('#000000'))
 
-        manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False)
-        cursor_manager = pygame_gui.UIManager(window_size, 'theme.json')
+        manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False, starting_language=settings['language'])
+        cursor_manager = pygame_gui.UIManager(window_size, 'theme.json', starting_language=settings['language'])
 
         game = GUI(window_size, manager, cursor_manager)
 
@@ -54,7 +55,7 @@ def main():
                 elif event.type == pygame_gui.UI_BUTTON_PRESSED:
                     sounds['click_end'].play()
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE and pygame.key.get_mods() & pygame.KMOD_ALT:
                         visual_debug = not visual_debug
                         manager.set_visual_debug_mode(visual_debug)
                 elif event.type == APPLY_VOLUME_CHANGE:
@@ -76,6 +77,13 @@ def main():
                     consumed = cursor_manager.process_events(event)
                     if not consumed:
                         manager.process_events(event)
+                except NotEnoughResourcesError as e:
+                    if game is not None:
+                        game.print(e, out=1, floating_text_box_time=5)
+                        print_exc()
+                    else:
+                        print(e)
+                        print_exc()
                 except Exception as e:
                     if game is not None:
                         game.print(e, out=1)
@@ -83,9 +91,25 @@ def main():
                     else:
                         print(e)
                         print_exc()
-
-            manager.update(time_delta)
-            cursor_manager.update(time_delta)
+            try:
+                manager.update(time_delta)
+                cursor_manager.update(time_delta)
+                if game is not None:
+                    game.update(time_delta)
+            except NotEnoughResourcesError as e:
+                if game is not None:
+                    game.print(e, out=1, floating_text_box_time=5)
+                    print_exc()
+                else:
+                    print(e)
+                    print_exc()
+            except Exception as e:
+                if game is not None:
+                    game.print(e, out=1)
+                    print_exc()
+                else:
+                    print(e)
+                    print_exc()
 
             window_surface.blit(background, (0, 0))
             manager.draw_ui(window_surface)

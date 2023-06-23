@@ -20,7 +20,7 @@ class SettingsWindow(UIWindow):
         super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible)
         self.settings = load_settings()
         self.label_width = 160
-        self.full_screen_checkbox = UICheckbox(pygame.Rect(20, 20, 20, 20), self.settings['fullscreen'], manager, self)
+        self.full_screen_checkbox = UICheckbox(pygame.Rect(20, 20, 20, 20), self.settings['fullscreen'], container=self)
         self.full_screen_label = UILabel(pygame.Rect(0,-20,self.label_width,20), local['Fullscreen'], manager, container=self,
             anchors={
                 'left': 'left',
@@ -145,7 +145,7 @@ class SettingsWindow(UIWindow):
                 self.click_volume_value_label.set_text(str(int(self.click_volume_slider.current_value)))
         return consume
 
-    def persist_settings(self, filename='settings'):
+    def persist_settings(self, filename='settings.yaml'):
         settings = {}
         settings['fullscreen'] = self.full_screen_checkbox.is_selected
         settings['click_volume'] = self.click_volume_slider.current_value / 100
