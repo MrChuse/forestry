@@ -1,4 +1,5 @@
 import dataclasses
+import os
 import pickle
 import random
 import textwrap
@@ -1008,11 +1009,22 @@ class Game:
         }
 
     def save(self, name):
-        with open(name + '.forestry', 'wb') as f:
+        if not os.path.exists('saves'):
+            os.mkdir('saves')
+        with open('saves/' + name + '.forestry', 'wb') as f:
             pickle.dump(self.get_state(), f)
 
+    def get_save_names_list(self):
+        return [x.replace('.forestry', '') for x in os.listdir('saves') if x.endswith('forestry')]
+
+    def load_last(self):
+        d = {path: os.path.getmtime('saves/' + path) for path in os.listdir('saves') if path.endswith('.forestry')}
+        latest = max(d, key=d.get).replace('.forestry', '')
+        print(latest)
+        self.load(latest)
+
     def load(self, name) -> dict:
-        with open(name + '.forestry', 'rb') as f:
+        with open('saves/' + name + '.forestry', 'rb') as f:
             state : dict = pickle.load(f)
 
         from migration import (  # import here to avoid circular imports

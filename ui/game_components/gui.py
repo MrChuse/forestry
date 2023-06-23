@@ -5,7 +5,7 @@ from traceback import print_exc
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIButton, UITextBox
+from pygame_gui.elements import UIButton, UITextBox, UITextEntryLine
 from pygame_gui.windows import UIMessageWindow
 
 from config import (INVENTORY_WINDOW_SIZE, UI_MESSAGE_SIZE, ResourceTypes,
@@ -32,7 +32,7 @@ class GUI(Game):
 
         self.window_size = window_size
         self.ui_manager = manager
-        if not os.path.exists('save.forestry'):
+        if len(list(filter(lambda x: x.endswith('.forestry'), os.listdir('saves')))) == 0:
             self.help_window()
 
         self.cursor_manager = cursor_manager
@@ -97,11 +97,15 @@ class GUI(Game):
         self.load_confirm = None
         self.save_confirm = None
 
-        esc_menu_rect = pygame.Rect(0, 0, 200, 500)
+        self.esc_menu_width = 200
+        esc_menu_rect = pygame.Rect(0, 0, self.esc_menu_width, 500)
         esc_menu_rect.center = (self.window_size[0]/2, self.window_size[1]/2)
         self.esc_menu = UIPickList(esc_menu_rect, [local['Greetings Window'], local['Settings'], local['Load'], local['Save'], local['Exit']], cursor_manager, visible=False, starting_height=30)
+        self.load_file_selection_list = None
+        self.filename_entry = None
+        self.save_file_selection_list = None
 
-        self.load('save')
+        self.load_last()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -153,9 +157,37 @@ class GUI(Game):
         r = pygame.Rect((mouse_pos[0] + UI_MESSAGE_SIZE[0], mouse_pos[1]), UI_MESSAGE_SIZE)
         return UILocationFindingMessageWindow(r, local['mendel_notification'], self.ui_manager)
 
+    def open_load_file_selection_list(self):
+        self.load_file_selection_list = UIPickList(pygame.Rect(0, self.esc_menu.get_abs_rect().top, self.esc_menu_width, 500),
+                                                   self.get_save_names_list(),
+                                                   manager=self.cursor_manager,
+                                                   anchors={'left_target': self.esc_menu})
+
+    def open_save_file_selection_list(self):
+        self.filename_entry = UITextEntryLine(pygame.Rect(0, self.esc_menu.get_abs_rect().top, self.esc_menu_width, 44),
+                                              manager=self.cursor_manager,
+                                              anchors={'left_target': self.esc_menu})
+        self.save_file_selection_list = UIPickList(pygame.Rect(0, 0, self.esc_menu_width, 500),
+                                                   self.get_save_names_list(),
+                                                   manager=self.cursor_manager,
+                                                   anchors={'left_target': self.esc_menu,
+                                                            'top_target': self.filename_entry})
+        diff = self.save_file_selection_list.rect.bottom - self.esc_menu.rect.bottom
+        self.save_file_selection_list.set_dimensions((self.esc_menu_width, 500 - diff))
+
+
     def toggle_esc_menu(self):
         if self.esc_menu.visible:
             self.esc_menu.hide()
+            if self.load_file_selection_list is not None:
+                self.load_file_selection_list.kill()
+                self.load_file_selection_list = None
+            if self.save_file_selection_list is not None:
+                self.save_file_selection_list.kill()
+                self.save_file_selection_list = None
+            if self.filename_entry is not None:
+                self.filename_entry.kill()
+                self.filename_entry = None
         else:
             self.esc_menu.show()
 
@@ -200,12 +232,14 @@ class GUI(Game):
                     self.build_dropdown.add_options([local[option]])
 
     def add_bestiary_to_esc_menu(self):
-        self.esc_menu._raw_item_list.insert(1, local['Bestiary'])
-        self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
+        if local['Bestiary'] not in self.esc_menu._raw_item_list:
+            self.esc_menu._raw_item_list.insert(1, local['Bestiary'])
+            self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
 
     def add_mendelian_inheritance_to_esc_menu(self):
-        self.esc_menu._raw_item_list.insert(2, local['Mendelian Inheritance'])
-        self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
+        if local['Mendelian Inheritance'] not in self.esc_menu._raw_item_list:
+            self.esc_menu._raw_item_list.insert(2, local['Mendelian Inheritance'])
+            self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
 
     def set_dimensions(self, size):
         self.window_size = size
@@ -224,7 +258,7 @@ class GUI(Game):
                     self.apiary_windows.append(
                         ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), (300, 420)), self.ui_manager)
                     )
-                else:
+                elif event.text in self.inventories:
                     index = event.text
                     mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
                     self.inventory_windows.append(
@@ -236,27 +270,51 @@ class GUI(Game):
                 if event.text == local['Exit']:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 elif event.text == local['Load']:
-                    r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
-                    self.load_confirm = UILocationFindingConfirmationDialog(r, local['load_confirm'], self.cursor_manager)
+                    self.open_load_file_selection_list()
+                    if self.save_file_selection_list is not None:
+                        self.save_file_selection_list.kill()
+                        self.save_file_selection_list = None
+                        self.filename_entry.kill()
+                        self.filename_entry = None
                 elif event.text == local['Save']:
-                    if os.path.exists('save.forestry'):
-                        r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
-                        self.save_confirm = UILocationFindingConfirmationDialog(r, local['save_confirm'], self.cursor_manager)
-                    else:
-                        self.save('save')
-                        self.print('Saved the game to the disk')
+                    self.open_save_file_selection_list()
+                    if self.load_file_selection_list is not None:
+                        self.load_file_selection_list.kill()
+                        self.load_file_selection_list = None
                 elif event.text == local['Settings']:
                     self.settings_window()
+                    self.toggle_esc_menu()
                 elif event.text == local['Bestiary']:
                     self.bestiary_window = self.open_bestiary_window()
+                    self.toggle_esc_menu()
                 elif event.text == local['Mendelian Inheritance']:
                     self.open_mendel_window()
+                    self.toggle_esc_menu()
                 elif event.text == local['Greetings Window']:
                     self.help_window()
+                    self.toggle_esc_menu()
                 elif event.text == local['Mating History']:
                     if self.mating_history_window is None:
                         self.mating_history_window = self.open_mating_history_window()
-                self.esc_menu.hide()
+                    self.toggle_esc_menu()
+            elif event.ui_element == self.load_file_selection_list:
+                r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
+                self.load_confirm = UILocationFindingConfirmationDialog(r, local['load_confirm'], self.cursor_manager)
+                self.load_confirm.filename = event.text
+            elif event.ui_element == self.save_file_selection_list:
+                r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
+                self.save_confirm = UILocationFindingConfirmationDialog(r, local['save_confirm'], self.cursor_manager)
+                self.save_confirm.filename = event.text
+        elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+            if event.ui_element == self.filename_entry:
+                if event.text in self.get_save_names_list():
+                    r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
+                    self.save_confirm = UILocationFindingConfirmationDialog(r, local['save_confirm'], self.cursor_manager)
+                    self.save_confirm.filename = event.text
+                else:
+                    self.save(event.text)
+                    self.print('Saved the game to the disk')
+                    self.toggle_esc_menu()
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if isinstance(event.ui_element, InventoryWindow):
                 self.most_recent_inventory = event.ui_element.inv
@@ -296,11 +354,13 @@ class GUI(Game):
             self.update_windows_list()
         elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.load_confirm:
-                self.load('save')
+                self.load(self.load_confirm.filename)
                 self.print('Loaded save from disk')
+                self.toggle_esc_menu()
             elif event.ui_element == self.save_confirm:
-                self.save('save')
+                self.save(self.save_confirm.filename)
                 self.print('Saved the game to the disk')
+                self.toggle_esc_menu()
             elif event.ui_element == self.inspect_confirm:
                 self.inspect_bee(self.inspect_confirm.bee_button.slot.slot)
                 if isinstance(self.inspect_confirm.ui_element, InspectWindow):
