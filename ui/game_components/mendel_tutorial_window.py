@@ -3,43 +3,55 @@ from typing import List
 import pygame
 import pygame_gui
 from pygame_gui.elements import (UIButton, UIPanel, UIStatusBar, UITextBox,
-                                 UIWindow)
+                                 UIWindow, UILabel)
 
-from config import local, mendel_text
+from config import BeeFertility, BeeLifespan, BeeSpeed, local, mendel_text, dominant
 from forestry import Bee, BeeSpecies, Drone, Genes, MatingEntry, Princess, Slot
 from ui.elements.ui_grid_window import UIGridPanel
+from ui.elements.ui_table import UITable
+from ui.game_components.bee_stats import BeeStats, colorize
 from ui.game_components.mating_entry_panel import MatingEntryPanel
 from ui.game_components.ui_button_slot import UIButtonSlot
 
 
-class BeeHighlight(UIPanel):
-                def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager = None, *, element_id: str = 'panel', margins = None, container = None, parent_element = None, object_id = None, anchors = None, visible: int = 1):
-                    relative_rect.size = 134, 134
-                    super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
-                    UIButtonSlot(
-                        Slot(Drone(Genes(bee.genes.species, None, None, None), bee.inspected), 1),
-                        pygame.Rect(32, 0, 64, 64),
-                        '',
-                        self.ui_manager,
-                        self,
-                        is_inspectable=False)
-                    UIButtonSlot(
-                        Slot(Drone(Genes((bee.genes.species[0], bee.genes.species[0]), None, None, None), bee.inspected), 1),
-                        pygame.Rect(0, 64, 64, 64),
-                        '',
-                        self.ui_manager,
-                        self,
-                        is_inspectable=False,
-                        allow_popup=False)
-                    UIButtonSlot(
-                        Slot(Drone(Genes((bee.genes.species[1], bee.genes.species[1]), None, None, None), bee.inspected), 1),
-                        pygame.Rect(64, 64, 64, 64),
-                        '',
-                        self.ui_manager,
-                        self,
-                        is_inspectable=False,
-                        allow_popup=False)
+class BeeHighlight(UITable):
+    def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager = None, *, element_id: str = 'panel', margins = None, container = None, parent_element = None, object_id = None, anchors = None, visible: int = 1):
+        relative_rect.size = 134, 66
+        self.bee = bee
+        super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, resizable=True)
 
+    def populate_table_contents(self):
+        super().populate_table_contents()
+        self.table_contents.append([
+            UIButtonSlot(
+                Slot(Drone(Genes((self.bee.genes.species[0], self.bee.genes.species[0])), self.bee.inspected), 1),
+                pygame.Rect(0, 0, 64, 64),
+                '',
+                self.ui_manager,
+                self,
+                is_inspectable=False,
+                allow_popup=False),
+            UIButtonSlot(
+                Slot(Drone(Genes((self.bee.genes.species[1], self.bee.genes.species[1])), self.bee.inspected), 1),
+                pygame.Rect(64, 0, 64, 64),
+                '',
+                self.ui_manager,
+                self,
+                is_inspectable=False,
+                allow_popup=False)
+        ])
+
+class NamedBeeHighlight(UITable):
+    def __init__(self, name: str, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager = None, *, element_id: str = 'panel', margins = None, container = None, parent_element = None, object_id = None, anchors = None, visible: int = 1):
+        relative_rect.size = 134, 66
+        self.bee = bee
+        self.name = name
+        super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, resizable=True)
+
+    def populate_table_contents(self):
+        super().populate_table_contents()
+        self.table_contents.append([UITextBox(self.name, pygame.Rect(0, 0, 128, 44), object_id='@Centered', container=self)])
+        self.table_contents.append([BeeHighlight(self.bee, pygame.Rect(0, 0, 0, 0), container=self)])
 
 
 class MendelTutorialWindow(UIWindow):
@@ -54,14 +66,7 @@ class MendelTutorialWindow(UIWindow):
             text_box = UITextBox(text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height - self.arrow_buttons_height)), self.ui_manager, container=self)
             self.text_boxes.append(text_box)
 
-        self.panels = [UIPanel(pygame.Rect((0,0), (size[0], self.interactive_panel_height)), manager=self.ui_manager, container=self,
-            anchors={
-                'left': 'left',
-                'right': 'right',
-                'top': 'top',
-                'bottom': 'bottom',
-                'top_target': text_box
-            }) for text_box in self.text_boxes]
+        self.panels = {}
         self._fill_panels()
         self.left_arrow_button = UIButton(pygame.Rect(0, -self.arrow_buttons_height, self.arrow_buttons_height, self.arrow_buttons_height), '<', self.ui_manager, self,
             anchors={
@@ -91,340 +96,378 @@ class MendelTutorialWindow(UIWindow):
         self.progress_bar.redraw()
         self.show_current_page()
 
+    def setup_phenotype_genotype(self, panel_num):
+        panel = self.panels[panel_num]
+        size = panel.get_abs_rect().size
+        table = UITable(pygame.Rect(0, 0, size[0], size[1]), kill_on_repopulation=False, container=self, anchors=panel.anchors)
+        table.table_contents.append([
+            UILabel(pygame.Rect(0, 0, 120, 30), local['Phenotype'], container=table, object_id='@Centered'),
+            UILabel(pygame.Rect(0, 0, 148, 30), local['Genotype'], container=table, object_id='@Centered'),
+            UILabel(pygame.Rect(0, 0, 148, 30), local['Allele'], container=table, object_id='@Centered'),
+            UILabel(pygame.Rect(0, 0, 148, 30), local['Purebred'], container=table, object_id='@Centered')
+        ])
+        bee = Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST),
+                          (BeeFertility.TWO, BeeFertility.THREE),
+                          (BeeLifespan.SHORT, BeeLifespan.SHORTER),
+                          (BeeSpeed.SLOW, BeeSpeed.SLOWEST)), True)
+        pure_bee = Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST),
+                               (BeeFertility.TWO, BeeFertility.TWO),
+                               (BeeLifespan.SHORT, BeeLifespan.SHORT),
+                               (BeeSpeed.SLOW, BeeSpeed.SLOW)), True)
+        text = []
+        for allele in BeeSpeed:
+            text.append(f'{colorize(local[allele][0], "#ec3661" if dominant[allele] else "#3687ec")}: {allele.value}')
+        text = '\n'.join(text)
+        table.table_contents.append([
+            UIButtonSlot(
+                Slot(bee, 1),
+                pygame.Rect(0, 0, 64, 64),
+                '',
+                self.ui_manager,
+                table,
+                is_inspectable=False,
+                allow_popup=False),
+            BeeStats(bee, pygame.Rect(0, 0, 1, 1), container=table, resizable=True),
+            UITextBox(text, pygame.Rect(0, 0, 250, 218), container=table),
+            BeeStats(pure_bee, pygame.Rect(0, 0, 1, 1), container=table, resizable=True),
+        ])
+        table.rebuild()
+        panel.kill()
+        self.panels[panel_num] = table
+
+    def setup_bee_highlights(self, panel_num):
+        panel = self.panels[panel_num]
+        def create_beehighlight(name, species, container, inspected=False):
+            return NamedBeeHighlight(name, Drone(Genes(species), inspected), pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container)
+        def create_highlights(container):
+            return [
+                create_beehighlight('<font color=#ec3661>AA</font>', (BeeSpecies.FOREST, BeeSpecies.FOREST), container),
+                create_beehighlight('<font color=#ec3661>BB</font>', (BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), container),
+                create_beehighlight('<font color=#3687ec>cc</font>', (BeeSpecies.NOBLE, BeeSpecies.NOBLE), container),
+                create_beehighlight('<font color=#3687ec>dd</font>', (BeeSpecies.DILIGENT, BeeSpecies.DILIGENT), container),
+                create_beehighlight('<font color=#ec3661>AB</font>', (BeeSpecies.FOREST, BeeSpecies.MEADOWS), container),
+                create_beehighlight('<font color=#ec3661>BA</font>', (BeeSpecies.MEADOWS, BeeSpecies.FOREST), container),
+                create_beehighlight('<font color=#3687ec>cd</font>', (BeeSpecies.NOBLE, BeeSpecies.DILIGENT), container),
+                create_beehighlight('<font color=#3687ec>dc</font>', (BeeSpecies.DILIGENT, BeeSpecies.NOBLE), container),
+            ]
+        self.panels[panel_num].kill()
+        self.panels[panel_num] = UIGridPanel(panel.relative_rect, panel.starting_height, self.ui_manager, container=self, subelements_function=create_highlights,
+            anchors={
+                'left': 'left',
+                'right': 'right',
+                'top': 'top',
+                'bottom': 'bottom',
+                'top_target': self.text_boxes[panel_num]
+            })
+
+    # 3
+    def setup_dominance_and_uniformity(self, panel_num):
+        panel = self.panels[panel_num]
+        # set up 6 mating entries:
+        mating_entries = []
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+
+        # create UIGridPanel
+        def subelements_function(container):
+            return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
+
+        width = 524
+        height = 73 * len(mating_entries)
+        if height > panel.get_container().get_rect().height:
+            width += 18
+            height = panel.get_container().get_rect().height
+        relative_rect = pygame.Rect(0, 0, width, height)
+        relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
+        UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
+
+    # 4
+    def setup_segregation(self, panel_num):
+        panel = self.panels[panel_num]
+        # set up 6 mating entries:
+        mating_entries = []
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+
+
+        # create UIGridPanel
+        def subelements_function(container):
+            return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
+
+        width = 524
+        height = 73 * len(mating_entries)
+        if height > panel.get_container().get_rect().height:
+            width += 18
+            height = panel.get_container().get_rect().height
+        relative_rect = pygame.Rect(0, 0, width, height)
+        relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
+        UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
+
+    # 5
+    def setup_purebred_and_F1(self, panel_num):
+        panel = self.panels[panel_num]
+        # set up 6 mating entries:
+        mating_entries = []
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        # create UIGridPanel
+        def subelements_function(container):
+            return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
+
+        width = 524
+        height = 73 * len(mating_entries)
+        if height > panel.get_container().get_rect().height:
+            width += 18
+            height = panel.get_container().get_rect().height
+        relative_rect = pygame.Rect(0, 0, width, height)
+        relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
+        UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
+
+    # 6
+    def setup_radically_different_1(self, panel_num):
+        panel = self.panels[panel_num]
+        # set up 6 mating entries:
+        mating_entries = []
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.DILIGENT))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                force_inspect=True
+            )
+        )
+        # create UIGridPanel
+        def subelements_function(container):
+            return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
+
+        width = 524
+        height = 73 * len(mating_entries)
+        if height > panel.get_container().get_rect().height:
+            width += 18
+            height = panel.get_container().get_rect().height
+        relative_rect = pygame.Rect(0, 0, width, height)
+        relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
+        UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
+
+    # 7
+    def setup_radically_different_2(self, panel_num):
+        panel = self.panels[panel_num]
+        # set up 6 mating entries:
+        mating_entries = []
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.DILIGENT))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.FOREST, BeeSpecies.DILIGENT))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT))),
+                force_inspect=True
+            )
+        )
+        mating_entries.append(MatingEntry.from_bees(
+                Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE))),
+                Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT))),
+                Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.NOBLE))),
+                force_inspect=True
+            )
+        )
+        # create UIGridPanel
+        def subelements_function(container):
+            return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
+
+        width = 524
+        height = 73 * len(mating_entries)
+        if height > panel.get_container().get_rect().height:
+            width += 18
+            height = panel.get_container().get_rect().height
+        relative_rect = pygame.Rect(0, 0, width, height)
+        relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
+        UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
+
     def _fill_panels(self):
         # 0
         # 1
 
         # 2
-        def setup_bee_highlights(panel_num):
-            panel = self.panels[panel_num]
-            def create_beehighlight(species, container, inspected=False):
-                return BeeHighlight(Drone(Genes(species, None, None, None), inspected), pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container)
-            def create_highlights(container):
-                return [
-                    create_beehighlight((BeeSpecies.FOREST, BeeSpecies.FOREST), container),
-                    create_beehighlight((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), container),
-                    create_beehighlight((BeeSpecies.NOBLE, BeeSpecies.NOBLE), container),
-                    create_beehighlight((BeeSpecies.DILIGENT, BeeSpecies.DILIGENT), container),
-                    create_beehighlight((BeeSpecies.FOREST, BeeSpecies.MEADOWS), container, True),
-                    create_beehighlight((BeeSpecies.MEADOWS, BeeSpecies.FOREST), container, True),
-                    create_beehighlight((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), container, True),
-                    create_beehighlight((BeeSpecies.DILIGENT, BeeSpecies.NOBLE), container, True),
-                ]
-            self.panels[panel_num].kill()
-            self.panels[panel_num] = UIGridPanel(panel.relative_rect, panel.starting_height, self.ui_manager, container=self, subelements_function=create_highlights,
-                anchors={
-                    'left': 'left',
-                    'right': 'right',
-                    'top': 'top',
-                    'bottom': 'bottom',
-                    'top_target': self.text_boxes[panel_num]
-                })
-
-        # 3
-        def setup_dominance_and_uniformity(panel_num):
-            panel = self.panels[panel_num]
-            # set up 6 mating entries:
-            mating_entries = []
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-
-
-            # create UIGridPanel
-            def subelements_function(container):
-                return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
-
-            width = 524
-            height = 73 * len(mating_entries)
-            if height > panel.get_container().get_rect().height:
-                width += 18
-                height = panel.get_container().get_rect().height
-            relative_rect = pygame.Rect(0, 0, width, height)
-            relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
-            UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
-
-        # 4
-        def setup_segregation(panel_num):
-            panel = self.panels[panel_num]
-            # set up 6 mating entries:
-            mating_entries = []
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.MEADOWS), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-
-
-            # create UIGridPanel
-            def subelements_function(container):
-                return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
-
-            width = 524
-            height = 73 * len(mating_entries)
-            if height > panel.get_container().get_rect().height:
-                width += 18
-                height = panel.get_container().get_rect().height
-            relative_rect = pygame.Rect(0, 0, width, height)
-            relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
-            UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
-
-        # 5
-        def setup_purebred_and_F1(panel_num):
-            panel = self.panels[panel_num]
-            # set up 6 mating entries:
-            mating_entries = []
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            # create UIGridPanel
-            def subelements_function(container):
-                return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
-
-            width = 524
-            height = 73 * len(mating_entries)
-            if height > panel.get_container().get_rect().height:
-                width += 18
-                height = panel.get_container().get_rect().height
-            relative_rect = pygame.Rect(0, 0, width, height)
-            relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
-            UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
-
-        # 6
-        def setup_radically_different_1(panel_num):
-            panel = self.panels[panel_num]
-            # set up 6 mating entries:
-            mating_entries = []
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.DILIGENT), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            # create UIGridPanel
-            def subelements_function(container):
-                return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
-
-            width = 524
-            height = 73 * len(mating_entries)
-            if height > panel.get_container().get_rect().height:
-                width += 18
-                height = panel.get_container().get_rect().height
-            relative_rect = pygame.Rect(0, 0, width, height)
-            relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
-            UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
-
-        # 7
-        def setup_radically_different_2(panel_num):
-            panel = self.panels[panel_num]
-            # set up 6 mating entries:
-            mating_entries = []
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.MEADOWS), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.FOREST), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.DILIGENT), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.FOREST, BeeSpecies.DILIGENT), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.NOBLE, BeeSpecies.DILIGENT), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            mating_entries.append(MatingEntry.from_bees(
-                    Princess(Genes((BeeSpecies.FOREST, BeeSpecies.NOBLE), None, None, None)),
-                    Drone(Genes((BeeSpecies.MEADOWS, BeeSpecies.DILIGENT), None, None, None)),
-                    Drone(Genes((BeeSpecies.DILIGENT, BeeSpecies.NOBLE), None, None, None)),
-                    force_inspect=True
-                )
-            )
-            # create UIGridPanel
-            def subelements_function(container):
-                return [MatingEntryPanel(1, entry, pygame.Rect(0,0,0,0), 1, self.ui_manager, container=container) for i, entry in enumerate(mating_entries)]
-
-            width = 524
-            height = 73 * len(mating_entries)
-            if height > panel.get_container().get_rect().height:
-                width += 18
-                height = panel.get_container().get_rect().height
-            relative_rect = pygame.Rect(0, 0, width, height)
-            relative_rect.center = panel.get_container().get_rect().width//2, panel.get_container().get_rect().height//2
-            UIGridPanel(relative_rect, 20, self.ui_manager, container=panel, subelements_function=subelements_function)
-
         def auto_counter(initial_value=None):
             if initial_value:
                 auto_counter.value = initial_value
@@ -434,12 +477,14 @@ class MendelTutorialWindow(UIWindow):
             auto_counter.value += 1
             return ret
 
-        setup_bee_highlights(auto_counter(3)) # the functions are used to hide code in the editor
-        setup_dominance_and_uniformity(auto_counter())
-        setup_segregation(auto_counter())
-        setup_purebred_and_F1(auto_counter())
-        setup_radically_different_1(auto_counter())
-        setup_radically_different_2(auto_counter())
+        self.panel_functions = {}
+        self.panel_functions[1] = self.setup_phenotype_genotype
+        self.panel_functions[3] = self.setup_bee_highlights
+        self.panel_functions[auto_counter(5)] = self.setup_dominance_and_uniformity
+        self.panel_functions[auto_counter()] = self.setup_segregation
+        self.panel_functions[auto_counter()] = self.setup_purebred_and_F1
+        self.panel_functions[auto_counter()] = self.setup_radically_different_1
+        self.panel_functions[auto_counter()] = self.setup_radically_different_2
 
     def add_page(self, amount: int):
         self.current_page += amount
@@ -454,9 +499,23 @@ class MendelTutorialWindow(UIWindow):
     def show_current_page(self):
         for text_box in self.text_boxes:
             text_box.hide()
-        for panel in self.panels:
+        for panel in self.panels.values():
             panel.hide()
         self.text_boxes[self.current_page].show()
+        if self.panels.get(self.current_page) is None:
+            size = self.get_container().get_size()
+            self.panels[self.current_page] = UIPanel(pygame.Rect((0,0), (size[0], self.interactive_panel_height)), manager=self.ui_manager, container=self,
+                anchors={
+                    'left': 'left',
+                    'right': 'right',
+                    'top': 'top',
+                    'bottom': 'bottom',
+                    'top_target': text_box
+                })
+
+            func = self.panel_functions.get(self.current_page)
+            if func is not None:
+                func(self.current_page)
         self.panels[self.current_page].show()
 
     def process_event(self, event: pygame.event.Event) -> bool:

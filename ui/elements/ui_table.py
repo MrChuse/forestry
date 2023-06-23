@@ -6,8 +6,9 @@ from pygame_gui.elements import UIWindow, UIPanel
 
 
 class UITable(UIPanel):
-    def __init__(self, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: IUIManagerInterface | None = None, *, element_id: str = 'panel', margins: Dict[str, int] | None = None, container: IContainerLikeInterface | None = None, parent_element: UIElement | None = None, object_id: ObjectID | str | None = None, anchors: Dict[str, str | UIElement] | None = None, visible: int = 1, resizable: bool = False, table_contents: List[List[UIElement]] | List = None):
+    def __init__(self, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: IUIManagerInterface | None = None, *, element_id: str = 'panel', margins: Dict[str, int] | None = None, container: IContainerLikeInterface | None = None, parent_element: UIElement | None = None, object_id: ObjectID | str | None = None, anchors: Dict[str, str | UIElement] | None = None, visible: int = 1, resizable: bool = False, table_contents: List[List[UIElement]] | List = None, kill_on_repopulation: bool = True):
         self.resizable = resizable
+        self.kill_on_repopulation = kill_on_repopulation
         self.table_contents = table_contents if table_contents is not None else []
         self.original_rect = pygame.Rect(relative_rect)
         self.buttons = []
@@ -15,11 +16,12 @@ class UITable(UIPanel):
         self.rebuild()
 
     def populate_table_contents(self):
-        if self.table_contents is not None:
-            for row in self.table_contents:
-                for element in row:
-                    element.kill()
-        self.table_contents = []
+        if self.kill_on_repopulation:
+            if self.table_contents is not None:
+                for row in self.table_contents:
+                    for element in row:
+                        element.kill()
+            self.table_contents = []
 
     def rebuild(self):
         if hasattr(self, 'panel_container'):

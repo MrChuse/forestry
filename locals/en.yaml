@@ -121,6 +121,12 @@ achievements:
   breedUNWEARY: Breed UNWEARY species
   breedINDUSTRIOUS: Breed INDUSTRIOUS species
 
+mendel_text_additionals:
+  Phenotype: Phenotype
+  Genotype: Genotype
+  Allele: Allele
+  Purebred: Purebred
+
 texts:
   helper_text:
     - |
@@ -150,7 +156,7 @@ texts:
       This helper window will explain basics of genetics according to Mendelian Inheritance.
       It is not actually needed to win the game but will help if you want to breed bees efficiently.
 
-      The most important fact to remember is that when two bees with <b>different</b> species alleles mate, their offspring may or may not have a mutation chance to transform into the <b>different</b> species.
+      The most important fact to remember is that when two bees with <b>different</b> species alleles mate, their offspring may have a mutation chance to transform into the <b>different</b> species.
 
     - |
       First, let's develop an understanding of fundamentals:
@@ -182,16 +188,15 @@ texts:
       <i>Some alleles are <font color=#ec3661>dominant</font> while others are <font color=#3687ec>recessive</font>; an organism with at least one <font color=#ec3661>dominant</font> allele will display the effect of the <font color=#ec3661>dominant</font> allele.</i>
       I will refer to an allele which will display its effect as the active allele. Active alleles are located in the left column of the inspection window.
       If the child has two <font color=#ec3661>dominant</font> or two <font color=#3687ec>recessive</font> alleles, one of them will be chosen to be active at random.
-
-      I will now show several examples to demonstrate the laws.
+    - |
+      I will now show several examples to demonstrate this law.
       Note that these examples show you the mechanics of the game and not real world.
       First, let's consider two purebred organisms:
-      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font> as these alleles are both <font color=#ec3661>dominant</font> (and these organisms are actually identical in their genotype (in the sense that these will produce identical offsprings) and different in their phenotype). This example is shown in the first two rows.
-      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>, because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>. This example is shown in the two following rows.
-      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>, because both alleles are <font color=#3687ec>recessive</font>. This example is shown in the last two rows.
-
+      <font color=#ec3661>AA</font> + <font color=#ec3661>BB</font> -> 50% <font color=#ec3661>AB</font>, 50% <font color=#ec3661>BA</font>. The order of alleles is chosen randomly as these alleles are both <font color=#ec3661>dominant</font>. This example is shown in the first two rows.
+      <font color=#3687ec>cc</font> + <font color=#3687ec>dd</font> -> 50% <font color=#3687ec>cd</font>, 50% <font color=#3687ec>dc</font>. The order of alleles is chosen randomly as these alleles are both <font color=#3687ec>recessive</font>. This example is shown in the next two rows.
+      <font color=#ec3661>AA</font> + <font color=#3687ec>cc</font> -> 100% <font color=#ec3661>A</font><font color=#3687ec>c</font>. All the offspring become <font color=#ec3661>A</font><font color=#3687ec>c</font> because <font color=#ec3661>A</font> is <font color=#ec3661>dominant</font> and <font color=#3687ec>c</font> is <font color=#3687ec>recessive</font>. This example is shown in the last two rows.
       These offspring are called F1-generation.
-      The second experiment of this group demonstrates the first law.
+      The last experiment of this group demonstrates the first law. As the law states, all the offspring are identical.
 
     - |
       Law of segregation:

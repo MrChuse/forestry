@@ -183,8 +183,9 @@ class GUI(Game):
 
         super().__init__()
 
-        if not new_game:
-            self.load_last()
+        # if not new_game:
+        #     self.load_last()
+        self.open_mendel_window()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -200,7 +201,8 @@ class GUI(Game):
         return BestiaryWindow(self.bestiary, r, self.ui_manager, local['Bestiary'])
 
     def open_mendel_window(self):
-        r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
+        r = pygame.Rect(0, 0, 1036, 584)
+        print(r)
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         return MendelTutorialWindow(r, self.ui_manager)
 

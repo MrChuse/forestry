@@ -98,7 +98,7 @@ with codecs.open(filename, "r", "utf_8_sig" ) as f:
     local_conf = yaml.safe_load(f)
 
 local = {}
-straight = ['genes', 'bee_genders', 'buildings', 'esc_menu', 'achievements']
+straight = ['genes', 'bee_genders', 'buildings', 'esc_menu', 'achievements', 'mendel_text_additionals']
 for thing in straight:
     local.update(local_conf[thing])
 for res, translation in local_conf['resources'].items():
