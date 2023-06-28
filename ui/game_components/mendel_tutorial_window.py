@@ -2,10 +2,11 @@ from typing import List
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel, UIStatusBar, UITextBox,
-                                 UIWindow, UILabel)
+from pygame_gui.elements import (UIButton, UILabel, UIPanel, UIStatusBar,
+                                 UITextBox, UIWindow)
 
-from config import BeeFertility, BeeLifespan, BeeSpeed, local, mendel_text, dominant
+from config import (BeeFertility, BeeLifespan, BeeSpeed, dominant, local,
+                    mendel_text)
 from forestry import Bee, BeeSpecies, Drone, Genes, MatingEntry, Princess, Slot
 from ui.elements.ui_grid_window import UIGridPanel
 from ui.elements.ui_table import UITable
@@ -56,14 +57,21 @@ class NamedBeeHighlight(UITable):
 
 class MendelTutorialWindow(UIWindow):
     def __init__(self, rect: pygame.Rect, manager):
-        super().__init__(rect, manager, local['Mendelian Inheritance'])
+        super().__init__(rect, manager, local['Mendelian Inheritance'], resizable=True)
         self.set_minimum_dimensions((700, 500))
         self.interactive_panel_height = self.get_container().get_rect().height//2
         self.arrow_buttons_height = 40
         size = self.get_container().get_size()
         self.text_boxes : List[UITextBox] = []
         for text in mendel_text:
-            text_box = UITextBox(text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height - self.arrow_buttons_height)), self.ui_manager, container=self)
+            text_box = UITextBox(text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height - self.arrow_buttons_height)), self.ui_manager, container=self,
+                anchors={
+                    'top': 'top',
+                    'bottom': 'bottom',
+                    'left': 'left',
+                    'right': 'right'
+                })
+            text_box.time_until_full_rebuild_after_changing_size = 0.001
             self.text_boxes.append(text_box)
 
         self.panels = {}
