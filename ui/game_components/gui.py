@@ -1,7 +1,7 @@
 import os
 from enum import IntEnum
-from typing import Union
 from traceback import print_exc
+from typing import Union
 
 import pygame
 import pygame_gui
@@ -13,12 +13,14 @@ from config import (INVENTORY_WINDOW_SIZE, UI_MESSAGE_SIZE, ResourceTypes,
 from forestry import Achievement, Apiary, Game, Inventory, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
-from ..custom_events import INSPECT_BEE, INVENTORY_RENAMED, TUTORIAL_STAGE_CHANGED
+from ..custom_events import (INSPECT_BEE, INVENTORY_RENAMED,
+                             TUTORIAL_STAGE_CHANGED)
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UINonChangingDropDownMenu, UIPickList)
-from . import (Cursor, InspectWindow, InventoryWindow, MatingHistoryWindow,
-               MendelTutorialWindow, SettingsWindow, TutorialStage, BestiaryWindow, ResourcesPanel)
+from . import (BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
+               MatingHistoryWindow, MendelTutorialWindow, ResourcesPanel,
+               SettingsWindow, TutorialStage)
 from .apiary_window import ApiaryWindow
 from .tutorial_stage import CurrentTutorialStage
 

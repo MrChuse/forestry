@@ -143,7 +143,7 @@ class UIButtonSlot(UIButton):
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
-        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered', object_id='#button_slot_text_box'), anchors=self.kwargs.get('anchors'))
+        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, starting_height=2, object_id=ObjectID(class_id='@Centered', object_id='#button_slot_text_box'), anchors=self.kwargs.get('anchors'))
         self.text_box.hide()
         self.saved_amount = 0
         self.show_was_called_recently = False

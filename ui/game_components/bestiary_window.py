@@ -25,7 +25,7 @@ class BestiaryWindow(UIWindow):
         if self.table is not None:
             self.table.kill()
 
-        self.table = UITable((0, 0, 0, 0), resizable=True, container=self, kill_on_repopulation=False)
+        self.table = UITable(pygame.Rect(0, 0, 0, 0), resizable=True, container=self, kill_on_repopulation=False)
         self.table.table_contents.append([
             UILabel(pygame.Rect(0, 0, 132, 30), local['species'], container=self.table, object_id='@Centered'),
             UILabel(pygame.Rect(0, 0, 132, 30), local['produced'], container=self.table, object_id='@Centered'),
