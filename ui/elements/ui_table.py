@@ -26,7 +26,7 @@ class UITable(UIPanel):
             self.table_contents = []
 
     def rebuild(self):
-        if hasattr(self, 'panel_container'):
+        if self.panel_container is not None:
             self.populate_table_contents()
 
         super().rebuild()
