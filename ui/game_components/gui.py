@@ -93,6 +93,19 @@ class GUI(Game):
             },
             visible=True)
 
+        if self.bestiary_button is not None:
+            self.bestiary_button.kill()
+            self.bestiary_button = None
+        self.bestiary_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Bestiary'], container=None,
+            anchors={
+                'top':'bottom',
+                'bottom':'bottom',
+                'left':'left',
+                'right':'left',
+                'bottom_target': self.menu_button
+            },
+            visible=False)
+
         for w in self.apiary_windows:
             w.kill()
         for w in self.inventory_windows:
@@ -164,6 +177,7 @@ class GUI(Game):
 
         self.forage_button = None
         self.open_inspect_window_button = None
+        self.bestiary_button = None
         self.menu_button = None
 
         self.apiary_windows = []
@@ -200,20 +214,28 @@ class GUI(Game):
         return UILocationFindingMessageWindow(r, helper_text[0], self.ui_manager)
 
     def open_bestiary_window(self):
+        if self.bestiary_window is not None:
+            self.bestiary_window.kill()
+            self.bestiary_window = None
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
-        return BestiaryWindow(self.bestiary, r, self.ui_manager, local['Bestiary'])
+        self.bestiary_window = BestiaryWindow(self.bestiary, r, self.ui_manager, local['Bestiary'])
 
     def open_mendel_window(self):
+        if self.mendel_window is not None:
+            self.mendel_window.kill()
+            self.mendel_window = None
         r = pygame.Rect(0, 0, 1036, 584)
-        print(r)
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
-        return MendelTutorialWindow(r, self.ui_manager)
+        self.mendel_window = MendelTutorialWindow(r, self.ui_manager)
 
     def open_mating_history_window(self):
+        if self.mating_history_window is not None:
+            self.mating_history_window.kill()
+            self.mating_history_window = None
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
-        return MatingHistoryWindow(self.mating_history, r, self.ui_manager, 'Mating History')
+        self.mating_history_window = MatingHistoryWindow(self.mating_history, r, self.ui_manager, 'Mating History')
 
     def open_inspect_window(self, rect: Union[pygame.Rect, None] = None):
         if rect is None:
@@ -221,7 +243,6 @@ class GUI(Game):
         self.inspect_windows.append(InspectWindow(self, self.cursor, rect, self.ui_manager))
 
     def open_apiary_selection_list(self):
-        print('opened apiary selection')
         apiary_selection_list_rect = pygame.Rect(0, 0, self.apiary_selection_list_width, self.window_size[1])
         apiary_selection_list_rect.right = 0
         self.apiary_selection_list = UIPickList(apiary_selection_list_rect, [], self.ui_manager,
@@ -232,11 +253,6 @@ class GUI(Game):
                 'right':'right',
             })
         self.update_windows_list()
-
-    def open_bestiary_notification(self):
-        mouse_pos = self.ui_manager.get_mouse_position()
-        r = pygame.Rect(mouse_pos, UI_MESSAGE_SIZE)
-        return UILocationFindingMessageWindow(r, local['bestiary_notification'], self.ui_manager)
 
     def open_mendel_notification(self):
         mouse_pos = self.ui_manager.get_mouse_position()
@@ -317,11 +333,6 @@ class GUI(Game):
                     self.local_build_options.append(local[option])
                     self.build_dropdown.add_options([local[option]])
 
-    def add_bestiary_to_esc_menu(self):
-        if local['Bestiary'] not in self.esc_menu._raw_item_list:
-            self.esc_menu._raw_item_list.insert(1, local['Bestiary'])
-            self.esc_menu.set_item_list(self.esc_menu._raw_item_list)
-
     def add_mendelian_inheritance_to_esc_menu(self):
         if local['Mendelian Inheritance'] not in self.esc_menu._raw_item_list:
             self.esc_menu._raw_item_list.insert(2, local['Mendelian Inheritance'])
@@ -374,17 +385,17 @@ class GUI(Game):
                     self.settings_window()
                     self.toggle_esc_menu()
                 elif event.text == local['Bestiary']:
-                    self.bestiary_window = self.open_bestiary_window()
+                    self.open_bestiary_window()
                     self.toggle_esc_menu()
                 elif event.text == local['Mendelian Inheritance']:
-                    self.mendel_window = self.open_mendel_window()
+                    self.open_mendel_window()
                     self.toggle_esc_menu()
                 elif event.text == local['Greetings Window']:
                     self.help_window()
                     self.toggle_esc_menu()
                 elif event.text == local['Mating History']:
                     if self.mating_history_window is None:
-                        self.mating_history_window = self.open_mating_history_window()
+                        self.open_mating_history_window()
                     self.toggle_esc_menu()
             elif event.ui_element == self.load_file_selection_list:
                 r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
@@ -473,6 +484,8 @@ class GUI(Game):
                 self.forage(self.most_recent_inventory)
             elif event.ui_element == self.open_inspect_window_button:
                 self.open_inspect_window()
+            elif event.ui_element == self.bestiary_button:
+                self.open_bestiary_window()
             elif event.ui_element == self.menu_button:
                 self.toggle_esc_menu()
         elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
@@ -497,8 +510,7 @@ class GUI(Game):
                         win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
-                self.open_bestiary_notification()
-                self.add_bestiary_to_esc_menu()
+                self.bestiary_button.show()
                 self.resources_panel.show()
             elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
@@ -550,7 +562,7 @@ class GUI(Game):
 
         CurrentTutorialStage.current_tutorial_stage = state['current_tutorial_stage']
         if state['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
-            self.add_bestiary_to_esc_menu()
+            self.bestiary_button.show()
             self.resources_panel.resources = state['resources']
             self.resources_panel.show()
         if state['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
