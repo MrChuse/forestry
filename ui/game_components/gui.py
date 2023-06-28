@@ -109,6 +109,9 @@ class GUI(Game):
         if self.bestiary_window is not None:
             self.bestiary_window.kill()
             self.bestiary_window = None
+        if self.mendel_window is not None:
+            self.mendel_window.kill()
+            self.mendel_window = None
         if self.mating_history_window is not None:
             self.mating_history_window.kill()
             self.mating_history_window = None
@@ -171,6 +174,7 @@ class GUI(Game):
         self.apiary_selection_list = None
 
         self.bestiary_window = None
+        self.mendel_window = None
         self.mating_history_window = None
         self.load_confirm = None
         self.save_confirm = None
@@ -373,7 +377,7 @@ class GUI(Game):
                     self.bestiary_window = self.open_bestiary_window()
                     self.toggle_esc_menu()
                 elif event.text == local['Mendelian Inheritance']:
-                    self.open_mendel_window()
+                    self.mendel_window = self.open_mendel_window()
                     self.toggle_esc_menu()
                 elif event.text == local['Greetings Window']:
                     self.help_window()
