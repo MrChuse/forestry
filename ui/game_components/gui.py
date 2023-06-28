@@ -430,7 +430,7 @@ class GUI(Game):
         elif event.type == INSPECT_BEE:
             if self.total_inspections == 0:
                 r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
-                self.inspect_confirm = UILocationFindingConfirmationDialog(r, local['Inspection popup'].format(config_production_modifier), self.ui_manager)
+                self.inspect_confirm = UILocationFindingConfirmationDialog(r, local['Inspection popup'].format(self.inspect_cost * config_production_modifier), self.ui_manager)
                 self.inspect_confirm.bee_button = event.ui_element.bee_button
                 self.inspect_confirm.bee_stats = event.ui_element.bee_stats
                 self.inspect_confirm.ui_element = event.ui_element

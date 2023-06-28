@@ -9,12 +9,12 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
-from typing import Any, Callable, List, Tuple, Union
 from traceback import print_exc
+from typing import Any, Callable, List, Tuple, Union
 
-from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed, ResourceTypes,
-                    config_production_modifier, dominant, helper_text, local,
-                    mendel_text, mutations, products)
+from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
+                    ResourceTypes, config_production_modifier, dominant,
+                    helper_text, local, mendel_text, mutations, products)
 
 
 def weighted_if(weight, out1, out2):
@@ -551,7 +551,7 @@ class Slot:
 
 
 class Inventory:
-    cost = {ResourceTypes.WOOD: 5, ResourceTypes.FLOWERS: 5}
+    cost = {ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     def __init__(self, capacity=None, name=''):
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
@@ -687,7 +687,7 @@ class ApiaryProblems(Enum):
     NO_SPACE = 'no_space'
 
 class Apiary:
-    cost = {ResourceTypes.HONEY: 10, ResourceTypes.WOOD: 5, ResourceTypes.FLOWERS: 5}
+    cost = {ResourceTypes.HONEY: 100, ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     production_modifier = 1/3
     def __init__(self, name, add_resources, add_mating_entry, bestiary: Bestiary):
         self.inv = Inventory(7)
@@ -816,9 +816,10 @@ class Apiary:
             self.problem = ApiaryProblems.NO_QUEEN
 
 class Alveary(Apiary):
-    cost = {ResourceTypes.HONEY: 100, ResourceTypes.ROYAL_JELLY: 25, ResourceTypes.POLLEN_CLUSTER: 25}
+    cost = {ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250}
 
 class Game:
+    inspect_cost = 3
     def __init__(self):
         self.exit_event = threading.Event()
         self.inner_state_thread = None
@@ -942,7 +943,7 @@ class Game:
 
     def inspect_bee(self, bee):
         if bee is not None and not bee.inspected:
-            self.resources.remove_resources({ResourceTypes.HONEY: 1})
+            self.resources.remove_resources({ResourceTypes.HONEY: self.inspect_cost})
             bee.inspect()
             self.total_inspections += 1
 
