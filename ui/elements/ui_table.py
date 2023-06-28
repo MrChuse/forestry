@@ -1,12 +1,14 @@
 from typing import Dict, List, Optional, Union
+
 import pygame
 from pygame_gui.core import ObjectID, UIElement
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
-from pygame_gui.elements import UIWindow, UIPanel
+from pygame_gui.core.interfaces import (IContainerLikeInterface,
+                                        IUIManagerInterface)
+from pygame_gui.elements import UIPanel, UIWindow
 
 
 class UITable(UIPanel):
-    def __init__(self, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: IUIManagerInterface | None = None, *, element_id: str = 'panel', margins: Dict[str, int] | None = None, container: IContainerLikeInterface | None = None, parent_element: UIElement | None = None, object_id: ObjectID | str | None = None, anchors: Dict[str, str | UIElement] | None = None, visible: int = 1, resizable: bool = False, table_contents: List[List[UIElement]] | List = None, kill_on_repopulation: bool = True):
+    def __init__(self, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: Optional[IUIManagerInterface]  = None, *, element_id: str = 'panel', margins: Optional[Dict[str, int]]  = None, container: Optional[IContainerLikeInterface]  = None, parent_element: Optional[UIElement]  = None, object_id: Union[ObjectID, str, None] = None, anchors: Optional[Dict[str, Union[str, UIElement]]]  = None, visible: int = 1, resizable: bool = False, table_contents: Optional[List[List[UIElement]]]  = None, kill_on_repopulation: bool = True):
         self.resizable = resizable
         self.kill_on_repopulation = kill_on_repopulation
         self.table_contents = table_contents if table_contents is not None else []

@@ -1,19 +1,22 @@
 from typing import Optional, Union
+
 import pygame
 from pygame_gui.core import ObjectID
 from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.elements import UILabel, UIWindow
 
+from config import BeeSpecies, local
 from forestry import Bestiary, Drone, Genes, Slot
 from ui.game_components import UIButtonSlot
+
 from ..elements import UITable
-from pygame_gui.elements import UIWindow, UILabel
-from config import BeeSpecies, local
+
 
 class BestiaryWindow(UIWindow):
-    def __init__(self, bestiary: Bestiary, rect: pygame.Rect, manager: IUIManagerInterface | None = None, window_display_title: str = "", element_id: str | None = None, object_id: ObjectID | str | None = None, resizable: bool = False, visible: int = 1, draggable: bool = True):
+    def __init__(self, bestiary: Bestiary, rect: pygame.Rect, manager: Optional[IUIManagerInterface]  = None, window_display_title: str = "", element_id: Optional[str]  = None, object_id: Union[ObjectID, str, None]  = None, resizable: bool = False, visible: int = 1, draggable: bool = True):
         self.bestiary = bestiary
-        self.table : UITable | None = None
-        self.shown_bestiary : Bestiary | None = None
+        self.table : Optional[UITable]  = None
+        self.shown_bestiary : Optional[Bestiary]  = None
         self.first_frame = True # just to make killing on the second frame
         super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible, draggable)
 

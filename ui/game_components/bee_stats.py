@@ -3,7 +3,8 @@ from typing import Dict, List, Optional, Union
 import pygame
 import pygame_gui
 from pygame_gui.core import ObjectID, UIElement
-from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.core.interfaces import (IContainerLikeInterface,
+                                        IUIManagerInterface)
 from pygame_gui.elements import UIButton, UILabel, UIPanel
 
 from config import UI_MESSAGE_SIZE, dominant, genes_enums, local
@@ -18,7 +19,7 @@ def colorize(text, color):
     return f'<font color={color}>{text}</font>'
 
 class BeeStats(UITable):
-    def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: IUIManagerInterface | None = None, *, element_id: str = 'panel', margins: Dict[str, int] | None = None, container: IContainerLikeInterface | None = None, parent_element: UIElement | None = None, object_id: ObjectID | str | None = None, anchors: Dict[str, str | UIElement] | None = None, visible: int = 1, resizable: bool = False):
+    def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: Optional[IUIManagerInterface] = None, *, element_id: str = 'panel', margins: Optional[Dict[str, int]]  = None, container: Optional[IContainerLikeInterface]  = None, parent_element: Optional[UIElement]  = None, object_id: Union[ObjectID, str, None]  = None, anchors: Optional[Dict[str, Union[str, UIElement]]]  = None, visible: int = 1, resizable: bool = False):
         self.bee = bee
         self.resizable = resizable
         self.table_contents : Optional[List[List[UIElement]]] = None
