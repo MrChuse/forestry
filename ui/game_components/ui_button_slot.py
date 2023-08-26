@@ -138,6 +138,8 @@ class UIButtonSlot(UIButton):
         self.args = args
         self.kwargs = kwargs
         self.kwargs['generate_click_events_from'] = [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT]
+        self.text_box = None
+        self.inspected_status = None
         super().__init__(*args, **kwargs)
 
         r = pygame.Rect(0,0,0,0)
@@ -254,7 +256,8 @@ class UIButtonSlot(UIButton):
     def hide(self):
         if self.visible:
             super().hide()
-            self.text_box.hide()
+            if self.text_box is not None:
+                self.text_box.hide()
             if self.inspected_status is not None:
                 self.inspected_status.hide()
 
