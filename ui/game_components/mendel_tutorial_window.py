@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional, Union
-from random import sample, randint
+from random import choices, randint
 
 import pygame
 import pygame_gui
@@ -95,7 +95,7 @@ class BreedingAlgorithmAnimationPanel(UIPanel):
     def reset_animation(self):
         self.delete_all()
 
-        self.initial_alleles = sample([BeeSpecies.FOREST, BeeSpecies.MEADOWS, BeeSpecies.NOBLE, BeeSpecies.DILIGENT], counts=[4,4,4,4], k=4)
+        self.initial_alleles = choices([BeeSpecies.FOREST, BeeSpecies.MEADOWS, BeeSpecies.NOBLE, BeeSpecies.DILIGENT], k=4)
         if dominant[self.initial_alleles[1]] and not dominant[self.initial_alleles[0]]:
             self.initial_alleles[0], self.initial_alleles[1] = self.initial_alleles[1], self.initial_alleles[0]
         if dominant[self.initial_alleles[3]] and not dominant[self.initial_alleles[2]]:
