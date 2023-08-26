@@ -119,14 +119,14 @@ theme = {
     '#mating_history_right_arrow_button':{
         'images':{
             'normal_image':{
-                'path': '{assets_dir}/mating_history_right_arrow.png'
+                'path': f'{assets_dir}/mating_history_right_arrow.png'
             }
         }
     },
     '#mating_history_plus_button':{
         'images':{
             'normal_image':{
-                'path': '{assets_dir}/mating_history_plus.png'
+                'path': f'{assets_dir}/mating_history_plus.png'
             }
         }
     }
