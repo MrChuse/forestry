@@ -109,10 +109,10 @@ class BreedingAlgorithmAnimationPanel(UIPanel):
         self.pick2 = randint(0, 1)
 
         table = {
-            (True, True): (randint(0, 1), 'Both dominant, choose active at random'),
-            (True, False): (0, 'Left is dominant, choose it as active'),
-            (False, True): (1, 'Right is dominant, choose it as active'),
-            (False, False): (randint(0, 1), 'Both recessive, choose active at random'),
+            (True, True): (randint(0, 1), local['anim_text_TT']),
+            (True, False): (0, local['anim_text_TF']),
+            (False, True): (1, local['anim_text_FT']),
+            (False, False): (randint(0, 1), local['anim_text_FF']),
         }
         self.should_swap, self.label_text = table[dominant[self.initial_alleles[self.pick1]], dominant[self.initial_alleles[2 + self.pick2]]]
 
@@ -149,7 +149,8 @@ class BreedingAlgorithmAnimationPanel(UIPanel):
         elif self.acc < 6:
             # analyze if should swap, show uilabel
             if self.label is None:
-                self.label = UILabel(pygame.Rect(356+70, 27, 600, 30), self.label_text, container=self)
+                self.label = UITextBox(self.label_text, pygame.Rect(356+70, 6, 350, 130), container=self)
+                # self.label = UILabel(pygame.Rect(356+70, 27, 600, 30), self.label_text, container=self)
         elif self.acc < 7:
             if self.should_swap:
                 move_element_lerp(self.picked_uibuttonslot1, self.final1, self.final2, (self.acc-6) / 1)

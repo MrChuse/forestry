@@ -126,6 +126,10 @@ mendel_text_additionals:
   Genotype: Genotype
   Allele: Allele
   Purebred: Purebred
+  anim_text_TT: Both dominant, choose active at random
+  anim_text_TF: Left is dominant, choose it as active
+  anim_text_FT: Right is dominant, choose it as active
+  anim_text_FF: Both recessive, choose active at random
 
 texts:
   helper_text:
