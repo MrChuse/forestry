@@ -26,19 +26,22 @@ class BestiaryWindow(UIWindow):
             self.table.kill()
 
         self.table = UITable(pygame.Rect(0, 0, 0, 0), resizable=True, container=self, kill_on_repopulation=False)
+        row_length = max(map(len, self.bestiary.produced_resources.values()))
         self.table.table_contents.append([
             UILabel(pygame.Rect(0, 0, 132, 30), local['species'], container=self.table, object_id='@Centered'),
-            UILabel(pygame.Rect(0, 0, 132, 30), local['produced'], container=self.table, object_id='@Centered'),
-            UILabel(pygame.Rect(0, 0, 132, 30), local['resource'], container=self.table, object_id='@Centered'),
             UILabel(pygame.Rect(0, 0, 132, 30), local['produced'], container=self.table, object_id='@Centered')
-        ])
-        row_length = 2 * max(map(len, self.bestiary.produced_resources.values()))
+            ]
+        )
+        for _ in range(row_length):
+            self.table.table_contents[0].append(UILabel(pygame.Rect(0, 0, 132, 30), local['resource'], container=self.table, object_id='@Centered'))
+            self.table.table_contents[0].append(UILabel(pygame.Rect(0, 0, 132, 30), local['produced'], container=self.table, object_id='@Centered'))
+
         for known_bee_species in self.bestiary.known_bees:
             product_labels = [] # these are added in the tail of the row
             for product, amount in self.bestiary.produced_resources[known_bee_species].items():
                 product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), local[product], container=self.table, object_id='@Centered'))
                 product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), str(amount), container=self.table, object_id='@Centered'))
-            needed = max(2 - len(product_labels), row_length - 2 * len(self.bestiary.produced_resources[known_bee_species])) # should be at least 4 to match first row (and 2 is already present, so max 2-len)
+            needed = max(2 - len(product_labels), 2 * row_length - 2 * len(self.bestiary.produced_resources[known_bee_species])) # should be at least 4 to match first row (and 2 is already present, so max 2-len)
             for _ in range(needed):
                 product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), '', container=self.table))
             self.table.table_contents.append([
