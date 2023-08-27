@@ -10,6 +10,7 @@ from forestry import Bestiary, Drone, Genes, Slot
 from ui.game_components import UIButtonSlot
 
 from ..elements import UITable
+from .resources_panel import create_resources_row
 
 
 class BestiaryWindow(UIWindow):
@@ -37,10 +38,7 @@ class BestiaryWindow(UIWindow):
             self.table.table_contents[0].append(UILabel(pygame.Rect(0, 0, 132, 30), local['produced'], container=self.table, object_id='@Centered'))
 
         for known_bee_species in self.bestiary.known_bees:
-            product_labels = [] # these are added in the tail of the row
-            for product, amount in self.bestiary.produced_resources[known_bee_species].items():
-                product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), local[product], container=self.table, object_id='@Centered'))
-                product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), str(amount), container=self.table, object_id='@Centered'))
+            product_labels = create_resources_row(self.bestiary.produced_resources[known_bee_species], self.table) # these are added in the tail of the row
             needed = max(2 - len(product_labels), 2 * row_length - 2 * len(self.bestiary.produced_resources[known_bee_species])) # should be at least 4 to match first row (and 2 is already present, so max 2-len)
             for _ in range(needed):
                 product_labels.append(UILabel(pygame.Rect(0, 0, 132, 30), '', container=self.table))
