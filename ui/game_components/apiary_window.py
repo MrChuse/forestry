@@ -5,7 +5,7 @@ import pygame_gui
 from pygame_gui.elements import UIButton, UIStatusBar, UIWindow
 
 from config import local
-from forestry import Apiary, Drone, Queen
+from forestry import Apiary, Drone, Queen, SlotOccupiedError
 
 from .cursor import Cursor
 from .ui_button_slot import UIButtonSlot
@@ -143,6 +143,20 @@ class ApiaryWindow(UIWindow):
                     if mods & pygame.KMOD_LSHIFT:
                         bee, amt = self.apiary.take(index)
                         self.game.most_recent_inventory.place_bees([bee]*amt)
+                    elif mods & pygame.KMOD_LCTRL:
+                        if self.apiary.inv[index].is_empty():
+                            break
+                        if isinstance(self.apiary.inv[index].slot, Drone):
+                            location = self.apiary.drone
+                        else:
+                            location = self.apiary.princess
+
+                        bee, amt = self.apiary.take(index)
+                        try:
+                            location.put(bee, amt)
+                            self.apiary.try_breed()
+                        except SlotOccupiedError:
+                            self.apiary.inv[index].put(bee, amt)
                     else:
                         self.cursor.process_cursor_slot_interaction(event, b.slot)
         return super().process_event(event)
