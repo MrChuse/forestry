@@ -17,12 +17,10 @@ from ..custom_events import (INSPECT_BEE, INVENTORY_RENAMED,
                              TUTORIAL_STAGE_CHANGED)
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
-                        UINonChangingDropDownMenu, UIPickList)
-from . import (BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
+                        UIPickList)
+from . import (ApiaryWindow, BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
                MatingHistoryWindow, MendelTutorialWindow, ResourcesPanel,
-               SettingsWindow, TutorialStage)
-from .apiary_window import ApiaryWindow
-from .tutorial_stage import CurrentTutorialStage
+               SettingsWindow, CurrentTutorialStage, TutorialStage, BuildButtonPanel)
 
 
 class GUI(Game):
@@ -45,15 +43,15 @@ class GUI(Game):
         if self.build_dropdown is not None:
             self.build_dropdown.kill()
             self.build_dropdown = None
-        bottom_buttons_height = 40
-        self.build_dropdown = UINonChangingDropDownMenu([], local['Build'], pygame.Rect(0, 0, resources_panel_rect.size[0]-6, bottom_buttons_height),
+
+        self.build_dropdown = BuildButtonPanel(self.resources, self.get_available_build_options(), self.left_menu_buttons_height, pygame.Rect(0, 0, resources_panel_rect.size[0]-6, (self.left_menu_buttons_height + 4) * 3),
             anchors={
                 'top':'top',
                 'bottom':'top',
                 'left':'left',
                 'right':'left',
                 'top_target': self.resources_panel
-            }, visible=False)
+            }, visible=False, fill_jagged=True, kill_on_repopulation=False, resizable=True)
 
         if self.forage_button is not None:
             self.forage_button.kill()
@@ -166,13 +164,12 @@ class GUI(Game):
         self.new_game = new_game
 
         self.resources_panel_width = 330
+        self.left_menu_buttons_height = 40
 
         self.shown_resources = None
         self.resources_panel = None
 
         self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
-        self.known_build_options = []
-        self.local_build_options = []
         self.build_dropdown = None
 
         self.forage_button = None
@@ -322,16 +319,7 @@ class GUI(Game):
             CurrentTutorialStage.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
 
-        if self.shown_resources != self.resources:
-            self.shown_resources = self.resources.copy()
-            available_build_options = self.get_available_build_options()
-            if len(available_build_options) > 0:
-                self.build_dropdown.show()
-            for option in available_build_options:
-                if option not in self.known_build_options:
-                    self.known_build_options.append(option)
-                    self.local_build_options.append(local[option])
-                    self.build_dropdown.add_options([local[option]])
+        self.build_dropdown.available_build_options = self.get_available_build_options()
 
     def add_mendelian_inheritance_to_esc_menu(self):
         if local['Mendelian Inheritance'] not in self.esc_menu._raw_item_list:
@@ -488,26 +476,24 @@ class GUI(Game):
                 self.open_bestiary_window()
             elif event.ui_element == self.menu_button:
                 self.toggle_esc_menu()
-        elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-            if event.ui_element == self.build_dropdown:
-                if event.text != 'Build':
-                    text = event.text
-                    index = self.local_build_options.index(text)
-                    building_name = self.known_build_options[index]
-                    building = self.build(building_name.lower())
-                    if isinstance(building, Apiary):
-                        window = ApiaryWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
-                        self.apiary_windows.append(window)
-                        self.update_windows_list()
-                    elif isinstance(building, Inventory):
-                        window = InventoryWindow(building, self.cursor,
-                        pygame.Rect(self.ui_manager.get_mouse_position(), INVENTORY_WINDOW_SIZE),
-                        self.ui_manager, resizable=True)
-                        self.inventory_windows.append(window)
-                        self.update_windows_list()
-                    else: #if isinstance(building, Alveary):
-                        win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
-                        win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
+            if event.ui_element in self.build_dropdown.buttons:
+                text = event.ui_element.text
+                index = self.build_dropdown.local_build_options.index(text)
+                building_name = self.build_dropdown.known_build_options[index]
+                building = self.build(building_name.lower())
+                if isinstance(building, Apiary):
+                    window = ApiaryWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (300, 420)), self.ui_manager)
+                    self.apiary_windows.append(window)
+                    self.update_windows_list()
+                elif isinstance(building, Inventory):
+                    window = InventoryWindow(building, self.cursor,
+                    pygame.Rect(self.ui_manager.get_mouse_position(), INVENTORY_WINDOW_SIZE),
+                    self.ui_manager, resizable=True)
+                    self.inventory_windows.append(window)
+                    self.update_windows_list()
+                else: #if isinstance(building, Alveary):
+                    win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
+                    win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
                 self.bestiary_button.show()
@@ -565,6 +551,8 @@ class GUI(Game):
             self.bestiary_button.show()
             self.resources_panel.resources = state['resources']
             self.resources_panel.show()
+            self.build_dropdown.resources = state['resources']
+            self.build_dropdown.available_build_options = self.get_available_build_options()
         if state['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
             self.open_inspect_window_button.show()
         if state['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:

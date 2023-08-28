@@ -979,11 +979,11 @@ class Game:
     def get_available_build_options(self):
         options = []
         if self.resources.check_enough(Apiary.cost):
-            options.append('Apiary')
+            options.append(('Apiary', Apiary.cost))
         if self.resources.check_enough(Inventory.cost):
-            options.append('Inventory')
+            options.append(('Inventory', Inventory.cost))
         if self.resources.check_enough(Alveary.cost):
-            options.append('Alveary')
+            options.append(('Alveary', Alveary.cost))
         return options
 
     def update_state(self):
