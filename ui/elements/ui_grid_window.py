@@ -151,11 +151,14 @@ class UIGridWindow(UIWindow):
         if self.grid_panel.scroll_bar is not None:
             xdim += self.grid_panel.scroll_bar_width
 
-        # ydim = self.grid_panel.subelement_size[1] * self.grid_panel.total_rows +\
-        #        self.grid_panel.min_marginy * (self.grid_panel.total_rows + 1) +\
-        #        2 * self.shadow_width
+        if self.grid_panel.scroll_bar is not None:
+            ydim = self.rect.height
+        else:
+            ydim = self.grid_panel.subelement_size[1] * self.grid_panel.total_rows +\
+                   self.grid_panel.min_marginy * (self.grid_panel.total_rows + 1) +\
+                   2 * self.shadow_width + 35 # why tf 35?
 
-        self.set_dimensions((xdim, self.rect.height))
+        self.set_dimensions((xdim, ydim))
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if (self is not None and event.type == pygame.MOUSEBUTTONUP and
