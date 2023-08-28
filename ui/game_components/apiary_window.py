@@ -146,17 +146,17 @@ class ApiaryWindow(UIWindow):
                     elif mods & pygame.KMOD_LCTRL:
                         if self.apiary.inv[index].is_empty():
                             break
-                        if isinstance(self.apiary.inv[index].slot, Drone):
-                            location = self.apiary.drone
-                        else:
-                            location = self.apiary.princess
 
                         bee, amt = self.apiary.take(index)
                         try:
-                            location.put(bee, amt)
-                            self.apiary.try_breed()
+                            self.apiary.put_drone(bee, amt)
                         except SlotOccupiedError:
                             self.apiary.inv[index].put(bee, amt)
+                        except TypeError:
+                            try:
+                                self.apiary.put_princess(bee, amt)
+                            except SlotOccupiedError:
+                                self.apiary.inv[index].put(bee, amt)
                     else:
                         self.cursor.process_cursor_slot_interaction(event, b.slot)
         return super().process_event(event)
