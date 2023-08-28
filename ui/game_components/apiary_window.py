@@ -149,14 +149,9 @@ class ApiaryWindow(UIWindow):
 
                         bee, amt = self.apiary.take(index)
                         try:
-                            self.apiary.put_drone(bee, amt)
+                            self.apiary.put(bee, amt)
                         except SlotOccupiedError:
                             self.apiary.inv[index].put(bee, amt)
-                        except TypeError:
-                            try:
-                                self.apiary.put_princess(bee, amt)
-                            except SlotOccupiedError:
-                                self.apiary.inv[index].put(bee, amt)
                     else:
                         self.cursor.process_cursor_slot_interaction(event, b.slot)
         return super().process_event(event)
