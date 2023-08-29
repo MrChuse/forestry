@@ -82,10 +82,10 @@ genes_alleles:
     UNWEARY: [UNWEARY]
     INDUSTRIOUS: [INDUSTRIOUS]
   BeeFertility:
-    ONE: ['1']
-    TWO: ['2']
-    THREE: ['3']
-    FOUR: ['4']
+    ONE: ['Low']
+    TWO: ['Medium']
+    THREE: ['High']
+    FOUR: ['Greece God']
   BeeLifespan:
     LONGEST: [Longest]
     LONGER: [Longer]
