@@ -115,3 +115,24 @@ for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
 
 helper_text = local_conf['texts']['helper_text']
 mendel_text = local_conf['texts']['mendel_text']
+
+logging_default = {
+  'version': 1,
+  'formatters': {
+    'default': {
+      'format': "%(asctime)-15s  %(levelname)-8s %(name)-8s\t %(filename)s:%(lineno)s \t%(message)s"
+    }
+  },
+  'handlers': {
+    'console': {
+      'class': 'logging.StreamHandler',
+      'formatter': 'default'
+    }
+  },
+  'loggers':{
+    "":{
+      'handlers': ["console"],
+      'level': 'INFO'
+    }
+  }
+}
