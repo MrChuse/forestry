@@ -333,6 +333,9 @@ class GUI(Game):
             self.apiary_selection_list.set_dimensions((self.apiary_selection_list_width, size[1]))
 
     def process_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.esc_menu.visible and not self.esc_menu.hovered:
+                self.toggle_esc_menu()
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             if event.ui_element == self.apiary_selection_list:
                 if event.text.startswith(local['Apiary']):
