@@ -360,8 +360,20 @@ class GUI(Game):
 
     def process_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.esc_menu.visible and not self.esc_menu.hovered:
-                self.toggle_esc_menu()
+            if self.esc_menu.visible:
+                mouse_hovers_esc_menu = self.esc_menu.hover_point(*self.ui_manager.get_mouse_position())
+                mouse_hovers_save_file_selection_list = self.save_file_selection_list is not None and self.save_file_selection_list.hover_point(*self.ui_manager.get_mouse_position())
+                mouse_hovers_load_file_selection_list = self.load_file_selection_list is not None and self.load_file_selection_list.hover_point(*self.ui_manager.get_mouse_position())
+                mouse_hovers_save_confirm = self.save_confirm is not None and self.save_confirm.hover_point(*self.ui_manager.get_mouse_position())
+                mouse_hovers_load_confirm = self.load_confirm is not None and self.load_confirm.hover_point(*self.ui_manager.get_mouse_position())
+                mouse_hovers_new_game_confirm = self.new_game_confirm is not None and self.new_game_confirm.hover_point(*self.ui_manager.get_mouse_position())
+                if (not mouse_hovers_esc_menu and
+                    not mouse_hovers_save_file_selection_list and
+                    not mouse_hovers_load_file_selection_list and
+                    not mouse_hovers_save_confirm and
+                    not mouse_hovers_load_confirm and
+                    not mouse_hovers_new_game_confirm):
+                        self.toggle_esc_menu()
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             if event.ui_element == self.apiary_selection_list:
                 if event.text.startswith(local['Apiary']):
