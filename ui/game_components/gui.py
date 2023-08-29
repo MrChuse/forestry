@@ -28,7 +28,7 @@ class GUI(Game):
         super().restart_game()
 
         CurrentTutorialStage.current_tutorial_stage = TutorialStage.BEFORE_FORAGE
-        if self.new_game or not os.path.exists('saves') or len(list(filter(lambda x: x.endswith('.forestry'), os.listdir('saves')))) == 0:
+        if not os.path.exists('saves') or len(list(filter(lambda x: x.endswith('.forestry'), os.listdir('saves')))) == 0:
             self.help_window()
 
         self.cursor = Cursor(Slot(), pygame.Rect(0, 0, 64, 64), '', self.cursor_manager)
@@ -153,7 +153,7 @@ class GUI(Game):
             self.save_file_selection_list.kill()
             self.save_file_selection_list = None
 
-    def __init__(self, window_size, manager: pygame_gui.UIManager, cursor_manager: pygame_gui.UIManager, new_game: bool = False):
+    def __init__(self, window_size, manager: pygame_gui.UIManager, cursor_manager: pygame_gui.UIManager):
         self.command_out = 1
         Slot.empty_str = ''
         Slot.str_amount = lambda x: '' # type: ignore
@@ -161,7 +161,6 @@ class GUI(Game):
         self.window_size = window_size
         self.ui_manager = manager
         self.cursor_manager = cursor_manager
-        self.new_game = new_game
 
         self.resources_panel_width = 330
         self.left_menu_buttons_height = 40
@@ -199,8 +198,7 @@ class GUI(Game):
 
         super().__init__()
 
-        if not new_game:
-            self.load_last()
+        self.load_last()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
