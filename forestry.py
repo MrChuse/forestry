@@ -827,6 +827,7 @@ class Game:
 
     def restart_game(self):
         self.resources = Resources()
+        # self.resources = Resources({ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50})
         self.bestiary = Bestiary()
         self.mating_history = MatingHistory()
         self.inventories : dict[str, Inventory] = {}
