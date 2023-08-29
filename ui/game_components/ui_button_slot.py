@@ -14,7 +14,8 @@ from ..elements import UICheckbox
 from .bee_stats import BeeStats
 from .tutorial_stage import CurrentTutorialStage, TutorialStage
 
-def find_valid_position(element: UIElement, position):
+def find_valid_position(element: UIElement, position: pygame.Vector2):
+    position = pygame.Vector2(position)
     window_rect = element.ui_manager.get_root_container().get_rect()
 
     element.rect.topleft = position
