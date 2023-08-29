@@ -14,7 +14,7 @@ from forestry import Achievement, Apiary, Game, Inventory, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
 from ..custom_events import (INSPECT_BEE, INVENTORY_RENAMED,
-                             TUTORIAL_STAGE_CHANGED)
+                             TUTORIAL_STAGE_CHANGED, SET_MOST_RECENT_INVENTORY)
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UIPickList)
@@ -406,10 +406,16 @@ class GUI(Game):
         elif event.type == pygame_gui.UI_WINDOW_MOVED_TO_FRONT:
             if isinstance(event.ui_element, InventoryWindow):
                 self.most_recent_inventory = event.ui_element.inv
+        elif event.type == SET_MOST_RECENT_INVENTORY:
+            self.most_recent_inventory = event.inv
         elif event.type == pygame_gui.UI_WINDOW_CLOSE:
             try:
                 if isinstance(event.ui_element, InventoryWindow):
                     self.inventory_windows.remove(event.ui_element)
+                    for window in reversed(self.ui_manager.get_window_stack().get_stack()):
+                        if isinstance(window, InventoryWindow):
+                            self.most_recent_inventory = window.inv
+                            break
                 elif isinstance(event.ui_element, ApiaryWindow):
                     self.apiary_windows.remove(event.ui_element)
                 elif isinstance(event.ui_element, MatingHistoryWindow):
@@ -558,7 +564,6 @@ class GUI(Game):
         if state['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
             self.add_mendelian_inheritance_to_esc_menu()
         if state['apiary_list_opened']:
-            print(' in load apiary_list_opened')
             self.open_apiary_selection_list()
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in state['inspect_windows']]
         for window, slot in zip(self.inspect_windows, state['inspect_slots']):
