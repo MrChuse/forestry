@@ -67,26 +67,18 @@ products:
   MEADOWS:
     FLOWERS: [1, 5]
   COMMON:
-    HONEY: [1, 7.5]
-  CULTIVATED:
-    HONEY: [1, 10]
-  NOBLE:
     HONEY: [1, 2.5]
+  CULTIVATED:
+    HONEY: [1, 5]
+  NOBLE:
     GOLD: [1, 1]
   MAJESTIC:
-    HONEY: [1, 2.5]
-    GOLD: [1, 1.5]
+    GOLD: [1, 2]
   IMPERIAL:
-    HONEY: [1, 2.5]
-    GOLD: [1, 1]
     ROYAL_JELLY: [1, 1]
   DILIGENT:
-    HONEY: [1, 2.5]
     STRING: [1, 1]
   UNWEARY:
-    HONEY: [1, 2.5]
-    STRING: [1, 1.5]
+    STRING: [1, 2]
   INDUSTRIOUS:
-    HONEY: [1, 2.5]
-    STRING: [1, 1]
     POLLEN_CLUSTER: [1, 1]
