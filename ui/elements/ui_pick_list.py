@@ -14,6 +14,8 @@ from pygame_gui.elements import UISelectionList
 class UIPickList(UISelectionList):
     def __init__(self, relative_rect: pygame.Rect, item_list: Union[List[str], List[Tuple[str, str]]], manager: Optional[IUIManagerInterface] = None, *, allow_multi_select: bool = False, allow_double_clicks: bool = True, container: Optional[IContainerLikeInterface] = None, starting_height: int = 1, parent_element: Optional[UIElement] = None, object_id: Optional[Union[ObjectID, str]] = None, anchors: Optional[Dict[str, Union[str, UIElement]]] = None, visible: int = 1, default_selection: Optional[Union[str, Tuple[str, str], List[str], List[Tuple[str, str]]]] = None, not_select=True):
         self.not_select = not_select
+        if object_id is None:
+            object_id = 'pick_list'
         super().__init__(relative_rect, item_list, manager, allow_multi_select=allow_multi_select, allow_double_clicks=allow_double_clicks, container=container, starting_height=starting_height, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, default_selection=default_selection)
 
     def process_event(self, event: pygame.event.Event) -> bool:

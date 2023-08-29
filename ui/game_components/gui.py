@@ -117,7 +117,7 @@ class GUI(Game):
 
         if self.apiary_selection_list is not None:
             self.apiary_selection_list.kill()
-
+            self.apiary_selection_list = None
         if self.bestiary_window is not None:
             self.bestiary_window.kill()
             self.bestiary_window = None
