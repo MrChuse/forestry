@@ -30,7 +30,7 @@ class BestiaryWindow(UIWindow):
         row_length = max(map(len, self.bestiary.produced_resources.values()))
         self.table.table_contents.append([
             UILabel(pygame.Rect(0, 0, 132, 30), local['species'], container=self.table, object_id='@Centered'),
-            UILabel(pygame.Rect(0, 0, 132, 30), local['produced'], container=self.table, object_id='@Centered')
+            UILabel(pygame.Rect(0, 0, 132, 30), local['born'], container=self.table, object_id='@Centered')
             ]
         )
         for _ in range(row_length):

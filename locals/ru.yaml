@@ -65,6 +65,7 @@ esc_menu:
   Mating History: История скрещивания
   mendel_notification: "Уведомление: Обучение законам Менделя теперь доступно в меню (Escape)."
   bestiary_notification: "Уведомление: Бестиарий теперь доступно в меню (Escape)."
+  born: Родилось
   produced: Произведено
   resource: Ресурс
   load_confirm: Несохраненный прогресс может быть потерян. Продолжить?
