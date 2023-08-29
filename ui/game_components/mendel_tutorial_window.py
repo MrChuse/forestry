@@ -162,7 +162,7 @@ class BreedingAlgorithmAnimationPanel(UIPanel):
 
 
 class MendelTutorialWindow(UIWindow):
-    def __init__(self, rect: pygame.Rect, manager):
+    def __init__(self, rect: pygame.Rect, manager=None):
         super().__init__(rect, manager, local['Mendelian Inheritance'], resizable=True)
         self.set_minimum_dimensions((700, 500))
         self.interactive_panel_height = self.get_container().get_rect().height//2
@@ -214,7 +214,7 @@ class MendelTutorialWindow(UIWindow):
         panel = self.panels[panel_num]
         size = panel.get_abs_rect().size
         table = UITable(pygame.Rect(0, 0, size[0], size[1]), kill_on_repopulation=False, container=self, anchors=panel.anchors)
-        table.table_contents.append([
+        table.add_row([
             UILabel(pygame.Rect(0, 0, 120, 30), local['Phenotype'], container=table, object_id='@Centered'),
             UILabel(pygame.Rect(0, 0, 148, 30), local['Genotype'], container=table, object_id='@Centered'),
             UILabel(pygame.Rect(0, 0, 148, 30), local['Allele'], container=table, object_id='@Centered'),
@@ -223,7 +223,7 @@ class MendelTutorialWindow(UIWindow):
         bee = Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST),
                           (BeeFertility.TWO, BeeFertility.THREE),
                           (BeeLifespan.SHORT, BeeLifespan.SHORTER),
-                          (BeeSpeed.SLOW, BeeSpeed.SLOWEST)), True)
+                          (BeeSpeed.SLOWEST, BeeSpeed.SLOW)), True)
         pure_bee = Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST),
                                (BeeFertility.TWO, BeeFertility.TWO),
                                (BeeLifespan.SHORT, BeeLifespan.SHORT),
@@ -232,7 +232,12 @@ class MendelTutorialWindow(UIWindow):
         for allele in BeeSpeed:
             text.append(f'{colorize(local[allele][0], "#ec3661" if dominant[allele] else "#3687ec")}: {allele.value}')
         text = '\n'.join(text)
-        table.table_contents.append([
+        rect = pygame.Rect(0,0,318,177)
+        bs1 = BeeStats(bee, rect, container=table, resizable=True)
+        bs2 = BeeStats(pure_bee, rect, container=table, resizable=True)
+        bs1.rebuild()
+        bs2.rebuild()
+        table.add_row([
             UIButtonSlot(
                 Slot(bee, 1),
                 pygame.Rect(0, 0, 64, 64),
@@ -240,10 +245,10 @@ class MendelTutorialWindow(UIWindow):
                 self.ui_manager,
                 table,
                 is_inspectable=False,
-                allow_popup=False),
-            BeeStats(bee, pygame.Rect(0, 0, 1, 1), container=table, resizable=True),
+                allow_popup=True),
+            bs1,
             UITextBox(text, pygame.Rect(0, 0, 250, 218), container=table),
-            BeeStats(pure_bee, pygame.Rect(0, 0, 1, 1), container=table, resizable=True),
+            bs2,
         ])
         table.rebuild()
         panel.kill()
