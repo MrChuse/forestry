@@ -50,6 +50,7 @@ resources:
 esc_menu:
   Greetings Window: Окно Приветствия
   Mendelian Inheritance: Законы Менделя
+  Achievements: Достижения
   Bestiary: Бестиарий
   Save: Сохранить
   Load: Загрузить
@@ -106,6 +107,68 @@ genes_alleles:
     SLOW: [Медленная]
     SLOWER: [Медленнее]
     SLOWEST: [Медленнейшая]
+
+achievements_misc:
+  unlocked: Достижение получено
+  requirement: "Требования"
+  reward: "Награда"
+  comment: "Комментарий"
+  hover: Наведите курсор
+  achieved: Полученные достижения
+  next_achievements: Следующие достижения
+achievements:
+  produce10flowers10wood:
+    requirement: Произвести 10 цветков и 10 дерева
+    reward: 5 мёда
+    comment: Класс.
+  produce1honey:
+    requirement: Произвести 1 мёд
+    reward: 5 мёда
+    comment: Почти две стоимости изучения, между прочим.
+  produce50honey:
+    requirement: Произвести 50 мёда
+    reward: 1 скопление пыльцы и 1 маточное молочко
+    comment: Попробуйте произвести эти сложные в получении ресурсы. Потребуются различные пчелы!
+  produce1pollencluster:
+    requirement: Произвести 1 скопление пыльцы
+    reward: 5 скоплений пыльцы
+    comment: Разработчик игры признателен
+  produce1royaljelly:
+    requirement: Произвести 1 маточное молочко
+    reward: 5 единиц маточного молочка
+    comment: Разработчик игры восхищен
+  breedCOMMON:
+    requirement: Вывести ОБЫЧНЫЙ вид
+    reward: Ничего
+    comment: ''
+  breedCULTIVATED:
+    requirement: Вывести КУЛЬТИВИРОВАННЫЙ вид
+    reward: Ничего
+    comment: ''
+  breedNOBLE:
+    requirement: Вывести БЛАГОРОДНЫЙ вид
+    reward: Ничего
+    comment: ''
+  breedMAJESTIC:
+    requirement: Вывести ВЕЛИЧЕСТВЕННЫЙ вид
+    reward: Ничего
+    comment: ''
+  breedIMPERIAL:
+    requirement: Вывести ИМПЕРСКИЙ вид
+    reward: Ничего
+    comment: ''
+  breedDILIGENT:
+    requirement: Вывести ТРУДОЛЮБИВЫЙ вид
+    reward: Ничего
+    comment: ''
+  breedUNWEARY:
+    requirement: Вывести ВЫНОСЛИВЫЙ вид
+    reward: Ничего
+    comment: ''
+  breedINDUSTRIOUS:
+    requirement: Вывести ИНДУСТРИАЛЬНЫЙ вид
+    reward: Ничего
+    comment: ''
 
 mendel_text_additionals:
   Phenotype: Фенотип
@@ -206,21 +269,3 @@ texts:
       <font color=#ec3661>AB</font> + <font color=#3687ec>cd</font> -> 25% <font color=#ec3661>A</font><font color=#3687ec>c</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>d</font>
     - |
       <font color=#ec3661>A</font><font color=#3687ec>c</font> + <font color=#ec3661>B</font><font color=#3687ec>d</font> -> 12.5% <font color=#ec3661>AB</font> 12.5% <font color=#ec3661>BA</font>, 25% <font color=#ec3661>A</font><font color=#3687ec>d</font>, 25% <font color=#ec3661>B</font><font color=#3687ec>c</font>, 12.5% <font color=#3687ec>cd</font>, 12.5% <font color=#3687ec>dc</font>
-
-achievements:
-  unlocked: Достижение получено
-  produce1flower: "Произвести цветок.<br>Награда: второй цветок."
-  produce1wood: 'Произвести кусок дерева.<br>Награда: еще один кусок.'
-  produce10flowers10wood: 'Произвести 10 цветков и 10 дерева.<br>Награда: 5 мёда. Класс.'
-  produce1honey: 'Произвести 1 мёд.<br>Награда: 5 мёда. Половина стоимости изучения, между прочим.'
-  produce50honey: 'Произвести 50 мёда.<br>Награда: 1 скопление пыльцы и 1 маточное молочко. Попробуйте произвести эти сложные в получении ресурсы. Потребуются различные пчелы!'
-  produce1pollencluster: 'Произвести 1 скопление пыльцы.<br>Награда: 5 скоплений пыльцы. Разработчик игры признателен'
-  produce1royaljelly: 'Произвести 1 маточное молочко.<br>Награда: 5 единиц маточного молочка. Разработчик игры восхищен'
-  breedCOMMON: Вывести ОБЫЧНЫЙ вид
-  breedCULTIVATED: Вывести КУЛЬТИВИРОВАННЫЙ вид
-  breedNOBLE: Вывести БЛАГОРОДНЫЙ вид
-  breedMAJESTIC: Вывести ВЕЛИЧЕСТВЕННЫЙ вид
-  breedIMPERIAL: Вывести ИМПЕРСКИЙ вид
-  breedDILIGENT: Вывести ТРУДОЛЮБИВЫЙ вид
-  breedUNWEARY: Вывести ВЫНОСЛИВЫЙ вид
-  breedINDUSTRIOUS: Вывести ИНДУСТРИАЛЬНЫЙ вид

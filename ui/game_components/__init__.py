@@ -3,6 +3,7 @@ from .cursor import Cursor
 from .apiary_window import ApiaryWindow
 from .bee_stats import BeeStats
 from .bestiary_window import BestiaryWindow
+from .achievements_window import AchievementsWindow
 from .inspect_window import InspectWindow
 from .inventory_window import InventoryWindow
 from .build_button_panel import BuildButtonPanel

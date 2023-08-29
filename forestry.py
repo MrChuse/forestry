@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 import os
 import pickle
 import random
@@ -352,8 +353,10 @@ class Bestiary:
 
 class Achievement:
     string = ''
-    def __init__(self, text: str, achieved: bool = False):
-        self.text = text
+    def __init__(self, requirement: str, reward: str, comment: str, achieved: bool = False):
+        self.requirement_str = requirement
+        self.reward_str = reward
+        self.comment_str = comment
         self.achieved = achieved
 
     def check(self, game: 'Game'):
@@ -363,10 +366,10 @@ class Achievement:
         pass
 
 class ProducedProducts(Achievement):
-    def __init__(self, products, reward_resources, text, achieved: bool = False):
+    def __init__(self, products, reward_resources, requirement: str, reward: str, comment: str, achieved: bool = False):
         self.products = products
         self.reward_resources = reward_resources
-        super().__init__(text, achieved)
+        super().__init__(requirement, reward, comment, achieved)
 
     def check(self, game: 'Game'):
         per_product = []
@@ -379,9 +382,9 @@ class ProducedProducts(Achievement):
         game.resources.add_resources(self.reward_resources)
 
 class BredSpecies(Achievement):
-    def __init__(self, species: BeeSpecies, text: str, achieved: bool = False):
+    def __init__(self, species: BeeSpecies, requirement: str, reward: str, comment: str, achieved: bool = False):
         self.species = species
-        super().__init__(text, achieved)
+        super().__init__(requirement, reward, comment, achieved)
 
     def check(self, game: 'Game'):
         return self.species in game.bestiary.known_bees
@@ -391,6 +394,7 @@ class AchievementManager:
         self.game = game
         self.achievements = achievements
         self.notify = notify
+        self.changed_recently = False
 
     def check_achievements(self):
         for achievement in self.achievements:
@@ -399,6 +403,7 @@ class AchievementManager:
                     achievement.achieved = True
                     achievement.reward(self.game)
                     self.notify(achievement)
+                    self.changed_recently = True
 
 @dataclass
 class MatingEntry:
@@ -838,11 +843,11 @@ class Game:
         self.total_inspections = 0
 
         product_achievements = [
-            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, local['produce10flowers10wood']),
-            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, local['produce1honey']),
-            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, local['produce50honey']),
-            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, local['produce1pollencluster']),
-            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, local['produce1royaljelly']),
+            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, **local['produce10flowers10wood']),
+            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, **local['produce1honey']),
+            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, **local['produce50honey']),
+            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, **local['produce1pollencluster']),
+            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, **local['produce1royaljelly']),
         ]
         achievement_species = [
             (BeeSpecies.COMMON, 'breedCOMMON'),
@@ -854,7 +859,7 @@ class Game:
             (BeeSpecies.UNWEARY, 'breedUNWEARY'),
             (BeeSpecies.INDUSTRIOUS, 'breedINDUSTRIOUS'),
         ]
-        species_achievements = [BredSpecies(species, local[text]) for species, text in achievement_species]
+        species_achievements = [BredSpecies(species, **local[text]) for species, text in achievement_species]
         self.achievement_manager = AchievementManager(
             self,
             product_achievements + species_achievements,
@@ -870,7 +875,10 @@ class Game:
         self.inner_state_thread.start()
 
     def notify_achievement(self, achievement: Achievement):
-        self.print(local['unlocked'] + ':\n' + achievement.text)
+        self.print(local['unlocked'] + ':\n' +
+                   local['requirement'] + achievement.requirement_str + '\n' +
+                   local['reward'] + achievement.reward_str + '\n' +
+                   local['comment'] + achievement.comment_str)
 
     def exit(self):  # tested
         self.exit_event.set()

@@ -19,7 +19,7 @@ from ..custom_events import (INSPECT_BEE, INVENTORY_RENAMED,
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UIPickList)
-from . import (ApiaryWindow, BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
+from . import (AchievementsWindow, ApiaryWindow, BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
                MatingHistoryWindow, MendelTutorialWindow, ResourcesPanel,
                SettingsWindow, CurrentTutorialStage, TutorialStage, BuildButtonPanel)
 
@@ -105,6 +105,19 @@ class GUI(Game):
             },
             visible=False)
 
+        if self.achievements_button is not None:
+            self.achievements_button.kill()
+            self.achievements_button = None
+        self.achievements_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Achievements'], container=None,
+            anchors={
+                'top':'bottom',
+                'bottom':'bottom',
+                'left':'left',
+                'right':'left',
+                'bottom_target': self.bestiary_button
+            },
+            visible=False)
+
         for w in self.apiary_windows:
             w.kill()
         for w in self.inventory_windows:
@@ -121,6 +134,9 @@ class GUI(Game):
         if self.bestiary_window is not None:
             self.bestiary_window.kill()
             self.bestiary_window = None
+        if self.achievements_window is not None:
+            self.achievements_window.kill()
+            self.achievements_window = None
         if self.mendel_window is not None:
             self.mendel_window.kill()
             self.mendel_window = None
@@ -173,6 +189,7 @@ class GUI(Game):
 
         self.forage_button = None
         self.open_inspect_window_button = None
+        self.achievements_button = None
         self.bestiary_button = None
         self.menu_button = None
 
@@ -184,6 +201,7 @@ class GUI(Game):
         self.apiary_selection_list = None
 
         self.bestiary_window = None
+        self.achievements_window = None
         self.mendel_window = None
         self.mating_history_window = None
         self.load_confirm = None
@@ -215,6 +233,14 @@ class GUI(Game):
         r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
         r.center = (self.window_size[0]/2, self.window_size[1]/2)
         self.bestiary_window = BestiaryWindow(self.bestiary, r, self.ui_manager, local['Bestiary'])
+
+    def open_achievements_window(self):
+        if self.achievements_window is not None:
+            self.achievements_window.kill()
+            self.achievements_window = None
+        r = pygame.Rect(0, 0, 3/4*self.window_size[0], 3/4*self.window_size[1])
+        r.center = (self.window_size[0]/2, self.window_size[1]/2)
+        self.achievements_window = AchievementsWindow(self.achievement_manager, r, self.ui_manager, local['Achievements'])
 
     def open_mendel_window(self):
         if self.mendel_window is not None:
@@ -373,9 +399,6 @@ class GUI(Game):
                 elif event.text == local['Settings']:
                     self.settings_window()
                     self.toggle_esc_menu()
-                elif event.text == local['Bestiary']:
-                    self.open_bestiary_window()
-                    self.toggle_esc_menu()
                 elif event.text == local['Mendelian Inheritance']:
                     self.open_mendel_window()
                     self.toggle_esc_menu()
@@ -423,6 +446,8 @@ class GUI(Game):
                     self.mating_history_window = None
                 elif isinstance(event.ui_element, BestiaryWindow):
                     self.bestiary_window = None
+                elif isinstance(event.ui_element, Achievement):
+                    self.achievements_window = None
                 elif isinstance(event.ui_element, InspectWindow):
                     self.inspect_windows.remove(event.ui_element)
             except ValueError:
@@ -481,6 +506,8 @@ class GUI(Game):
                 self.open_inspect_window()
             elif event.ui_element == self.bestiary_button:
                 self.open_bestiary_window()
+            elif event.ui_element == self.achievements_button:
+                self.open_achievements_window()
             elif event.ui_element == self.menu_button:
                 self.toggle_esc_menu()
             if event.ui_element in self.build_dropdown.buttons:
@@ -504,6 +531,7 @@ class GUI(Game):
         elif event.type == TUTORIAL_STAGE_CHANGED:
             if CurrentTutorialStage.current_tutorial_stage == TutorialStage.RESOURCES_AVAILABLE:
                 self.bestiary_button.show()
+                self.achievements_button.show()
                 self.resources_panel.show()
             elif CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
                 self.open_inspect_window_button.show()
@@ -557,6 +585,7 @@ class GUI(Game):
         CurrentTutorialStage.current_tutorial_stage = state['current_tutorial_stage']
         if state['current_tutorial_stage'] >= TutorialStage.RESOURCES_AVAILABLE:
             self.bestiary_button.show()
+            self.achievements_button.show()
             self.resources_panel.resources = state['resources']
             self.resources_panel.show()
             self.build_dropdown.resources = state['resources']

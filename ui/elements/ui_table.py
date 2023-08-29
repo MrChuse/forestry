@@ -18,13 +18,16 @@ class UITable(UIPanel):
         super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
         self.rebuild()
 
+    def clear(self):
+        if self.table_contents is not None:
+            for row in self.table_contents:
+                for element in row:
+                    element.kill()
+        self.table_contents = []
+
     def populate_table_contents(self):
         if self.kill_on_repopulation:
-            if self.table_contents is not None:
-                for row in self.table_contents:
-                    for element in row:
-                        element.kill()
-            self.table_contents = []
+            self.clear()
 
     def rebuild(self):
         if self.panel_container is not None:
