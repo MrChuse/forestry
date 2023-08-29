@@ -1,3 +1,4 @@
+import logging
 import os
 from enum import IntEnum
 from traceback import print_exc
@@ -168,7 +169,6 @@ class GUI(Game):
         self.shown_resources = None
         self.resources_panel = None
 
-        self.original_build_options = ['Inventory', 'Apiary', 'Alveary']
         self.build_dropdown = None
 
         self.forage_button = None
@@ -513,7 +513,7 @@ class GUI(Game):
         state = super().get_state()
         state['front_version'] = CURRENT_FRONT_VERSION
         state['current_tutorial_stage'] = CurrentTutorialStage.current_tutorial_stage
-        state['apiary_list_opened'] = self.apiary_selection_list is not None
+        state['apiary_list_opened'] = self.apiary_selection_list.visible
         state['cursor_slot'] = self.cursor.slot
         insp_win = []
         insp_slots = []
@@ -546,6 +546,7 @@ class GUI(Game):
         for window in self.inspect_windows:
             window.kill()
         if self.apiary_selection_list is not None:
+            logging.debug('killed apiary_selection in load')
             self.apiary_selection_list.kill()
 
         self.cursor.slot = state['cursor_slot']
@@ -562,6 +563,7 @@ class GUI(Game):
         if state['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
             self.add_mendelian_inheritance_to_esc_menu()
         if state['apiary_list_opened']:
+            logging.debug('open apiary_selection in load')
             self.open_apiary_selection_list()
         self.inspect_windows = [InspectWindow(self, self.cursor, rect, self.ui_manager) for rect in state['inspect_windows']]
         for window, slot in zip(self.inspect_windows, state['inspect_slots']):
