@@ -445,7 +445,7 @@ class GUI(Game):
             if isinstance(event.ui_element, InventoryWindow):
                 self.most_recent_inventory = event.ui_element.inv
         elif event.type == SET_MOST_RECENT_INVENTORY:
-            self.most_recent_inventory = event.inv
+            self.most_recent_inventory = event.inventory
         elif event.type == pygame_gui.UI_WINDOW_CLOSE:
             try:
                 if isinstance(event.ui_element, InventoryWindow):

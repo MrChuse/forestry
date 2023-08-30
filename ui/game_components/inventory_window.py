@@ -153,7 +153,7 @@ class InventoryWindow(UICustomTitleBarWindow, UIGridWindow):
                 self.entry_line.set_text(event.new_name)
         if should_set_as_most_recent:
             event_data = {'ui_element': self,
-                        'inventory': self.inv}
+                          'inventory': self.inv}
             pygame.event.post(pygame.event.Event(SET_MOST_RECENT_INVENTORY, event_data))
 
         return super().process_event(event)
