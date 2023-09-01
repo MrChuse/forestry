@@ -79,26 +79,26 @@ class BuildButtonPanel(UITable):
         self.resources = resources
         self.button_height = button_height
         self.shown_resources = None
-        self.available_build_options = available_build_options # set externally because get_available_build_options is a method of `Game`
+        self.available_build_options = None  # set in set_available_build_options because get_available_build_options is a method of `Game`
         self.known_build_options = []
         self.local_build_options = []
         self.buttons = []
         super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, resizable=resizable, table_contents=table_contents, kill_on_repopulation=kill_on_repopulation, fill_jagged=fill_jagged)
+        self.set_available_build_options(available_build_options)
 
-    def update(self, time_delta: float):
-        super().update(time_delta)
+    def set_available_build_options(self, available_build_options):
+        if self.available_build_options == available_build_options:
+            return
+        self.available_build_options = available_build_options
+        if len(self.available_build_options) > 0:
+            self.show()
+        for option, cost in self.available_build_options:
+            if option not in self.known_build_options:
+                self.known_build_options.append(option)
+                self.local_build_options.append(local[option])
 
-        if self.shown_resources != self.resources:
-            self.shown_resources = self.resources.copy()
-            if len(self.available_build_options) > 0:
-                self.show()
-            for option, cost in self.available_build_options:
-                if option not in self.known_build_options:
-                    self.known_build_options.append(option)
-                    self.local_build_options.append(local[option])
-
-                    # resources_row = create_resources_row(cost, self)
-                    button = BuildButton(cost, pygame.Rect(0, 0, self.get_container().get_rect().w, self.button_height), local[option], container=self)
-                    self.buttons.append(button)
-                    self.add_row([button])
-                    self.rebuild()
+                # resources_row = create_resources_row(cost, self)
+                button = BuildButton(cost, pygame.Rect(0, 0, self.get_container().get_rect().w, self.button_height), local[option], container=self)
+                self.buttons.append(button)
+                self.add_row([button])
+                self.rebuild()

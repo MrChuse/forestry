@@ -343,7 +343,7 @@ class GUI(Game):
             CurrentTutorialStage.current_tutorial_stage = TutorialStage.INSPECT_AVAILABLE
             pygame.event.post(pygame.event.Event(TUTORIAL_STAGE_CHANGED, {}))
 
-        self.build_dropdown.available_build_options = self.get_available_build_options()
+        self.build_dropdown.set_available_build_options(self.get_available_build_options())
 
     def add_mendelian_inheritance_to_esc_menu(self):
         if local['Mendelian Inheritance'] not in self.esc_menu._raw_item_list:
@@ -603,7 +603,7 @@ class GUI(Game):
             self.resources_panel.resources = state['resources']
             self.resources_panel.show()
             self.build_dropdown.resources = state['resources']
-            self.build_dropdown.available_build_options = self.get_available_build_options()
+            self.build_dropdown.set_available_build_options(self.get_available_build_options())
         if state['current_tutorial_stage'] >= TutorialStage.INSPECT_AVAILABLE:
             self.open_inspect_window_button.show()
         if state['current_tutorial_stage'] >= TutorialStage.GENE_HELPER_TEXT_CLICKED:
