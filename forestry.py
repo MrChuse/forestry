@@ -353,12 +353,12 @@ class Bestiary:
         return self.produced_resources == other.produced_resources and self.known_bees == other.known_bees
 
 class Achievement:
-    string = ''
     def __init__(self, requirement: str, reward: str, comment: str, achieved: bool = False):
         self.requirement_str = requirement
         self.reward_str = reward
         self.comment_str = comment
         self.achieved = achieved
+        self.text = self.requirement_str
 
     def check(self, game: 'Game'):
         return False

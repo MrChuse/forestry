@@ -583,7 +583,7 @@ class GUI(Game):
         state = super().get_state()
         state['front_version'] = CURRENT_FRONT_VERSION
         state['current_tutorial_stage'] = CurrentTutorialStage.current_tutorial_stage
-        state['apiary_list_opened'] = self.apiary_selection_list.visible
+        state['apiary_list_opened'] = self.apiary_selection_list is not None and self.apiary_selection_list.visible
         state['cursor_slot'] = self.cursor.slot
         insp_win = []
         insp_slots = []
