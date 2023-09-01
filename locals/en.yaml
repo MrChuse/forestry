@@ -26,6 +26,10 @@ buildings:
   entertosave: "`Enter` to save"
   Sort: Squeeze # sort button
   Apiary: Apiary
+  Analyzer: Analyzer
+  analyzed: Analyzed
+  hints: "Hints for mutations:"
+  no_mutations: "No further mutations"
   Apiary_problem_ALL_OK: All ok
   Apiary_problem_NO_QUEEN: No queen present
   Apiary_problem_NO_SPACE: Not enough space for offspring

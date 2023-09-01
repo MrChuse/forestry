@@ -52,6 +52,19 @@ mutations:
     - [CULTIVATED, DILIGENT, UNWEARY, 0.08]
     - [UNWEARY, DILIGENT, INDUSTRIOUS, 0.08]
 
+tier:
+  BeeSpecies:
+    FOREST: 0
+    MEADOWS: 0
+    COMMON: 1
+    CULTIVATED: 2
+    NOBLE: 3
+    MAJESTIC: 4
+    IMPERIAL: 5
+    DILIGENT: 3
+    UNWEARY: 4
+    INDUSTRIOUS: 5
+
 production_modifier: 1
 resources:
   - WOOD
@@ -82,3 +95,15 @@ products:
     STRING: [1, 2]
   INDUSTRIOUS:
     POLLEN_CLUSTER: [1, 1]
+
+amount_needed_to_analyze:
+  FOREST: 10
+  MEADOWS: 10
+  COMMON: 50
+  CULTIVATED: 100
+  NOBLE: 50
+  MAJESTIC: 50
+  IMPERIAL: 10
+  DILIGENT: 50
+  UNWEARY: 50
+  INDUSTRIOUS: 10

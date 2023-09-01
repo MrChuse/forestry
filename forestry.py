@@ -15,7 +15,8 @@ from typing import Any, Callable, List, Tuple, Union
 
 from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
                     ResourceTypes, config_production_modifier, dominant,
-                    helper_text, local, mendel_text, mutations, products)
+                    helper_text, local, mendel_text, mutations, products,
+                    amount_needed_to_analyze, tiers)
 
 
 def weighted_if(weight, out1, out2):
@@ -554,10 +555,23 @@ class Slot:
     def is_empty(self):
         return self.slot is None
 
+class CostWatcher(type):
+    def __init__(cls, name, bases, clsdict):
+        mro = cls.mro()
+        if len(mro) > 2:
+            if not hasattr(cls, 'cost'):
+                raise SyntaxError(f'All buildings must have costs: {cls}')
+            mro[-2].__dict__['all_buildings_costs'][name] = cls.cost
+            logging.debug("Building registered: " + name)
+        super(CostWatcher, cls).__init__(name, bases, clsdict)
 
-class Inventory:
+class Building(metaclass=CostWatcher):
+    all_buildings_costs = {}
+
+class Inventory(Building):
     cost = {ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     def __init__(self, capacity=None, name=''):
+        super().__init__()
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
         self.name = name
@@ -691,10 +705,11 @@ class ApiaryProblems(Enum):
     NO_QUEEN = 'no_queen'
     NO_SPACE = 'no_space'
 
-class Apiary:
+class Apiary(Building):
     cost = {ResourceTypes.HONEY: 100, ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     production_modifier = 1/3
     def __init__(self, name, add_resources, add_mating_entry, bestiary: Bestiary):
+        super().__init__()
         self.inv = Inventory(7)
         self.princess = Slot()
         self.drone = Slot()
@@ -823,6 +838,69 @@ class Apiary:
 class Alveary(Apiary):
     cost = {ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250}
 
+class Analyzer(Building):
+    cost = {ResourceTypes.STRING: 10, ResourceTypes.GOLD: 10}
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.slot = Slot()
+        self.time_left = None
+        self.amount_needed_to_consume = None
+        self.species = None
+        self.hints = []
+        self.time_to_analyze = 1 # 4
+        self.consumed_amount = 0
+
+    def update(self):
+        if self.slot.is_empty():
+            self.time_left = None
+            return
+
+        if self.consumed_enough():
+            return
+
+        if self.time_left is None:
+            self.time_left = self.time_to_analyze # initialize consuming
+            logging.debug('analyzer initialized')
+        elif self.time_left > 0:
+            self.time_left -= 1
+            logging.debug(f'{self.time_left=}')
+        else:
+            self.consumed_amount += 1
+            self.slot.take()
+            if not self.slot.is_empty() and not self.consumed_enough():
+                self.time_left = self.time_to_analyze
+            else:
+                self.time_left = None
+            logging.info(f'{self.consumed_amount=}')
+        if self.consumed_amount >= self.amount_needed_to_consume:
+            print(local[self.species][0])
+
+
+    def put(self, bee: Bee, amount=1):
+        if bee is None: return
+        if not bee.inspected:
+            raise ValueError('Bee should be inspected')
+        if bee.genes.species[0] != bee.genes.species[1]:
+            raise ValueError('Bee should have identical species alleles')
+        if self.species is not None and self.species != bee.genes.species[0]:
+            raise ValueError(f'This analyzer can analyze only {local[self.species][0]} bees')
+        if self.consumed_amount == 0:
+            self.set_need_to_consume(bee.genes.species[0])
+        self.slot.put(bee, amount)
+
+    def set_need_to_consume(self, species: BeeSpecies):
+        self.species = species
+        self.amount_needed_to_consume = amount_needed_to_analyze[species]
+
+        for mutation in mutations:
+            if mutation[0] == self.species and tiers[mutation[0]] >= tiers[mutation[1]]:
+                self.hints.append(mutation)
+        # self.hints = ['a+b', 'b+c', 'c+d']
+
+    def consumed_enough(self):
+        return self.consumed_amount >= self.amount_needed_to_consume
+
 class Game:
     inspect_cost = 3
     def __init__(self):
@@ -840,6 +918,7 @@ class Game:
         self.inv = self.inventories[local['Inventory'] + ' 1']
         self.apiaries : List[Apiary] = []
         self.build('apiary', free=True)
+        self.analyzers: List[Analyzer] = []
         self.total_inspections = 0
 
         product_achievements = [
@@ -973,6 +1052,14 @@ class Game:
             if not free:
                 self.resources.remove_resources(Alveary.cost)
             self.print('You won the demo!', out=self.command_out, flush=True)
+            return Alveary('Alveary', self.resources.add_resources, self.mating_history.append, self.bestiary)
+        elif params[0] == 'analyzer':
+            if not free:
+                self.resources.remove_resources(Analyzer.cost)
+            self.analyzers.append(Analyzer(str(len(self.analyzers))))
+            return self.analyzers[-1]
+        else:
+            raise ValueError('Tried to build unknown building')
 
     def rename_inventory(self, from_str, to_str):
         if to_str == '':
@@ -987,12 +1074,9 @@ class Game:
 
     def get_available_build_options(self):
         options = []
-        if self.resources.check_enough(Apiary.cost):
-            options.append(('Apiary', Apiary.cost))
-        if self.resources.check_enough(Inventory.cost):
-            options.append(('Inventory', Inventory.cost))
-        if self.resources.check_enough(Alveary.cost):
-            options.append(('Alveary', Alveary.cost))
+        for building_name, cost in Building.all_buildings_costs.items():
+            if self.resources.check_enough(cost):
+                options.append((building_name, cost))
         return options
 
     def update_state(self):
@@ -1003,6 +1087,8 @@ class Game:
 
             for apiary in self.apiaries:
                 apiary.update()
+            for analyzer in self.analyzers:
+                analyzer.update()
 
             self.achievement_manager.check_achievements()
 
@@ -1019,6 +1105,7 @@ class Game:
             'resources': self.resources,
             'inventories': self.inventories,
             'apiaries': self.apiaries,
+            'analyzers':self.analyzers,
             'total_inspections': self.total_inspections,
             'mating_history': self.mating_history,
             'bestiary': self.bestiary,
@@ -1041,10 +1128,10 @@ class Game:
         if len(d) == 0:
             return
         latest = max(d, key=d.get)
-        print(latest)
         self.load(latest)
 
     def load(self, name) -> dict:
+        logging.info(f'load save name {name}')
         with open('saves/' + name + '.forestry', 'rb') as f:
             state : dict = pickle.load(f)
 
@@ -1062,6 +1149,7 @@ class Game:
         self.resources = state['resources']
         self.inventories = state['inventories']
         self.apiaries = state['apiaries']
+        self.analyzers = state.get('analyzers', [])
         self.total_inspections = state['total_inspections']
         self.mating_history = state['mating_history']
         self.bestiary = state['bestiary']

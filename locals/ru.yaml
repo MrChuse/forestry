@@ -32,6 +32,10 @@ buildings:
   Apiary_problem_NO_SPACE: Не хватает места для потомства
   Take: Взять все
   Alveary: Алвеарий
+  Analyzer: Анализатор
+  analyzed: Анализировано
+  hints: "Подсказки для мутаций:"
+  no_mutations: "Нет дальнейших мутаций"
   Open Inspect Window: Открыть окно исследования
   Inspect Window: Окно исследования
   Inspect: Исследовать

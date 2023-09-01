@@ -19,6 +19,8 @@ with open('config.yaml') as f:
 # some ui stuff
 UI_MESSAGE_SIZE = (500, 300)
 INVENTORY_WINDOW_SIZE = (486, 513)
+APIARY_WINDOW_SIZE = (300, 420)
+ANALYZER_WINDOW_SIZE = (300, 350)
 
 # load all the genes and their alleles
 genes_conf = config['genes_alleles']
@@ -33,6 +35,13 @@ for gene_name, list_of_alleles in genes_conf.items():
     for allele_name, _, dominance in list_of_alleles:
         dominant[gene_enum[allele_name]] = dominance
 BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed = genes_enums.values()
+
+tiers_conf = config['tier']
+tiers: Dict[LocalEnum, int] = {}
+for gene_name, dict_of_tiers in tiers_conf.items():
+    for allele_name, tier in dict_of_tiers.items():
+        allele = genes_enums[gene_name][allele_name]
+        tiers[allele] = tier
 
 # load mutations
 mutations_conf = config['mutations']
@@ -75,6 +84,14 @@ for allele_name, prod_dict in products_config.items():
             print('prod_name was not listed in the `resources` section')
             raise e
         products[BeeSpecies[allele_name]][prod_name] = (amt, prob)
+
+amount_needed_to_analyze_config = config['amount_needed_to_analyze']
+amount_needed_to_analyze = {}
+for allele_name, amt in amount_needed_to_analyze_config.items():
+    if BeeSpecies[allele_name] not in amount_needed_to_analyze:
+        amount_needed_to_analyze[BeeSpecies[allele_name]] = amt
+    else:
+        raise RuntimeError('Encountered repeating alleles in `amount_needed_to_analyze` in config file')
 
 # local
 existing_locals = [i[:-5] for i in os.listdir('locals')] # drop .yaml
