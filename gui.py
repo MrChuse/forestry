@@ -1,18 +1,14 @@
-import logging
-import logging.config
 from traceback import print_exc
 
 import pygame
 import pygame_gui
 from pygame import mixer
 
-from config import load_settings, logging_default
+from config import load_settings
 from forestry import NotEnoughResourcesError
 from ui.custom_events import APPLY_VOLUME_CHANGE
 # keep TutorialStage here because needed for backwards compatibility with pickle.load
 from ui.game_components import GUI, TutorialStage
-
-logging.config.dictConfig(logging_default)
 
 def main():
     game = None

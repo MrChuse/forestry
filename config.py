@@ -120,8 +120,8 @@ logging_default = {
   'version': 1,
   'formatters': {
     'default': {
-      'format': "%(asctime)-15s  %(levelname)-8s %(name)-8s\t %(filename)s:%(lineno)s \t%(message)s"
-    }
+      'format': "%(asctime)-15s %(levelname)-8s %(filename)s:%(lineno)s \t%(message)s"
+    } # %(name)-8s
   },
   'handlers': {
     'console': {
@@ -136,3 +136,7 @@ logging_default = {
     }
   }
 }
+
+import logging
+import logging.config
+logging.config.dictConfig(logging_default)
