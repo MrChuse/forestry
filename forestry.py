@@ -561,7 +561,8 @@ class CostWatcher(type):
         if len(mro) > 2:
             if not hasattr(cls, 'cost'):
                 raise SyntaxError(f'All buildings must have costs: {cls}')
-            mro[-2].__dict__['all_buildings_costs'][name] = cls.cost
+            if not (hasattr(cls, 'hide_from_buildings') and cls.hide_from_buildings):
+                mro[-2].__dict__['all_buildings_costs'][name] = cls.cost
             logging.debug("Building registered: " + name)
         super(CostWatcher, cls).__init__(name, bases, clsdict)
 
@@ -840,6 +841,7 @@ class Alveary(Apiary):
 
 class Analyzer(Building):
     cost = {ResourceTypes.STRING: 10, ResourceTypes.GOLD: 10}
+    hide_from_buildings = True
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -902,9 +904,11 @@ class Analyzer(Building):
         return self.consumed_amount >= self.amount_needed_to_consume
 
 class AnalyzerGold(Analyzer):
+    hide_from_buildings = False
     cost = {ResourceTypes.GOLD: 20}
 
 class AnalyzerString(Analyzer):
+    hide_from_buildings = False
     cost = {ResourceTypes.STRING: 20}
 
 class Game:
