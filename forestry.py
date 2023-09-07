@@ -882,11 +882,11 @@ class Analyzer(Building):
     def put(self, bee: Bee, amount=1):
         if bee is None: return
         if not bee.inspected:
-            raise ValueError('Bee should be inspected')
+            raise ValueError(f'{local["should_inspected"]}')
         if bee.genes.species[0] != bee.genes.species[1]:
-            raise ValueError('Bee should have identical species alleles')
+            raise ValueError(f'{local["should_alleles"]}')
         if self.species is not None and self.species != bee.genes.species[0]:
-            raise ValueError(f'This analyzer can analyze only {local[self.species][0]} bees')
+            raise ValueError(f'{local["can_analyze"]} {local[self.species][0]}')
         if self.consumed_amount == 0:
             self.set_need_to_consume(bee.genes.species[0])
         self.slot.put(bee, amount)
@@ -895,9 +895,11 @@ class Analyzer(Building):
         self.species = species
         self.amount_needed_to_consume = amount_needed_to_analyze[species]
 
-        for mutation in mutations:
+        for mutation, children in mutations.items():
             if mutation[0] == self.species and tiers[mutation[0]] >= tiers[mutation[1]]:
-                self.hints.append(mutation)
+                times = len(children) - 1
+                for _ in range(times):
+                    self.hints.append(mutation)
         # self.hints = ['a+b', 'b+c', 'c+d']
 
     def consumed_enough(self):

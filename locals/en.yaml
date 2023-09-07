@@ -28,6 +28,9 @@ buildings:
   Apiary: Apiary
   should_princess_queen: Bee should be a Princess or a Queen
   should_drone: Bee should be a Drone
+  should_inspected: Bee should be inspected
+  should_alleles: Bee should have identical species alleles
+  can_analyze: "This analyzer can analyze only:"
   Analyzer: Analyzer
   AnalyzerGold: Analyzer (gold)
   AnalyzerString: Analyzer (string)
