@@ -27,6 +27,8 @@ buildings:
   entertosave: "`Enter` для сохранения"
   Sort: Ужать
   Apiary: Улей
+  should_princess_queen: Пчела должна быть принцессой или королевой
+  should_drone: Пчела должна быть трутнем
   Apiary_problem_ALL_OK: Все в порядке
   Apiary_problem_NO_QUEEN: Нет королевы
   Apiary_problem_NO_SPACE: Не хватает места для потомства

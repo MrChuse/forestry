@@ -737,7 +737,7 @@ class Apiary(Building):
 
     def put_princess(self, bee, amount=1):
         if not isinstance(bee, Princess) and not isinstance(bee, Queen):
-            raise TypeError('Bee should be a Princess or a Queen')
+            raise TypeError(f'{local["should_princess_queen"]}')
         self.princess.put(bee, amount)
         self.try_breed()
 
@@ -746,7 +746,7 @@ class Apiary(Building):
 
     def put_drone(self, bee, amount=1):
         if not isinstance(bee, Drone):
-            raise TypeError('Bee should be a Drone')
+            raise TypeError(f'{local["should_drone"]}')
         self.drone.put(bee, amount)
         self.try_breed()
 

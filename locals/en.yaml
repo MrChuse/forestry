@@ -26,6 +26,8 @@ buildings:
   entertosave: "`Enter` to save"
   Sort: Squeeze # sort button
   Apiary: Apiary
+  should_princess_queen: Bee should be a Princess or a Queen
+  should_drone: Bee should be a Drone
   Analyzer: Analyzer
   AnalyzerGold: Analyzer (gold)
   AnalyzerString: Analyzer (string)
