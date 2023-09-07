@@ -489,6 +489,8 @@ class GUI(Game):
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.toggle_esc_menu()
+            elif event.key == pygame.K_F5:
+                self.resources.add_resources({ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250})
         elif event.type == INSPECT_BEE:
             if self.total_inspections == 0:
                 r = pygame.Rect((pygame.mouse.get_pos()), UI_MESSAGE_SIZE)
@@ -546,7 +548,10 @@ class GUI(Game):
                 index = self.build_dropdown.local_build_options.index(text)
                 building_name = self.build_dropdown.known_build_options[index]
                 building = self.build(building_name.lower())
-                if isinstance(building, Apiary):
+                if isinstance(building, Alveary):
+                    win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), f'<effect id=bounce><font size=7.0>{local["won_the_demo"]}</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
+                    win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
+                elif isinstance(building, Apiary):
                     window = ApiaryWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), APIARY_WINDOW_SIZE), self.ui_manager)
                     self.apiary_windows.append(window)
                     self.update_windows_list()
@@ -556,9 +561,6 @@ class GUI(Game):
                         self.ui_manager, resizable=True)
                     self.inventory_windows.append(window)
                     self.update_windows_list()
-                elif isinstance(building, Alveary):
-                    win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), f'<effect id=bounce><font size=7.0>{local["won_the_demo"]}</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
-                    win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
                 elif isinstance(building, Analyzer):
                     window = AnalyzerWindow(building, self.cursor,
                         pygame.Rect(self.ui_manager.get_mouse_position(), (0,0)))

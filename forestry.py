@@ -1061,7 +1061,7 @@ class Game:
         elif params[0] == 'alveary':
             if not free:
                 self.resources.remove_resources(Alveary.cost)
-            self.print('You won the demo!', out=self.command_out, flush=True)
+            self.print(f'{local["won_the_demo"]}', out=self.command_out, flush=True)
             return Alveary('Alveary', self.resources.add_resources, self.mating_history.append, self.bestiary)
         elif params[0] == 'analyzer':
             if not free:
