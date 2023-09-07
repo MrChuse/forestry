@@ -94,10 +94,10 @@ class ApiaryWindow(UIWindow):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_h:
+            if event.key == pygame.K_F3:
                 for b in self.buttons:
                     b.hide()
-            if event.key == pygame.K_g:
+            if event.key == pygame.K_F4:
                 for b in self.buttons:
                     b.show()
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
