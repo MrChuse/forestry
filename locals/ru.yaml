@@ -43,6 +43,7 @@ buildings:
   Inspect: Исследовать
   Inspection popup: Исследование тратит {} меда
   Menu: Меню
+  won_the_demo: Вы победили! Спасибо за игру!
 resources:
   RESOURCES: РЕСУРСЫ
   notenough: "Не хватает `{}`: у вас есть {}, но нужно {}"

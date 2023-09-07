@@ -557,7 +557,7 @@ class GUI(Game):
                     self.inventory_windows.append(window)
                     self.update_windows_list()
                 elif isinstance(building, Alveary):
-                    win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), '<effect id=bounce><font size=7.0>You won the demo!</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
+                    win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), f'<effect id=bounce><font size=7.0>{local["won_the_demo"]}</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
                     win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
                 elif isinstance(building, Analyzer):
                     window = AnalyzerWindow(building, self.cursor,

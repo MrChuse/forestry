@@ -66,7 +66,6 @@ class InspectWindow(UIWindow):
         bee_stats_size_x, bee_stats_size_y = self.bee_stats.get_abs_rect().size
         new_dimensions = (bee_stats_size_x + (2 * self.shadow_width) + self.bee_stats.shadow_width,
                           bee_stats_size_y + self.title_bar_height + self.inspect_button_height + (2 * self.shadow_width) + self.bee_stats.shadow_width)
-        print(new_dimensions, 'resh acc too beestats')
         self.set_dimensions(new_dimensions)
 
     def on_close_window_button_pressed(self):
