@@ -58,7 +58,7 @@ class GUI(Game):
         if self.forage_button is not None:
             self.forage_button.kill()
             self.forage_button = None
-        self.forage_button = UIButton(pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 40), local['Forage'], container=None,
+        self.forage_button = UIButton(pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 40), local['Forage'],
             anchors={
                 'top':'top',
                 'bottom':'top',
@@ -71,20 +71,20 @@ class GUI(Game):
         if self.open_inspect_window_button is not None:
             self.open_inspect_window_button.kill()
             self.open_inspect_window_button = None
-        self.open_inspect_window_button = UIButton(pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 40), local['Open Inspect Window'], container=None,
+        self.open_inspect_window_button = UIButton(pygame.Rect(0, 45, resources_panel_rect.size[0]-6, 40), local['Open Inspect Window'],
             anchors={
                 'top':'top',
                 'bottom':'top',
                 'left':'left',
                 'right':'left',
-                'top_target': self.forage_button
+                'top_target': self.build_dropdown
             },
             visible=False)
 
         if self.menu_button is not None:
             self.menu_button.kill()
             self.menu_button = None
-        self.menu_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Menu'], container=None,
+        self.menu_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Menu'],
             anchors={
                 'top':'bottom',
                 'bottom':'bottom',
@@ -96,7 +96,7 @@ class GUI(Game):
         if self.bestiary_button is not None:
             self.bestiary_button.kill()
             self.bestiary_button = None
-        self.bestiary_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Bestiary'], container=None,
+        self.bestiary_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Bestiary'],
             anchors={
                 'top':'bottom',
                 'bottom':'bottom',
@@ -109,7 +109,7 @@ class GUI(Game):
         if self.achievements_button is not None:
             self.achievements_button.kill()
             self.achievements_button = None
-        self.achievements_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Achievements'], container=None,
+        self.achievements_button = UIButton(pygame.Rect(0, -40, resources_panel_rect.size[0]-6, 40), local['Achievements'],
             anchors={
                 'top':'bottom',
                 'bottom':'bottom',
