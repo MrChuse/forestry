@@ -850,7 +850,7 @@ class Analyzer(Building):
         self.amount_needed_to_consume = None
         self.species = None
         self.hints = []
-        self.time_to_analyze = 1 # 4
+        self.time_to_analyze = 4
         self.consumed_amount = 0
 
     def update(self):
