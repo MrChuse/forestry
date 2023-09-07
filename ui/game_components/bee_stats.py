@@ -31,6 +31,9 @@ class BeeStats(UITable):
     def populate_table_contents(self):
         super().populate_table_contents()
 
+        if self.bee is None:
+            return # set table contents to []
+
         def create_uilabel(text='', is_local=False, object_id=None, visible=True, set_32=False):
             label = UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
             if set_32:
@@ -42,9 +45,6 @@ class BeeStats(UITable):
             b._gene_name = gene_name
             self.buttons.append(b)
             return b
-
-        if self.bee is None:
-            return # set table contents to []
 
         if not self.bee.inspected:
             self.table_contents.append([create_uilabel(self.bee.small_str(), set_32=True)])

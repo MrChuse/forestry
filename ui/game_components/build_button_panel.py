@@ -92,6 +92,7 @@ class BuildButtonPanel(UITable):
         self.available_build_options = available_build_options
         if len(self.available_build_options) > 0:
             self.show()
+        need_to_rebuild = False
         for option, cost in self.available_build_options:
             if option not in self.known_build_options:
                 self.known_build_options.append(option)
@@ -101,4 +102,6 @@ class BuildButtonPanel(UITable):
                 button = BuildButton(cost, pygame.Rect(0, 0, self.get_container().get_rect().w, self.button_height), local[option], container=self)
                 self.buttons.append(button)
                 self.add_row([button])
-                self.rebuild()
+                need_to_rebuild = True
+        if need_to_rebuild:
+            self.rebuild()

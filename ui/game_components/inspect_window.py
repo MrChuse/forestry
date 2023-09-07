@@ -45,6 +45,11 @@ class InspectWindow(UIWindow):
             if event.ui_element == self.bee_button:
                 self.cursor.slot.swap(self.bee_button.slot)
                 self.bee_stats.bee = self.bee_button.slot.slot
+                if self.bee_stats.bee is None:
+                    self.bee_stats.set_dimensions((7,7))
+                    self.bee_stats.hide()
+                else:
+                    self.bee_stats.show()
                 self.reshape_according_to_bee_stats()
             elif event.ui_element == self.inspect_button:
                 event_data = {'ui_element': self}
@@ -61,6 +66,7 @@ class InspectWindow(UIWindow):
         bee_stats_size_x, bee_stats_size_y = self.bee_stats.get_abs_rect().size
         new_dimensions = (bee_stats_size_x + (2 * self.shadow_width) + self.bee_stats.shadow_width,
                           bee_stats_size_y + self.title_bar_height + self.inspect_button_height + (2 * self.shadow_width) + self.bee_stats.shadow_width)
+        print(new_dimensions, 'resh acc too beestats')
         self.set_dimensions(new_dimensions)
 
     def on_close_window_button_pressed(self):
