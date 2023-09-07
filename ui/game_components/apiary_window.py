@@ -136,7 +136,7 @@ class ApiaryWindow(UIWindow):
                     self.cursor.process_cursor_slot_interaction(event, self.drone_button.slot)
                     self.apiary.try_breed()
                 else:
-                    raise ValueError('Bee should be a Drone')
+                    raise ValueError(f'{local["should_drone"]}')
             for index, b in enumerate(self.buttons):
                 if event.ui_element == b:
                     mods = pygame.key.get_mods()
