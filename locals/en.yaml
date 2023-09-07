@@ -27,6 +27,8 @@ buildings:
   Sort: Squeeze # sort button
   Apiary: Apiary
   Analyzer: Analyzer
+  AnalyzerGold: Analyzer (gold)
+  AnalyzerString: Analyzer (string)
   analyzed: Analyzed
   hints: "Hints for mutations:"
   no_mutations: "No further mutations"

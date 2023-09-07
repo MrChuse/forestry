@@ -33,6 +33,8 @@ buildings:
   Take: Взять все
   Alveary: Алвеарий
   Analyzer: Анализатор
+  AnalyzerGold: Анализатор (золото)
+  AnalyzerString: Анализатор (нить)
   analyzed: Анализировано
   hints: "Подсказки для мутаций:"
   no_mutations: "Нет дальнейших мутаций"

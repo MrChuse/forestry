@@ -901,6 +901,12 @@ class Analyzer(Building):
     def consumed_enough(self):
         return self.consumed_amount >= self.amount_needed_to_consume
 
+class AnalyzerGold(Analyzer):
+    cost = {ResourceTypes.GOLD: 20}
+
+class AnalyzerString(Analyzer):
+    cost = {ResourceTypes.STRING: 20}
+
 class Game:
     inspect_cost = 3
     def __init__(self):
@@ -1056,6 +1062,16 @@ class Game:
         elif params[0] == 'analyzer':
             if not free:
                 self.resources.remove_resources(Analyzer.cost)
+            self.analyzers.append(Analyzer(str(len(self.analyzers))))
+            return self.analyzers[-1]
+        elif params[0] == 'analyzergold':
+            if not free:
+                self.resources.remove_resources(AnalyzerGold.cost)
+            self.analyzers.append(Analyzer(str(len(self.analyzers))))
+            return self.analyzers[-1]
+        elif params[0] == 'analyzerstring':
+            if not free:
+                self.resources.remove_resources(AnalyzerString.cost)
             self.analyzers.append(Analyzer(str(len(self.analyzers))))
             return self.analyzers[-1]
         else:
