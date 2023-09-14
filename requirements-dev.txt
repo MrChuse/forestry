@@ -1,7 +1,0 @@
-jupyterlab_materialdarker
-jupyterlab-code-formatter
-black
-isort
-blue
-autopep8
-pyinstaller
