@@ -1,6 +1,7 @@
 import codecs
 import os
 from enum import Enum
+from typing import Dict
 
 import yaml
 
@@ -18,11 +19,13 @@ with open('config.yaml') as f:
 # some ui stuff
 UI_MESSAGE_SIZE = (500, 300)
 INVENTORY_WINDOW_SIZE = (486, 513)
+APIARY_WINDOW_SIZE = (300, 420)
+ANALYZER_WINDOW_SIZE = (300, 350)
 
 # load all the genes and their alleles
 genes_conf = config['genes_alleles']
-genes_enums : dict[str, LocalEnum] = {}
-dominant : dict[LocalEnum, bool] = {}
+genes_enums : Dict[str, LocalEnum] = {}
+dominant : Dict[LocalEnum, bool] = {}
 for gene_name, list_of_alleles in genes_conf.items():
     enum_dict = []
     for allele_name, allele_value, _ in list_of_alleles:
@@ -32,6 +35,13 @@ for gene_name, list_of_alleles in genes_conf.items():
     for allele_name, _, dominance in list_of_alleles:
         dominant[gene_enum[allele_name]] = dominance
 BeeSpecies, BeeFertility, BeeLifespan, BeeSpeed = genes_enums.values()
+
+tiers_conf = config['tier']
+tiers: Dict[LocalEnum, int] = {}
+for gene_name, dict_of_tiers in tiers_conf.items():
+    for allele_name, tier in dict_of_tiers.items():
+        allele = genes_enums[gene_name][allele_name]
+        tiers[allele] = tier
 
 # load mutations
 mutations_conf = config['mutations']
@@ -75,6 +85,14 @@ for allele_name, prod_dict in products_config.items():
             raise e
         products[BeeSpecies[allele_name]][prod_name] = (amt, prob)
 
+amount_needed_to_analyze_config = config['amount_needed_to_analyze']
+amount_needed_to_analyze = {}
+for allele_name, amt in amount_needed_to_analyze_config.items():
+    if BeeSpecies[allele_name] not in amount_needed_to_analyze:
+        amount_needed_to_analyze[BeeSpecies[allele_name]] = amt
+    else:
+        raise RuntimeError('Encountered repeating alleles in `amount_needed_to_analyze` in config file')
+
 # local
 existing_locals = [i[:-5] for i in os.listdir('locals')] # drop .yaml
 
@@ -98,7 +116,7 @@ with codecs.open(filename, "r", "utf_8_sig" ) as f:
     local_conf = yaml.safe_load(f)
 
 local = {}
-straight = ['genes', 'bee_genders', 'buildings', 'esc_menu', 'achievements', 'mendel_text_additionals']
+straight = ['genes', 'bee_genders', 'buildings', 'esc_menu', 'achievements', 'achievements_misc', 'mendel_text_additionals']
 for thing in straight:
     local.update(local_conf[thing])
 for res, translation in local_conf['resources'].items():
@@ -114,3 +132,28 @@ for gene_name, dict_of_alleles in local_conf['genes_alleles'].items():
 
 helper_text = local_conf['texts']['helper_text']
 mendel_text = local_conf['texts']['mendel_text']
+
+logging_default = {
+  'version': 1,
+  'formatters': {
+    'default': {
+      'format': "%(asctime)-15s %(levelname)-8s %(filename)s:%(lineno)s \t%(message)s"
+    } # %(name)-8s
+  },
+  'handlers': {
+    'console': {
+      'class': 'logging.StreamHandler',
+      'formatter': 'default'
+    }
+  },
+  'loggers':{
+    "":{
+      'handlers': ["console"],
+      'level': 'INFO'
+    }
+  }
+}
+
+import logging
+import logging.config
+logging.config.dictConfig(logging_default)

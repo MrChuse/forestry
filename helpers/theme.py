@@ -3,6 +3,10 @@ import json
 from config import BeeSpecies, ResourceTypes
 from forestry import ApiaryProblems
 
+assets_dir = 'assets'
+bees_dir = 'bees2'
+icons_dir = 'icons'
+
 tool_tip_delay = '0.4'
 theme = {
     '@Centered':{
@@ -69,7 +73,7 @@ theme = {
     '#unpinned':{
         'images':{
             'normal_image':{
-                'path': 'assets/pin.png'
+                'path': f'{assets_dir}/{icons_dir}/pin.png'
             }
         }
     },
@@ -95,14 +99,14 @@ theme = {
     '#PrincessEmpty':{
         'images':{
             'normal_image':{
-                'path': 'assets/black_princess.png'
+                'path': f'{assets_dir}/{bees_dir}/black_princess.png'
             }
         }
     },
     '#DroneEmpty':{
         'images':{
             'normal_image':{
-                'path': 'assets/black_drone.png'
+                'path': f'{assets_dir}/{bees_dir}/black_drone.png'
             }
         }
     },
@@ -115,14 +119,14 @@ theme = {
     '#mating_history_right_arrow_button':{
         'images':{
             'normal_image':{
-                'path': 'assets/mating_history_right_arrow.png'
+                'path': f'{assets_dir}/mating_history_right_arrow.png'
             }
         }
     },
     '#mating_history_plus_button':{
         'images':{
             'normal_image':{
-                'path': 'assets/mating_history_plus.png'
+                'path': f'{assets_dir}/mating_history_plus.png'
             }
         }
     }
@@ -134,7 +138,7 @@ for problem in ApiaryProblems:
             'prototype': '@TooltipDelay',
             'images': {
                 'normal_image': {
-                    'path': f'assets/Apiary_problem_{problem.name}.png'
+                    'path': f'{assets_dir}/{icons_dir}/Apiary_problem_{problem.name}.png'
                 }
             }
         }
@@ -147,7 +151,7 @@ for species in BeeSpecies:
                 'prototype': f'#BeeButton',
                 'images':{
                     'normal_image': {
-                        'path': f'assets/{species.name}_{gender}.png'
+                        'path': f'{assets_dir}/{bees_dir}/{species.name}_{gender}.png'
                     }
                 }
             }})
@@ -160,7 +164,7 @@ for species in BeeSpecies:
                 },
                 'images':{
                     'normal_image': {
-                        'path': f'assets/{species.name}_{gender}.png'
+                        'path': f'{assets_dir}/{bees_dir}/{species.name}_{gender}.png'
                     }
                 }
             }})
@@ -171,7 +175,7 @@ for resource in ResourceTypes:
             'prototype': f'@TooltipDelay',
             'images':{
                 'normal_image': {
-                    'path': f'assets/{resource}.png'
+                    'path': f'{assets_dir}/{icons_dir}/{resource}.png'
                 }
             }
         }})

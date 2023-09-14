@@ -14,11 +14,38 @@ from ..elements import UICheckbox
 from .bee_stats import BeeStats
 from .tutorial_stage import CurrentTutorialStage, TutorialStage
 
+def find_valid_position(element: UIElement, position: pygame.Vector2):
+    position = pygame.Vector2(position)
+    window_rect = element.ui_manager.get_root_container().get_rect()
+
+    element.rect.topleft = position
+
+    if window_rect.contains(element.rect):
+        element.container.set_position(element.rect.topleft)
+        return True
+    else:
+        if element.rect.left < window_rect.left:
+            element.rect.left = window_rect.left + element.hover_distance_from_target[0]
+        if element.rect.right > window_rect.right:
+            element.rect.right = window_rect.right - element.hover_distance_from_target[0]
+        if element.rect.top < window_rect.top:
+            element.rect.top = int(position.y + element.hover_distance_from_target[1])
+        if element.rect.bottom > window_rect.bottom:
+            element.rect.bottom = int(position.y - element.hover_distance_from_target[1])
+
+    if window_rect.contains(element.rect):
+        element.container.set_position(element.rect.topleft)
+        return True
+    else:
+        element.relative_rect = element.rect.copy()
+        warnings.warn("Unable to fit tool tip on screen")
+        return False
 
 class InspectPopup(UITooltip):
     def __init__(self, bee_button: 'UIButtonSlot', hover_distance: Tuple[int, int], manager=None, parent_element = None, object_id: Union[ObjectID, str, None] = None, anchors: Dict[str, str] = None):
         self.container = None
         self.bee_button = bee_button
+        self.top_margin = 4
         super().__init__('', hover_distance, manager, parent_element, object_id, anchors)
         self.rebuild()
 
@@ -35,7 +62,6 @@ class InspectPopup(UITooltip):
         else:
             width = 170
             height = 40
-        self.top_margin = 4
         self.inspect_button_height = 32
 
         self.container = UIContainer(pygame.Rect(0, 0, width, height), self.ui_manager, starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1, parent_element=self)
@@ -85,50 +111,20 @@ class InspectPopup(UITooltip):
         return super().kill()
 
     def find_valid_position(self, position: pygame.math.Vector2) -> bool:
-        window_rect = self.ui_manager.get_root_container().get_rect()
-
-        # if not window_rect.contains(pygame.Rect(int(position[0]), int(position[1]), 1, 1)):
-        #     self.relative_rect = self.rect.copy()
-        #     warnings.warn("initial position for tool tip is off screen,"
-        #                   " unable to find valid position")
-        #     return False
-
-        self.rect.left = int(position.x - self.rect.width/2)
-        self.rect.top = int(position.y + self.hover_distance_from_target[1] - self.top_margin)
-
-        if window_rect.contains(self.rect):
-            self.relative_rect = self.rect.copy()
-            self.container.set_position(self.rect.topleft)
-            return True
-        else:
-            if self.rect.bottom > window_rect.bottom:
-                self.rect.bottom = int(position.y - self.hover_distance_from_target[1])
-            if self.rect.right > window_rect.right:
-                self.rect.right = window_rect.right - self.hover_distance_from_target[0]
-            if self.rect.left < window_rect.left:
-                self.rect.left = window_rect.left + self.hover_distance_from_target[0]
-
-        if window_rect.contains(self.rect):
-            self.relative_rect = self.rect.copy()
-            self.container.set_position(self.rect.topleft)
-            return True
-        else:
-            self.relative_rect = self.rect.copy()
-            warnings.warn("Unable to fit tool tip on screen")
-            return False
+        return find_valid_position(self, (position[0] - self.rect.width/2, position[1] + self.hover_distance_from_target[1] - self.top_margin))
 
 
 
 class UIButtonSlot(UIButton):
     empty_object_id = '#EMPTY'
     def __init__(self, slot: Slot, *args, highlighted=False, is_inspectable=True, allow_popup=True, **kwargs):
-        """ # must have params:
+        """ ### must have params:
             slot,
             rect,
             text, # probably empty
             ui_manager,
             container,
-            # optional:
+            ### optional:
             highlighted=False,
             is_inspectable=True
         """
@@ -138,12 +134,14 @@ class UIButtonSlot(UIButton):
         self.args = args
         self.kwargs = kwargs
         self.kwargs['generate_click_events_from'] = [pygame.BUTTON_LEFT, pygame.BUTTON_RIGHT]
+        self.text_box = None
+        self.inspected_status = None
         super().__init__(*args, **kwargs)
 
         r = pygame.Rect(0,0,0,0)
         r.size = 34, 30
         r.bottomright = self.relative_rect.bottomright
-        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, layer_starting_height=2, object_id=ObjectID(class_id='@Centered', object_id='#button_slot_text_box'), anchors=self.kwargs.get('anchors'))
+        self.text_box = UITextBox('1', r, self.ui_manager, container=self.ui_container, starting_height=2, object_id=ObjectID(class_id='@Centered', object_id='#button_slot_text_box'), anchors=self.kwargs.get('anchors'))
         self.text_box.hide()
         self.saved_amount = 0
         self.show_was_called_recently = False
@@ -254,7 +252,8 @@ class UIButtonSlot(UIButton):
     def hide(self):
         if self.visible:
             super().hide()
-            self.text_box.hide()
+            if self.text_box is not None:
+                self.text_box.hide()
             if self.inspected_status is not None:
                 self.inspected_status.hide()
 

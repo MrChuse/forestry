@@ -9,7 +9,7 @@ from forestry import Inventory
 
 from ..elements import UIGridWindow, UICustomTitleBarWindow
 from . import Cursor, UIButtonSlot
-from ..custom_events import INVENTORY_RENAMED
+from ..custom_events import INVENTORY_RENAMED, SET_MOST_RECENT_INVENTORY
 
 
 class InventoryWindow(UICustomTitleBarWindow, UIGridWindow):
@@ -118,11 +118,14 @@ class InventoryWindow(UICustomTitleBarWindow, UIGridWindow):
         return self.buttons
 
     def process_event(self, event):
+        should_set_as_most_recent = False
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.sort_window_button:
                 self.inv.sort()
+                should_set_as_most_recent = True
             for index, button in enumerate(self.buttons):
                     if event.ui_element == button:
+                        should_set_as_most_recent = True
                         mods = pygame.key.get_mods()
                         if mods & pygame.KMOD_LSHIFT:
                             self.inv.take_all(index)
@@ -131,19 +134,26 @@ class InventoryWindow(UICustomTitleBarWindow, UIGridWindow):
                         return True
         elif event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
             if event.ui_element == self.entry_line:
+                should_set_as_most_recent = True
                 if self.title_bar is not None:
                     self.title_bar.set_text(local['entertosave'])
         elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
             if event.ui_element == self.entry_line:
+                should_set_as_most_recent = True
                 if self.title_bar is not None:
                     self.title_bar.set_text('')
                 event_data = {'ui_element': self,
-                            'ui_object_id': self.most_specific_combined_id,
-                            'inventory': self.inv,
-                            'old_name': self.inv.name,
-                            'new_name': event.text}
+                              'ui_object_id': self.most_specific_combined_id,
+                              'inventory': self.inv,
+                              'old_name': self.inv.name,
+                              'new_name': event.text}
                 pygame.event.post(pygame.event.Event(INVENTORY_RENAMED, event_data))
         elif event.type == INVENTORY_RENAMED:
             if event.ui_element != self and event.inventory == self.inv:
                 self.entry_line.set_text(event.new_name)
+        if should_set_as_most_recent:
+            event_data = {'ui_element': self,
+                          'inventory': self.inv}
+            pygame.event.post(pygame.event.Event(SET_MOST_RECENT_INVENTORY, event_data))
+
         return super().process_event(event)

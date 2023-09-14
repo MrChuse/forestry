@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 import os
 import pickle
 import random
@@ -9,12 +10,13 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
-from typing import Any, Callable, List, Tuple, Union
 from traceback import print_exc
+from typing import Any, Callable, List, Tuple, Union
 
-from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed, ResourceTypes,
-                    config_production_modifier, dominant, helper_text, local,
-                    mendel_text, mutations, products)
+from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
+                    ResourceTypes, config_production_modifier, dominant,
+                    helper_text, local, mendel_text, mutations, products,
+                    amount_needed_to_analyze, tiers)
 
 
 def weighted_if(weight, out1, out2):
@@ -351,10 +353,12 @@ class Bestiary:
         return self.produced_resources == other.produced_resources and self.known_bees == other.known_bees
 
 class Achievement:
-    string = ''
-    def __init__(self, text: str, achieved: bool = False):
-        self.text = text
+    def __init__(self, requirement: str, reward: str, comment: str, achieved: bool = False):
+        self.requirement_str = requirement
+        self.reward_str = reward
+        self.comment_str = comment
         self.achieved = achieved
+        self.text = self.requirement_str
 
     def check(self, game: 'Game'):
         return False
@@ -363,10 +367,10 @@ class Achievement:
         pass
 
 class ProducedProducts(Achievement):
-    def __init__(self, products, reward_resources, text, achieved: bool = False):
+    def __init__(self, products, reward_resources, requirement: str, reward: str, comment: str, achieved: bool = False):
         self.products = products
         self.reward_resources = reward_resources
-        super().__init__(text, achieved)
+        super().__init__(requirement, reward, comment, achieved)
 
     def check(self, game: 'Game'):
         per_product = []
@@ -379,9 +383,9 @@ class ProducedProducts(Achievement):
         game.resources.add_resources(self.reward_resources)
 
 class BredSpecies(Achievement):
-    def __init__(self, species: BeeSpecies, text: str, achieved: bool = False):
+    def __init__(self, species: BeeSpecies, requirement: str, reward: str, comment: str, achieved: bool = False):
         self.species = species
-        super().__init__(text, achieved)
+        super().__init__(requirement, reward, comment, achieved)
 
     def check(self, game: 'Game'):
         return self.species in game.bestiary.known_bees
@@ -391,6 +395,7 @@ class AchievementManager:
         self.game = game
         self.achievements = achievements
         self.notify = notify
+        self.changed_recently = False
 
     def check_achievements(self):
         for achievement in self.achievements:
@@ -399,6 +404,7 @@ class AchievementManager:
                     achievement.achieved = True
                     achievement.reward(self.game)
                     self.notify(achievement)
+                    self.changed_recently = True
 
 @dataclass
 class MatingEntry:
@@ -549,10 +555,24 @@ class Slot:
     def is_empty(self):
         return self.slot is None
 
+class CostWatcher(type):
+    def __init__(cls, name, bases, clsdict):
+        mro = cls.mro()
+        if len(mro) > 2:
+            if not hasattr(cls, 'cost'):
+                raise SyntaxError(f'All buildings must have costs: {cls}')
+            if not (hasattr(cls, 'hide_from_buildings') and cls.hide_from_buildings):
+                mro[-2].__dict__['all_buildings_costs'][name] = cls.cost
+            logging.debug("Building registered: " + name)
+        super(CostWatcher, cls).__init__(name, bases, clsdict)
 
-class Inventory:
-    cost = {ResourceTypes.WOOD: 5, ResourceTypes.FLOWERS: 5}
+class Building(metaclass=CostWatcher):
+    all_buildings_costs = {}
+
+class Inventory(Building):
+    cost = {ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     def __init__(self, capacity=None, name=''):
+        super().__init__()
         self.capacity = capacity or 100
         self.storage = [Slot() for i in range(self.capacity)]
         self.name = name
@@ -686,10 +706,11 @@ class ApiaryProblems(Enum):
     NO_QUEEN = 'no_queen'
     NO_SPACE = 'no_space'
 
-class Apiary:
-    cost = {ResourceTypes.HONEY: 10, ResourceTypes.WOOD: 5, ResourceTypes.FLOWERS: 5}
+class Apiary(Building):
+    cost = {ResourceTypes.HONEY: 100, ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     production_modifier = 1/3
     def __init__(self, name, add_resources, add_mating_entry, bestiary: Bestiary):
+        super().__init__()
         self.inv = Inventory(7)
         self.princess = Slot()
         self.drone = Slot()
@@ -716,7 +737,7 @@ class Apiary:
 
     def put_princess(self, bee, amount=1):
         if not isinstance(bee, Princess) and not isinstance(bee, Queen):
-            raise TypeError('Bee should be a Princess or a Queen')
+            raise TypeError(f'{local["should_princess_queen"]}')
         self.princess.put(bee, amount)
         self.try_breed()
 
@@ -725,7 +746,7 @@ class Apiary:
 
     def put_drone(self, bee, amount=1):
         if not isinstance(bee, Drone):
-            raise TypeError('Bee should be a Drone')
+            raise TypeError(f'{local["should_drone"]}')
         self.drone.put(bee, amount)
         self.try_breed()
 
@@ -816,9 +837,84 @@ class Apiary:
             self.problem = ApiaryProblems.NO_QUEEN
 
 class Alveary(Apiary):
-    cost = {ResourceTypes.HONEY: 100, ResourceTypes.ROYAL_JELLY: 25, ResourceTypes.POLLEN_CLUSTER: 25}
+    cost = {ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250}
+
+class Analyzer(Building):
+    cost = {ResourceTypes.STRING: 10, ResourceTypes.GOLD: 10}
+    hide_from_buildings = True
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.slot = Slot()
+        self.time_left = None
+        self.amount_needed_to_consume = None
+        self.species = None
+        self.hints = []
+        self.time_to_analyze = 4
+        self.consumed_amount = 0
+
+    def update(self):
+        if self.slot.is_empty():
+            self.time_left = None
+            return
+
+        if self.consumed_enough():
+            return
+
+        if self.time_left is None:
+            self.time_left = self.time_to_analyze # initialize consuming
+            logging.debug('analyzer initialized')
+        elif self.time_left > 0:
+            self.time_left -= 1
+            logging.debug(f'{self.time_left=}')
+        else:
+            self.consumed_amount += 1
+            self.slot.take()
+            if not self.slot.is_empty() and not self.consumed_enough():
+                self.time_left = self.time_to_analyze
+            else:
+                self.time_left = None
+            logging.info(f'{self.consumed_amount=}')
+        if self.consumed_amount >= self.amount_needed_to_consume:
+            print(local[self.species][0])
+
+
+    def put(self, bee: Bee, amount=1):
+        if bee is None: return
+        if not bee.inspected:
+            raise ValueError(f'{local["should_inspected"]}')
+        if bee.genes.species[0] != bee.genes.species[1]:
+            raise ValueError(f'{local["should_alleles"]}')
+        if self.species is not None and self.species != bee.genes.species[0]:
+            raise ValueError(f'{local["can_analyze"]} {local[self.species][0]}')
+        if self.consumed_amount == 0:
+            self.set_need_to_consume(bee.genes.species[0])
+        self.slot.put(bee, amount)
+
+    def set_need_to_consume(self, species: BeeSpecies):
+        self.species = species
+        self.amount_needed_to_consume = amount_needed_to_analyze[species]
+
+        for mutation, children in mutations.items():
+            if mutation[0] == self.species and tiers[mutation[0]] >= tiers[mutation[1]]:
+                times = len(children) - 1
+                for _ in range(times):
+                    self.hints.append(mutation)
+        # self.hints = ['a+b', 'b+c', 'c+d']
+
+    def consumed_enough(self):
+        return self.consumed_amount >= self.amount_needed_to_consume
+
+class AnalyzerGold(Analyzer):
+    hide_from_buildings = False
+    cost = {ResourceTypes.GOLD: 20}
+
+class AnalyzerString(Analyzer):
+    hide_from_buildings = False
+    cost = {ResourceTypes.STRING: 20}
 
 class Game:
+    inspect_cost = 3
     def __init__(self):
         self.exit_event = threading.Event()
         self.inner_state_thread = None
@@ -826,6 +922,7 @@ class Game:
 
     def restart_game(self):
         self.resources = Resources()
+        # self.resources = Resources({ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50})
         self.bestiary = Bestiary()
         self.mating_history = MatingHistory()
         self.inventories : dict[str, Inventory] = {}
@@ -833,14 +930,15 @@ class Game:
         self.inv = self.inventories[local['Inventory'] + ' 1']
         self.apiaries : List[Apiary] = []
         self.build('apiary', free=True)
+        self.analyzers: List[Analyzer] = []
         self.total_inspections = 0
 
         product_achievements = [
-            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, local['produce10flowers10wood']),
-            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, local['produce1honey']),
-            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, local['produce50honey']),
-            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, local['produce1pollencluster']),
-            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, local['produce1royaljelly']),
+            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, **local['produce10flowers10wood']),
+            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, **local['produce1honey']),
+            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, **local['produce50honey']),
+            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, **local['produce1pollencluster']),
+            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, **local['produce1royaljelly']),
         ]
         achievement_species = [
             (BeeSpecies.COMMON, 'breedCOMMON'),
@@ -852,7 +950,7 @@ class Game:
             (BeeSpecies.UNWEARY, 'breedUNWEARY'),
             (BeeSpecies.INDUSTRIOUS, 'breedINDUSTRIOUS'),
         ]
-        species_achievements = [BredSpecies(species, local[text]) for species, text in achievement_species]
+        species_achievements = [BredSpecies(species, **local[text]) for species, text in achievement_species]
         self.achievement_manager = AchievementManager(
             self,
             product_achievements + species_achievements,
@@ -868,7 +966,10 @@ class Game:
         self.inner_state_thread.start()
 
     def notify_achievement(self, achievement: Achievement):
-        self.print(local['unlocked'] + ':\n' + achievement.text)
+        self.print(local['unlocked'] + ':\n' +
+                   local['requirement'] + achievement.requirement_str + '\n' +
+                   local['reward'] + achievement.reward_str + '\n' +
+                   local['comment'] + achievement.comment_str)
 
     def exit(self):  # tested
         self.exit_event.set()
@@ -942,7 +1043,7 @@ class Game:
 
     def inspect_bee(self, bee):
         if bee is not None and not bee.inspected:
-            self.resources.remove_resources({ResourceTypes.HONEY: 1})
+            self.resources.remove_resources({ResourceTypes.HONEY: self.inspect_cost})
             bee.inspect()
             self.total_inspections += 1
 
@@ -962,7 +1063,25 @@ class Game:
         elif params[0] == 'alveary':
             if not free:
                 self.resources.remove_resources(Alveary.cost)
-            self.print('You won the demo!', out=self.command_out, flush=True)
+            self.print(f'{local["won_the_demo"]}', out=self.command_out, flush=True)
+            return Alveary('Alveary', self.resources.add_resources, self.mating_history.append, self.bestiary)
+        elif params[0] == 'analyzer':
+            if not free:
+                self.resources.remove_resources(Analyzer.cost)
+            self.analyzers.append(Analyzer(str(len(self.analyzers))))
+            return self.analyzers[-1]
+        elif params[0] == 'analyzergold':
+            if not free:
+                self.resources.remove_resources(AnalyzerGold.cost)
+            self.analyzers.append(Analyzer(str(len(self.analyzers))))
+            return self.analyzers[-1]
+        elif params[0] == 'analyzerstring':
+            if not free:
+                self.resources.remove_resources(AnalyzerString.cost)
+            self.analyzers.append(Analyzer(str(len(self.analyzers))))
+            return self.analyzers[-1]
+        else:
+            raise ValueError('Tried to build unknown building')
 
     def rename_inventory(self, from_str, to_str):
         if to_str == '':
@@ -977,12 +1096,9 @@ class Game:
 
     def get_available_build_options(self):
         options = []
-        if self.resources.check_enough(Apiary.cost):
-            options.append('Apiary')
-        if self.resources.check_enough(Inventory.cost):
-            options.append('Inventory')
-        if self.resources.check_enough(Alveary.cost):
-            options.append('Alveary')
+        for building_name, cost in Building.all_buildings_costs.items():
+            if self.resources.check_enough(cost):
+                options.append((building_name, cost))
         return options
 
     def update_state(self):
@@ -993,6 +1109,8 @@ class Game:
 
             for apiary in self.apiaries:
                 apiary.update()
+            for analyzer in self.analyzers:
+                analyzer.update()
 
             self.achievement_manager.check_achievements()
 
@@ -1009,6 +1127,7 @@ class Game:
             'resources': self.resources,
             'inventories': self.inventories,
             'apiaries': self.apiaries,
+            'analyzers':self.analyzers,
             'total_inspections': self.total_inspections,
             'mating_history': self.mating_history,
             'bestiary': self.bestiary,
@@ -1031,10 +1150,10 @@ class Game:
         if len(d) == 0:
             return
         latest = max(d, key=d.get)
-        print(latest)
         self.load(latest)
 
     def load(self, name) -> dict:
+        logging.info(f'load save name {name}')
         with open('saves/' + name + '.forestry', 'rb') as f:
             state : dict = pickle.load(f)
 
@@ -1052,6 +1171,7 @@ class Game:
         self.resources = state['resources']
         self.inventories = state['inventories']
         self.apiaries = state['apiaries']
+        self.analyzers = state.get('analyzers', [])
         self.total_inspections = state['total_inspections']
         self.mating_history = state['mating_history']
         self.bestiary = state['bestiary']

@@ -45,6 +45,11 @@ class InspectWindow(UIWindow):
             if event.ui_element == self.bee_button:
                 self.cursor.slot.swap(self.bee_button.slot)
                 self.bee_stats.bee = self.bee_button.slot.slot
+                if self.bee_stats.bee is None:
+                    self.bee_stats.set_dimensions((7,7))
+                    self.bee_stats.hide()
+                else:
+                    self.bee_stats.show()
                 self.reshape_according_to_bee_stats()
             elif event.ui_element == self.inspect_button:
                 event_data = {'ui_element': self}

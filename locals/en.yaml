@@ -26,6 +26,17 @@ buildings:
   entertosave: "`Enter` to save"
   Sort: Squeeze # sort button
   Apiary: Apiary
+  should_princess_queen: Bee should be a Princess or a Queen
+  should_drone: Bee should be a Drone
+  should_inspected: Bee should be inspected
+  should_alleles: Bee should have identical species alleles
+  can_analyze: "This analyzer can analyze only:"
+  Analyzer: Analyzer
+  AnalyzerGold: Analyzer (gold)
+  AnalyzerString: Analyzer (string)
+  analyzed: Analyzed
+  hints: "Hints for mutations:"
+  no_mutations: "No further mutations"
   Apiary_problem_ALL_OK: All ok
   Apiary_problem_NO_QUEEN: No queen present
   Apiary_problem_NO_SPACE: Not enough space for offspring
@@ -36,6 +47,7 @@ buildings:
   Inspect: Inspect # left side bar button
   Inspection popup: Inspection costs {} honey to perform
   Menu: Menu
+  won_the_demo: You won! Thanks for playing!
 resources:
   RESOURCES: RESOURCES
   notenough: "Not enough {}: you have {} but you need {}"
@@ -49,6 +61,7 @@ resources:
 esc_menu:
   Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance
+  Achievements: Achievements
   Bestiary: Bestiary
   Save: Save
   Load: Load
@@ -64,6 +77,7 @@ esc_menu:
   Mating History: Mating History
   mendel_notification: "Notification: Mendelian inheritance tutorial is now available in the esc menu."
   bestiary_notification: "Notification: Bestiary is now available in the esc menu."
+  born: Born
   produced: Produced
   resource: Resource
   load_confirm: You can lose unsaved progress. Continue?
@@ -82,10 +96,10 @@ genes_alleles:
     UNWEARY: [UNWEARY]
     INDUSTRIOUS: [INDUSTRIOUS]
   BeeFertility:
-    ONE: ['1']
-    TWO: ['2']
-    THREE: ['3']
-    FOUR: ['4']
+    ONE: ['Low']
+    TWO: ['Medium']
+    THREE: ['High']
+    FOUR: ['Greece God']
   BeeLifespan:
     LONGEST: [Longest]
     LONGER: [Longer]
@@ -105,27 +119,77 @@ genes_alleles:
     SLOWER: [SLOWER]
     SLOWEST: [SLOWEST]
 
+achievements_misc:
+  unlocked: Achievement unlocked
+  requirement: "Requirement"
+  reward: "Reward"
+  comment: "Comment"
+  hover: Hover
+  achieved: Completed achievements
+  next_achievements: Next achievements
 achievements:
-  unlocked: "Achievement unlocked"
-  produce10flowers10wood: 'Produce 10 flowers and 10 wood.<br>Reward: 5 honey. Nice.'
-  produce1honey: 'Produce 1 honey.<br>Reward: 5 honey. Almost a free inspection for you.'
-  produce50honey: 'Produce 50 honey.<br>Reward: 1 pollen cluster and 1 royal jelly. Try to produce these difficult to obtain resources. Different bees required!'
-  produce1pollencluster: "Produce 1 pollen cluster.<br>Reward: 5 pollen clusters and game developer's appreciation"
-  produce1royaljelly: "Produce 1 royal jelly.<br>Reward: 5 royal jelly and game developer's admiration"
-  breedCOMMON: Breed COMMON species
-  breedCULTIVATED: Breed CULTIVATED species
-  breedNOBLE: Breed NOBLE species
-  breedMAJESTIC: Breed MAJESTIC species
-  breedIMPERIAL: Breed IMPERIAL species
-  breedDILIGENT: Breed DILIGENT species
-  breedUNWEARY: Breed UNWEARY species
-  breedINDUSTRIOUS: Breed INDUSTRIOUS species
+  produce10flowers10wood:
+    requirement: Produce 10 flowers and 10 wood
+    reward: 5 honey
+    comment: Nice.
+  produce1honey:
+    requirement: Produce 1 honey
+    reward: 5 honey
+    comment: Almost two free inspections for you.
+  produce50honey:
+    requirement: Produce 50 honey.
+    reward: 1 pollen cluster and 1 royal jelly
+    comment: Try to produce these difficult to obtain resources. Different bees required!
+  produce1pollencluster:
+    requirement: Produce 1 pollen cluster
+    reward: 5 pollen clusters
+    comment: and game developer's appreciation
+  produce1royaljelly:
+    requirement: Produce 1 royal jelly
+    reward: 5 royal jelly
+    comment: and game developer's admiration
+  breedCOMMON:
+    requirement: Breed COMMON species
+    reward: None
+    comment: ''
+  breedCULTIVATED:
+    requirement: Breed CULTIVATED species
+    reward: None
+    comment: ''
+  breedNOBLE:
+    requirement: Breed NOBLE species
+    reward: None
+    comment: ''
+  breedMAJESTIC:
+    requirement: Breed MAJESTIC species
+    reward: None
+    comment: ''
+  breedIMPERIAL:
+    requirement: Breed IMPERIAL species
+    reward: None
+    comment: ''
+  breedDILIGENT:
+    requirement: Breed DILIGENT species
+    reward: None
+    comment: ''
+  breedUNWEARY:
+    requirement: Breed UNWEARY species
+    reward: None
+    comment: ''
+  breedINDUSTRIOUS:
+    requirement: Breed INDUSTRIOUS species
+    reward: None
+    comment: ''
 
 mendel_text_additionals:
   Phenotype: Phenotype
   Genotype: Genotype
   Allele: Allele
   Purebred: Purebred
+  anim_text_TT: Both dominant, choose active at random
+  anim_text_TF: Left is dominant, choose it as active
+  anim_text_FT: Right is dominant, choose it as active
+  anim_text_FF: Both recessive, choose active at random
 
 texts:
   helper_text:

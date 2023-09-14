@@ -1,18 +1,26 @@
-from typing import List
+from typing import Dict, List, Optional, Union
+from random import choices, randint
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import (UIButton, UIPanel, UIStatusBar, UITextBox,
-                                 UIWindow, UILabel)
+from pygame_gui.core import ObjectID, UIElement
+from pygame_gui.core.interfaces import IContainerLikeInterface, IUIManagerInterface
+from pygame_gui.elements import (UIButton, UILabel, UIPanel, UIStatusBar,
+                                 UITextBox, UIWindow)
 
-from config import BeeFertility, BeeLifespan, BeeSpeed, local, mendel_text, dominant
-from forestry import Bee, BeeSpecies, Drone, Genes, MatingEntry, Princess, Slot
+from config import (BeeFertility, BeeLifespan, BeeSpeed, dominant, local,
+                    mendel_text)
+from forestry import Bee, BeeSpecies, Drone, Genes, MatingEntry, Princess, Slot, basic_species
 from ui.elements.ui_grid_window import UIGridPanel
 from ui.elements.ui_table import UITable
 from ui.game_components.bee_stats import BeeStats, colorize
 from ui.game_components.mating_entry_panel import MatingEntryPanel
 from ui.game_components.ui_button_slot import UIButtonSlot
 
+
+def move_element_lerp(el: UIElement, start: pygame.Vector2, end: pygame.Vector2, t: float):
+    pos = start + (end - start) * (t)
+    el.set_relative_position(pos)
 
 class BeeHighlight(UITable):
     def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager = None, *, element_id: str = 'panel', margins = None, container = None, parent_element = None, object_id = None, anchors = None, visible: int = 1):
@@ -53,17 +61,123 @@ class NamedBeeHighlight(UITable):
         self.table_contents.append([UITextBox(self.name, pygame.Rect(0, 0, 128, 44), object_id='@Centered', container=self)])
         self.table_contents.append([BeeHighlight(self.bee, pygame.Rect(0, 0, 0, 0), container=self)])
 
+class BreedingAlgorithmAnimationPanel(UIPanel):
+    def __init__(self, relative_rect: pygame.Rect, starting_height: int = 1, manager: Optional[IUIManagerInterface] = None, *, element_id: str = 'panel', margins: Optional[Dict[str, int]] = None, container: Optional[IContainerLikeInterface] = None, parent_element: Optional[UIElement] = None, object_id: Union[ObjectID, str, None] = None, anchors: Optional[Dict[str, Union[str, UIElement]]] = None, visible: int = 1):
+        self.acc = 0
+        self.bee_highlight1 = None
+        self.bee_highlight2 = None
+        self.picked_uibuttonslot1 = None
+        self.picked_uibuttonslot2 = None
+        self.label = None
+        self.initial_alleles = None
+        self.should_swap = None
+        self.button_size = (64, 64)
+
+        super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
+
+    def delete_all(self):
+        if self.bee_highlight1 is not None:
+            self.bee_highlight1.kill()
+            self.bee_highlight1 = None
+        if self.bee_highlight2 is not None:
+            self.bee_highlight2.kill()
+            self.bee_highlight2 = None
+        if self.picked_uibuttonslot1 is not None:
+            self.picked_uibuttonslot1.kill()
+            self.picked_uibuttonslot1 = None
+        if self.picked_uibuttonslot2 is not None:
+            self.picked_uibuttonslot2.kill()
+            self.picked_uibuttonslot2 = None
+        if self.label is not None:
+            self.label.kill()
+            self.label = None
+
+    def reset_animation(self):
+        self.delete_all()
+
+        self.initial_alleles = choices([BeeSpecies.FOREST, BeeSpecies.MEADOWS, BeeSpecies.NOBLE, BeeSpecies.DILIGENT], k=4)
+        if dominant[self.initial_alleles[1]] and not dominant[self.initial_alleles[0]]:
+            self.initial_alleles[0], self.initial_alleles[1] = self.initial_alleles[1], self.initial_alleles[0]
+        if dominant[self.initial_alleles[3]] and not dominant[self.initial_alleles[2]]:
+            self.initial_alleles[2], self.initial_alleles[3] = self.initial_alleles[3], self.initial_alleles[2]
+
+        initial_bee1 = Drone(Genes((self.initial_alleles[0], self.initial_alleles[1])))
+        initial_bee2 = Drone(Genes((self.initial_alleles[2], self.initial_alleles[3])))
+        self.bee_highlight1 = BeeHighlight(initial_bee1, relative_rect=pygame.Rect(0, 0, 135, 66), container=self)
+        self.bee_highlight2 = BeeHighlight(initial_bee2, relative_rect=pygame.Rect(0, 0, 135, 66), container=self, anchors={'left_target': self.bee_highlight1})
+        self.pick1 = randint(0, 1)
+        self.pick2 = randint(0, 1)
+
+        table = {
+            (True, True): (randint(0, 1), local['anim_text_TT']),
+            (True, False): (0, local['anim_text_TF']),
+            (False, True): (1, local['anim_text_FT']),
+            (False, False): (randint(0, 1), local['anim_text_FF']),
+        }
+        self.should_swap, self.label_text = table[dominant[self.initial_alleles[self.pick1]], dominant[self.initial_alleles[2 + self.pick2]]]
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        if self.acc == 0:
+            self.reset_animation()
+
+        self.acc += time_delta
+        if self.acc < 1:
+            pass
+        elif self.acc < 2:
+            if self.picked_uibuttonslot1 is None:
+                allele = self.initial_alleles[self.pick1]
+                self.initial1 = pygame.Vector2(6 + 68*self.pick1, 78)
+                # self.initial1 = pygame.Vector2(290, 6)
+                self.final1 = pygame.Vector2(290, 6)
+                rect = pygame.Rect(self.initial1, self.button_size)
+                self.picked_uibuttonslot1 = UIButtonSlot(Slot(Drone(Genes((allele,allele)))), rect, '', container=self)
+        elif self.acc < 3:
+            if self.picked_uibuttonslot2 is None:
+                allele = self.initial_alleles[2+self.pick2]
+                self.initial2 = pygame.Vector2(150 + 68 * self.pick2, 78)
+                # self.initial2 = pygame.Vector2(356, 6)
+                self.final2 = pygame.Vector2(356, 6)
+                rect = pygame.Rect(self.initial2, self.button_size)
+                self.picked_uibuttonslot2 = UIButtonSlot(Slot(Drone(Genes((allele,allele)))), rect, '', container=self)
+        elif self.acc < 4:
+            move_element_lerp(self.picked_uibuttonslot1, self.initial1, self.final1, (self.acc-3) / 1)
+            move_element_lerp(self.picked_uibuttonslot2, self.initial2, self.final2, (self.acc-3) / 1)
+        elif self.acc < 5:
+            move_element_lerp(self.picked_uibuttonslot1, self.initial1, self.final1, 1)
+            move_element_lerp(self.picked_uibuttonslot2, self.initial2, self.final2, 1)
+        elif self.acc < 6:
+            # analyze if should swap, show uilabel
+            if self.label is None:
+                self.label = UITextBox(self.label_text, pygame.Rect(356+70, 6, 350, 130), container=self)
+                # self.label = UILabel(pygame.Rect(356+70, 27, 600, 30), self.label_text, container=self)
+        elif self.acc < 7:
+            if self.should_swap:
+                move_element_lerp(self.picked_uibuttonslot1, self.final1, self.final2, (self.acc-6) / 1)
+                move_element_lerp(self.picked_uibuttonslot2, self.final2, self.final1, (self.acc-6) / 1)
+        elif self.acc < 9:
+            pass
+        else:
+            self.acc = 0
+
 
 class MendelTutorialWindow(UIWindow):
-    def __init__(self, rect: pygame.Rect, manager):
-        super().__init__(rect, manager, local['Mendelian Inheritance'])
+    def __init__(self, rect: pygame.Rect, manager=None):
+        super().__init__(rect, manager, local['Mendelian Inheritance'], resizable=True)
         self.set_minimum_dimensions((700, 500))
         self.interactive_panel_height = self.get_container().get_rect().height//2
         self.arrow_buttons_height = 40
         size = self.get_container().get_size()
         self.text_boxes : List[UITextBox] = []
         for text in mendel_text:
-            text_box = UITextBox(text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height - self.arrow_buttons_height)), self.ui_manager, container=self)
+            text_box = UITextBox(text, pygame.Rect((0,0), (size[0], size[1] - self.interactive_panel_height - self.arrow_buttons_height)), self.ui_manager, container=self,
+                anchors={
+                    'top': 'top',
+                    'bottom': 'bottom',
+                    'left': 'left',
+                    'right': 'right'
+                })
+            text_box.time_until_full_rebuild_after_changing_size = 0.001
             self.text_boxes.append(text_box)
 
         self.panels = {}
@@ -100,7 +214,7 @@ class MendelTutorialWindow(UIWindow):
         panel = self.panels[panel_num]
         size = panel.get_abs_rect().size
         table = UITable(pygame.Rect(0, 0, size[0], size[1]), kill_on_repopulation=False, container=self, anchors=panel.anchors)
-        table.table_contents.append([
+        table.add_row([
             UILabel(pygame.Rect(0, 0, 120, 30), local['Phenotype'], container=table, object_id='@Centered'),
             UILabel(pygame.Rect(0, 0, 148, 30), local['Genotype'], container=table, object_id='@Centered'),
             UILabel(pygame.Rect(0, 0, 148, 30), local['Allele'], container=table, object_id='@Centered'),
@@ -109,7 +223,7 @@ class MendelTutorialWindow(UIWindow):
         bee = Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST),
                           (BeeFertility.TWO, BeeFertility.THREE),
                           (BeeLifespan.SHORT, BeeLifespan.SHORTER),
-                          (BeeSpeed.SLOW, BeeSpeed.SLOWEST)), True)
+                          (BeeSpeed.SLOWEST, BeeSpeed.SLOW)), True)
         pure_bee = Drone(Genes((BeeSpecies.FOREST, BeeSpecies.FOREST),
                                (BeeFertility.TWO, BeeFertility.TWO),
                                (BeeLifespan.SHORT, BeeLifespan.SHORT),
@@ -118,7 +232,12 @@ class MendelTutorialWindow(UIWindow):
         for allele in BeeSpeed:
             text.append(f'{colorize(local[allele][0], "#ec3661" if dominant[allele] else "#3687ec")}: {allele.value}')
         text = '\n'.join(text)
-        table.table_contents.append([
+        rect = pygame.Rect(0,0,318,177)
+        bs1 = BeeStats(bee, rect, container=table, resizable=True)
+        bs2 = BeeStats(pure_bee, rect, container=table, resizable=True)
+        bs1.rebuild()
+        bs2.rebuild()
+        table.add_row([
             UIButtonSlot(
                 Slot(bee, 1),
                 pygame.Rect(0, 0, 64, 64),
@@ -126,10 +245,10 @@ class MendelTutorialWindow(UIWindow):
                 self.ui_manager,
                 table,
                 is_inspectable=False,
-                allow_popup=False),
-            BeeStats(bee, pygame.Rect(0, 0, 1, 1), container=table, resizable=True),
+                allow_popup=True),
+            bs1,
             UITextBox(text, pygame.Rect(0, 0, 250, 218), container=table),
-            BeeStats(pure_bee, pygame.Rect(0, 0, 1, 1), container=table, resizable=True),
+            bs2,
         ])
         table.rebuild()
         panel.kill()
@@ -160,6 +279,9 @@ class MendelTutorialWindow(UIWindow):
                 'top_target': self.text_boxes[panel_num]
             })
 
+    def setup_breeding_algorithm_animation(self, panel_num):
+        panel : UIPanel = self.panels[panel_num]
+        BreedingAlgorithmAnimationPanel(pygame.Rect((0, 0), panel.get_container().get_size()), container=panel)
     # 3
     def setup_dominance_and_uniformity(self, panel_num):
         panel = self.panels[panel_num]
@@ -479,6 +601,7 @@ class MendelTutorialWindow(UIWindow):
 
         self.panel_functions = {}
         self.panel_functions[1] = self.setup_phenotype_genotype
+        self.panel_functions[2] = self.setup_breeding_algorithm_animation
         self.panel_functions[3] = self.setup_bee_highlights
         self.panel_functions[auto_counter(5)] = self.setup_dominance_and_uniformity
         self.panel_functions[auto_counter()] = self.setup_segregation
@@ -501,6 +624,7 @@ class MendelTutorialWindow(UIWindow):
             text_box.hide()
         for panel in self.panels.values():
             panel.hide()
+            panel.disable()
         self.text_boxes[self.current_page].show()
         if self.panels.get(self.current_page) is None:
             size = self.get_container().get_size()
@@ -517,6 +641,7 @@ class MendelTutorialWindow(UIWindow):
             if func is not None:
                 func(self.current_page)
         self.panels[self.current_page].show()
+        self.panels[self.current_page].enable()
 
     def process_event(self, event: pygame.event.Event) -> bool:
         consumed = super().process_event(event)

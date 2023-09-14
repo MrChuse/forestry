@@ -5,7 +5,7 @@ import pygame_gui
 from pygame_gui.elements import UIButton, UIStatusBar, UIWindow
 
 from config import local
-from forestry import Apiary, Drone, Queen
+from forestry import Apiary, Drone, Queen, SlotOccupiedError
 
 from .cursor import Cursor
 from .ui_button_slot import UIButtonSlot
@@ -94,10 +94,10 @@ class ApiaryWindow(UIWindow):
 
     def process_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_h:
+            if event.key == pygame.K_F3:
                 for b in self.buttons:
                     b.hide()
-            if event.key == pygame.K_g:
+            if event.key == pygame.K_F4:
                 for b in self.buttons:
                     b.show()
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
@@ -136,13 +136,22 @@ class ApiaryWindow(UIWindow):
                     self.cursor.process_cursor_slot_interaction(event, self.drone_button.slot)
                     self.apiary.try_breed()
                 else:
-                    raise ValueError('Bee should be a Drone')
+                    raise ValueError(f'{local["should_drone"]}')
             for index, b in enumerate(self.buttons):
                 if event.ui_element == b:
                     mods = pygame.key.get_mods()
                     if mods & pygame.KMOD_LSHIFT:
                         bee, amt = self.apiary.take(index)
                         self.game.most_recent_inventory.place_bees([bee]*amt)
+                    elif mods & pygame.KMOD_LCTRL:
+                        if self.apiary.inv[index].is_empty():
+                            break
+
+                        bee, amt = self.apiary.take(index)
+                        try:
+                            self.apiary.put(bee, amt)
+                        except SlotOccupiedError:
+                            self.apiary.inv[index].put(bee, amt)
                     else:
                         self.cursor.process_cursor_slot_interaction(event, b.slot)
         return super().process_event(event)

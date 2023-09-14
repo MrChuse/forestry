@@ -1,8 +1,8 @@
-from config import config_production_modifier, ResourceTypes
+from config import config_production_modifier, ResourceTypes, local
 from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
                       Queen, Slot)
 
-CURRENT_BACK_VERSION = 7
+CURRENT_BACK_VERSION = 8
 
 def update_bee(slot: Slot):
     bee, amount = slot.take_all()
@@ -83,10 +83,40 @@ def update_back_state_6_7(state: dict) -> dict:
     state['resources'].res = {ResourceTypes[r.get(res, res.upper())]: amt for res, amt in state['resources'].items()}
     return state
 
+def update_achievements_split_text(state: dict) -> dict:
+    for achievement in state['achievements']:
+        for ach in local.values():
+            if isinstance(ach, dict):
+                if 'requirement' in ach and ach['requirement'] in achievement.text:
+                    achievement.requirement_str = ach['requirement']
+                    achievement.reward_str = ach['reward']
+                    achievement.comment_str = ach['comment']
+    return state
+
+def check_dict_have_current_keys(state):
+    for key in current_keys:
+        if key not in state:
+            return False
+    return True
+
+current_keys = [
+    'back_version'
+    'current_tutorial_stage',
+    'resources',
+    'inventories',
+    'apiaries',
+    'bestiary',
+    'mating_history',
+    'total_inspections'
+    'achievements',
+]
+
 update_back_versions = [update_back_state_0_1,
                         update_back_state_1_2,
                         update_back_state_2_3,
                         update_back_state_3_4,
                         update_bees_in_state,
                         update_back_state_5_6,
-                        update_back_state_6_7]
+                        update_back_state_6_7,
+                        update_achievements_split_text,
+                        ]
