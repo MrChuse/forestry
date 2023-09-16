@@ -24,7 +24,7 @@ class ConsoleGame(Game):
         self.commands = [
             Command(['exit', 'q'], self.exit, *desc['exit']),
             Command(['help', 'h'], self.help, *desc['help']),
-            Command(['manual'], lambda : self.execute_command('help manual'), *desc['manual']),
+            Command(['manual'], lambda x: self.execute_command('help manual'), *desc['manual']),
             Command(['save'], self.save, *desc['save']),
             Command(['load'], self.load, *desc['load']),
             Command(['show', 's'], self.show, *desc['show']),
