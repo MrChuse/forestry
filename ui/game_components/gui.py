@@ -411,14 +411,16 @@ class GUI(Game):
                 if event.text == local['Exit']:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 elif event.text == local['Load']:
-                    self.open_load_file_selection_list()
+                    if self.load_file_selection_list is None:
+                        self.open_load_file_selection_list()
                     if self.save_file_selection_list is not None:
                         self.save_file_selection_list.kill()
                         self.save_file_selection_list = None
                         self.filename_entry.kill()
                         self.filename_entry = None
                 elif event.text == local['Save']:
-                    self.open_save_file_selection_list()
+                    if self.save_file_selection_list is None:
+                        self.open_save_file_selection_list()
                     if self.load_file_selection_list is not None:
                         self.load_file_selection_list.kill()
                         self.load_file_selection_list = None
