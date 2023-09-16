@@ -141,8 +141,7 @@ class ApiaryWindow(UIWindow):
                 if event.ui_element == b:
                     mods = pygame.key.get_mods()
                     if mods & pygame.KMOD_LSHIFT:
-                        bee, amt = self.apiary.take(index)
-                        self.game.most_recent_inventory.place_bees([bee]*amt)
+                        self.game.most_recent_inventory.place_bees([self.apiary.inv[index]])
                     elif mods & pygame.KMOD_LCTRL:
                         if self.apiary.inv[index].is_empty():
                             break
