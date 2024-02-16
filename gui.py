@@ -10,6 +10,9 @@ from ui.custom_events import APPLY_VOLUME_CHANGE
 # keep TutorialStage here because needed for backwards compatibility with pickle.load
 from ui.game_components import GUI, TutorialStage
 
+# trash slot for inventory
+# controls for apiary and inventory
+
 def main():
     game = None
     try:
