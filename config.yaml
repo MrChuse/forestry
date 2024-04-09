@@ -40,6 +40,52 @@ genes_alleles:
     - [SLOWER, 0.6, True]
     - [SLOWEST, 0.3, True]
 
+default_genes:
+  FOREST:
+    fertility: 3
+    lifespan: SHORTER
+    speed: SLOWEST
+  MEADOWS:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOWEST
+  COMMON:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOWER
+  CULTIVATED:
+    fertility: 2
+    lifespan: SHORTEST
+    speed: FAST
+  NOBLE:
+    fertility: 2
+    lifespan: SHORT
+    speed: SLOWER
+  MAJESTIC:
+    fertility: 4
+    lifespan: SHORTENED
+    speed: NORMAL
+  IMPERIAL:
+    fertility: 2
+    lifespan: NORMAL
+    speed: SLOWER
+  DILIGENT:
+    fertility: 2
+    lifespan: SHORT
+    speed: SLOWER
+  UNWEARY:
+    fertility: 2
+    lifespan: SHORTENED
+    speed: NORMAL
+  INDUSTRIOUS:
+    fertility: 2
+    lifespan: NORMAL
+    speed: SLOWER
+
+basic_species:
+  - FOREST
+  - MEADOWS
+
 mutations:
   BeeSpecies:
     - [FOREST, MEADOWS, COMMON, 0.15]

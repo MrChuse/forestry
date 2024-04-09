@@ -43,6 +43,25 @@ for gene_name, dict_of_tiers in tiers_conf.items():
         allele = genes_enums[gene_name][allele_name]
         tiers[allele] = tier
 
+bs = BeeSpecies
+bf = BeeFertility
+bl = BeeLifespan
+bS = BeeSpeed
+
+default_genes = {}
+for species_str, default_alleles_dict in config['default_genes'].items():
+    species = bs[species_str]
+    fertility = bf(default_alleles_dict['fertility']) # because this is a number
+    lifespan = bl[default_alleles_dict['lifespan']]
+    speed = bS[default_alleles_dict['speed']]
+    default_genes[species] = {
+        'species': species,
+        'fertility': fertility,
+        'lifespan': lifespan,
+        'speed': speed,
+    }
+basic_species = [bs[species] for species in config['basic_species']]
+
 # load mutations
 mutations_conf = config['mutations']
 mutations = {}

@@ -16,82 +16,11 @@ from typing import Any, Callable, List, Tuple, Union
 from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
                     ResourceTypes, config_production_modifier, dominant,
                     helper_text, local, mendel_text, mutations, products,
-                    amount_needed_to_analyze, tiers)
+                    amount_needed_to_analyze, tiers, basic_species, default_genes)
 
 
 def weighted_if(weight, out1, out2):
     return out1 if random.random() < weight else out2
-
-bs = BeeSpecies
-bf = BeeFertility
-bl = BeeLifespan
-bS = BeeSpeed
-
-default_genes = {
-    bs.FOREST: {
-        'species': bs.FOREST,
-        'fertility': bf(3),
-        'lifespan': bl.SHORTER,
-        'speed': bS.SLOWEST,
-    },
-    bs.MEADOWS: {
-        'species': bs.MEADOWS,
-        'fertility': bf(2),
-        'lifespan': bl.SHORTER,
-        'speed': bS.SLOWEST,
-    },
-    bs.COMMON: {
-        'species': bs.COMMON,
-        'fertility': bf(2),
-        'lifespan': bl.SHORTER,
-        'speed': bS.SLOWER,
-    },
-    bs.CULTIVATED: {
-        'species': bs.CULTIVATED,
-        'fertility': bf(2),
-        'lifespan': bl.SHORTEST,
-        'speed': bS.FAST,
-    },
-    bs.NOBLE: {
-        'species': bs.NOBLE,
-        'fertility': bf(2),
-        'lifespan': bl.SHORT,
-        'speed': bS.SLOWER,
-    },
-    bs.MAJESTIC: {
-        'species': bs.MAJESTIC,
-        'fertility': bf(4),
-        'lifespan': bl.SHORTENED,
-        'speed': bS.NORMAL,
-    },
-    bs.IMPERIAL: {
-        'species': bs.IMPERIAL,
-        'fertility': bf(2),
-        'lifespan': bl.NORMAL,
-        'speed': bS.SLOWER,
-    },
-    bs.DILIGENT: {
-        'species': bs.DILIGENT,
-        'fertility': bf(2),
-        'lifespan': bl.SHORT,
-        'speed': bS.SLOWER,
-    },
-    bs.UNWEARY: {
-        'species': bs.UNWEARY,
-        'fertility': bf(2),
-        'lifespan': bl.SHORTENED,
-        'speed': bS.NORMAL,
-    },
-    bs.INDUSTRIOUS: {
-        'species': bs.INDUSTRIOUS,
-        'fertility': bf(2),
-        'lifespan': bl.NORMAL,
-        'speed': bS.SLOWER,
-    },
-}
-
-
-basic_species = [bs.FOREST, bs.MEADOWS]
 
 class SlotOccupiedError(RuntimeError):
     pass
