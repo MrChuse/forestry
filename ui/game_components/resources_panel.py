@@ -14,7 +14,7 @@ from ..elements import UITable
 def create_resources_row(resources: dict, container):
     row = []
     for resource, amount in resources.items():
-        row.append(UIButton(pygame.Rect(0, 0, 32, 32), '', container=container, tool_tip_text=local[resource], object_id='#'+str(resource)))
+        row.append(UIButton(pygame.Rect(0, 0, 32, 32), '', container=container, tool_tip_text=local.get(resource, resource.name), object_id='#'+str(resource)))
         row.append(UILabel(pygame.Rect(0, 0, 64, 28), str(amount), container=container))
     return row
 

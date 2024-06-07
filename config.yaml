@@ -3,6 +3,7 @@ genes_alleles:
   # Each allele is NAME, value, dominance
 
   BeeSpecies:
+    # first era
     - [FOREST, 1, True]
     - [MEADOWS, 2, True]
     - [COMMON, 3, True]
@@ -13,6 +14,31 @@ genes_alleles:
     - [DILIGENT, 8, False]
     - [UNWEARY, 9, True]
     - [INDUSTRIOUS, 10, False]
+
+    # second era
+    - [TECHNOLOGICAL, 11, True]
+    - [FRAME, 12, True]
+    - [RESOURCEFUL, 13, False]
+    - [FERTILE, 14, False]
+    - [LIVELY, 15, False]
+    - [MINING, 16, True]
+    - [ROCKY, 17, False]
+    - [FERROUS, 18, True]
+    - [AURIC, 19, False]
+    - [AWARE, 20, True]
+    - [SMART, 21, False]
+    - [CONSCIOUS, 22, True]
+    - [SENTIENT, 23, False]
+    - [MANUFACTURING, 24, True]
+    - [FABRICATING, 25, False]
+    - [ASSEMBLING, 26, True]
+    - [AUTOMATING, 27, False]
+    - [EXCITED, 28, True]
+    - [ENERGETIC, 29, False]
+    - [AMPED, 30, True]
+    - [ELECTRIC, 31, False]
+
+    # third era: tbd
 
   BeeFertility:
     - [ONE, 1, False]
@@ -42,45 +68,138 @@ genes_alleles:
 
 default_genes:
   FOREST:
-    fertility: 3
-    lifespan: SHORTER
+    fertility: 2
+    lifespan: SHORT
     speed: SLOWEST
   MEADOWS:
     fertility: 2
-    lifespan: SHORTER
+    lifespan: SHORT
     speed: SLOWEST
   COMMON:
     fertility: 2
-    lifespan: SHORTER
+    lifespan: SHORT
     speed: SLOWER
   CULTIVATED:
     fertility: 2
-    lifespan: SHORTEST
-    speed: FAST
+    lifespan: SHORTER
+    speed: SLOW
+
   NOBLE:
     fertility: 2
-    lifespan: SHORT
+    lifespan: SHORTENED
     speed: SLOWER
   MAJESTIC:
-    fertility: 4
-    lifespan: SHORTENED
-    speed: NORMAL
-  IMPERIAL:
     fertility: 2
     lifespan: NORMAL
-    speed: SLOWER
+    speed: SLOWEST
+  IMPERIAL:
+    fertility: 3
+    lifespan: NORMAL
+    speed: SLOWEST
+
   DILIGENT:
     fertility: 2
     lifespan: SHORT
     speed: SLOWER
   UNWEARY:
     fertility: 2
-    lifespan: SHORTENED
-    speed: NORMAL
+    lifespan: SHORTER
+    speed: SLOW
   INDUSTRIOUS:
     fertility: 2
-    lifespan: NORMAL
+    lifespan: SHORTEST
+    speed: NORMAL
+
+
+  TECHNOLOGICAL:
+    fertility: 1
+    lifespan: SHORT
+    speed: SLOWEST
+
+  FRAME:
+    fertility: 2
+    lifespan: SHORT
+    speed: SLOWEST
+  RESOURCEFUL:
+    fertility: 2
+    lifespan: SHORT
+    speed: SLOWEST
+  FERTILE:
+    fertility: 2
+    lifespan: SHORT
+    speed: SLOWEST
+  LIVELY:
+    fertility: 2
+    lifespan: SHORT
+    speed: SLOWEST
+
+  MINING:
+    fertility: 3
+    lifespan: SHORT
     speed: SLOWER
+  ROCKY:
+    fertility: 3
+    lifespan: SHORT
+    speed: SLOWER
+  FERROUS:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOWEST
+  AURIC:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOWEST
+
+  AWARE:
+    fertility: 2
+    lifespan: ELONGATED
+    speed: SLOWEST
+  SMART:
+    fertility: 2
+    lifespan: ELONGATED
+    speed: SLOWEST
+  CONSCIOUS:
+    fertility: 2
+    lifespan: ELONGATED
+    speed: SLOWEST
+  SENTIENT:
+    fertility: 2
+    lifespan: LONG
+    speed: SLOWEST
+
+  MANUFACTURING:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOW
+  FABRICATING:
+    fertility: 2
+    lifespan: SHORTEST
+    speed: NORMAL
+  ASSEMBLING:
+    fertility: 2
+    lifespan: SHORTEST
+    speed: FAST
+  AUTOMATING:
+    fertility: 2
+    lifespan: SHORTEST
+    speed: FAST
+
+  EXCITED:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOWER
+  ENERGETIC:
+    fertility: 2
+    lifespan: SHORTER
+    speed: SLOWER
+  AMPED:
+    fertility: 2
+    lifespan: SHORTEST
+    speed: SLOW
+  ELECTRIC:
+    fertility: 2
+    lifespan: SHORTEST
+    speed: SLOW
 
 basic_species:
   - FOREST
@@ -91,13 +210,43 @@ mutations:
     - [FOREST, MEADOWS, COMMON, 0.15]
     - [FOREST, COMMON, CULTIVATED, 0.12]
     - [COMMON, MEADOWS, CULTIVATED, 0.12]
+
     - [CULTIVATED, COMMON, NOBLE, 0.1]
     - [CULTIVATED, NOBLE, MAJESTIC, 0.08]
     - [CULTIVATED, COMMON, DILIGENT, 0.1]
+
     - [MAJESTIC, NOBLE, IMPERIAL, 0.08]
     - [CULTIVATED, DILIGENT, UNWEARY, 0.08]
     - [UNWEARY, DILIGENT, INDUSTRIOUS, 0.08]
 
+    - [INDUSTRIOUS, IMPERIAL, TECHNOLOGICAL, 0.15]
+
+    - [TECHNOLOGICAL, CULTIVATED, FRAME, 0.1]
+    - [TECHNOLOGICAL, FRAME, RESOURCEFUL, 0.1]
+    - [TECHNOLOGICAL, FRAME, FERTILE, 0.1]
+    - [TECHNOLOGICAL, FRAME, LIVELY, 0.1]
+
+    - [TECHNOLOGICAL, CULTIVATED, MINING, 0.1]
+    - [TECHNOLOGICAL, MINING, ROCKY, 0.1]
+    - [MINING, ROCKY, FERROUS, 0.1]
+    - [ROCKY, FERROUS, AURIC, 0.1]
+
+    - [TECHNOLOGICAL, CULTIVATED, AWARE, 0.1]
+    - [TECHNOLOGICAL, AWARE, SMART, 0.1]
+    - [AWARE, SMART, CONSCIOUS, 0.1]
+    - [SMART, CONSCIOUS, SENTIENT, 0.1]
+
+    - [TECHNOLOGICAL, CULTIVATED, MANUFACTURING, 0.1]
+    - [TECHNOLOGICAL, MANUFACTURING, FABRICATING, 0.1]
+    - [MANUFACTURING, FABRICATING, ASSEMBLING, 0.1]
+    - [FABRICATING, ASSEMBLING, AUTOMATING, 0.1]
+
+    - [TECHNOLOGICAL, CULTIVATED, EXCITED, 0.1]
+    - [TECHNOLOGICAL, EXCITED, ENERGETIC, 0.1]
+    - [EXCITED, ENERGETIC, AMPED, 0.1]
+    - [ENERGETIC, AMPED, ELECTRIC, 0.1]
+
+# maybe calculate based on the mutations?
 tier:
   BeeSpecies:
     FOREST: 0
@@ -111,15 +260,58 @@ tier:
     UNWEARY: 4
     INDUSTRIOUS: 5
 
+    TECHNOLOGICAL: 6
+    FRAME: 7
+    RESOURCEFUL: 8
+    FERTILE: 8
+    LIVELY: 8
+    MINING: 7
+    ROCKY: 8
+    FERROUS: 9
+    AURIC: 10
+    AWARE: 7
+    SMART: 8
+    CONSCIOUS: 9
+    SENTIENT: 10
+    MANUFACTURING: 7
+    FABRICATING: 8
+    ASSEMBLING: 9
+    AUTOMATING: 10
+    EXCITED: 7
+    ENERGETIC: 8
+    AMPED: 9
+    ELECTRIC: 10
+
 production_modifier: 1
 resources:
   - WOOD
   - FLOWERS
   - HONEY
-  - GOLD
+  - STINGER
   - STRING
   - ROYAL_JELLY
   - POLLEN_CLUSTER
+  - TOOL
+  - FRAME
+  - ACCELERATIUM
+  - PHEROMONE
+  - AMBROSIA
+  - ORE
+  - STONE
+  - IRON
+  - GOLD
+  - REACTION
+  - THOUGHT
+  - MIND
+  - KNOWLEDGE
+  - WHEEL
+  - GEAR
+  - SHAFT
+  - MECHANISM
+  - ELECTRON
+  - PROTON
+  - FORCE
+  - ELECTRICITY
 products:
   FOREST:
     WOOD: [1, 5]
@@ -130,9 +322,9 @@ products:
   CULTIVATED:
     HONEY: [1, 5]
   NOBLE:
-    GOLD: [1, 1]
+    STINGER: [1, 1]
   MAJESTIC:
-    GOLD: [1, 2]
+    STINGER: [1, 2]
   IMPERIAL:
     ROYAL_JELLY: [1, 1]
   DILIGENT:
@@ -141,6 +333,48 @@ products:
     STRING: [1, 2]
   INDUSTRIOUS:
     POLLEN_CLUSTER: [1, 1]
+  TECHNOLOGICAL:
+    TOOL: [1, 1]
+  FRAME:
+    FRAME: [1, 1]
+  RESOURCEFUL:
+    ACCELERATIUM: [1, 1]
+  FERTILE:
+    PHEROMONE: [1, 1]
+  LIVELY:
+    AMBROSIA: [1, 1]
+  MINING:
+    ORE: [1, 1]
+  ROCKY:
+    STONE: [1, 1]
+  FERROUS:
+    IRON: [1, 1]
+  AURIC:
+    GOLD: [1, 1]
+  AWARE:
+    REACTION: [1, 1]
+  SMART:
+    THOUGHT: [1, 1]
+  CONSCIOUS:
+    MIND: [1, 1]
+  SENTIENT:
+    KNOWLEDGE: [1, 1]
+  MANUFACTURING:
+    WHEEL: [1, 1]
+  FABRICATING:
+    GEAR: [1, 1]
+  ASSEMBLING:
+    SHAFT: [1, 1]
+  AUTOMATING:
+    MECHANISM: [1, 1]
+  EXCITED:
+    ELECTRON: [1, 1]
+  ENERGETIC:
+    PROTON: [1, 1]
+  AMPED:
+    FORCE: [1, 1]
+  ELECTRIC:
+    ELECTRICITY: [1, 1]
 
 amount_needed_to_analyze:
   FOREST: 10
@@ -149,7 +383,28 @@ amount_needed_to_analyze:
   CULTIVATED: 100
   NOBLE: 50
   MAJESTIC: 50
-  IMPERIAL: 10
+  IMPERIAL: 100
   DILIGENT: 50
   UNWEARY: 50
-  INDUSTRIOUS: 10
+  INDUSTRIOUS: 100
+  TECHNOLOGICAL: 100
+  FRAME: 500
+  RESOURCEFUL: 50
+  FERTILE: 50
+  LIVELY: 50
+  MINING: 100
+  ROCKY: 100
+  FERROUS: 100
+  AURIC: 50
+  AWARE: 100
+  SMART: 100
+  CONSCIOUS: 100
+  SENTIENT: 50
+  MANUFACTURING: 100
+  FABRICATING: 100
+  ASSEMBLING: 100
+  AUTOMATING: 50
+  EXCITED: 100
+  ENERGETIC: 100
+  AMPED: 100
+  ELECTRIC: 50

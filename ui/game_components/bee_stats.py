@@ -62,6 +62,9 @@ class BeeStats(UITable):
                 except IndexError:
                     allele0 = local[genes[key][0]][0] # TODO: remove [0]
                     allele1 = local[genes[key][1]][0]
+                except KeyError:
+                    allele0 = genes[key][0].name
+                    allele1 = genes[key][1].name
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
                 self.table_contents.append([create_uilabel(key, True),

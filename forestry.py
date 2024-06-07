@@ -143,6 +143,8 @@ class Bee:
                 allele = local[self.genes.species[0]][bee_species_index]
             except IndexError:
                 allele = local[self.genes.species[0]][0]
+            except KeyError:
+                allele = self.genes.species[0].name
             dom = dominant[self.genes.species[0]]
             return dom_local(allele, dom) + ' ' + name
         else:
@@ -334,6 +336,27 @@ class AchievementManager:
                     achievement.reward(self.game)
                     self.notify(achievement)
                     self.changed_recently = True
+
+def construct_achievements():
+        product_achievements = [
+            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, **local['produce10flowers10wood']),
+            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, **local['produce1honey']),
+            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, **local['produce50honey']),
+            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, **local['produce1pollencluster']),
+            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, **local['produce1royaljelly']),
+        ]
+        achievement_species = [
+            (BeeSpecies.COMMON, 'breedCOMMON'),
+            (BeeSpecies.CULTIVATED, 'breedCULTIVATED'),
+            (BeeSpecies.NOBLE, 'breedNOBLE'),
+            (BeeSpecies.MAJESTIC, 'breedMAJESTIC'),
+            (BeeSpecies.IMPERIAL, 'breedIMPERIAL'),
+            (BeeSpecies.DILIGENT, 'breedDILIGENT'),
+            (BeeSpecies.UNWEARY, 'breedUNWEARY'),
+            (BeeSpecies.INDUSTRIOUS, 'breedINDUSTRIOUS'),
+        ]
+        species_achievements = [BredSpecies(species, **local[text]) for species, text in achievement_species]
+        return product_achievements + species_achievements
 
 @dataclass
 class MatingEntry:
@@ -862,27 +885,10 @@ class Game:
         self.analyzers: List[Analyzer] = []
         self.total_inspections = 0
 
-        product_achievements = [
-            ProducedProducts({ResourceTypes.FLOWERS: 10, ResourceTypes.WOOD: 10}, {ResourceTypes.HONEY: 5}, **local['produce10flowers10wood']),
-            ProducedProducts({ResourceTypes.HONEY: 1}, {ResourceTypes.HONEY: 5}, **local['produce1honey']),
-            ProducedProducts({ResourceTypes.HONEY: 50}, {ResourceTypes.POLLEN_CLUSTER: 1, ResourceTypes.ROYAL_JELLY: 1}, **local['produce50honey']),
-            ProducedProducts({ResourceTypes.POLLEN_CLUSTER: 1}, {ResourceTypes.POLLEN_CLUSTER: 5}, **local['produce1pollencluster']),
-            ProducedProducts({ResourceTypes.ROYAL_JELLY: 1}, {ResourceTypes.ROYAL_JELLY: 5}, **local['produce1royaljelly']),
-        ]
-        achievement_species = [
-            (BeeSpecies.COMMON, 'breedCOMMON'),
-            (BeeSpecies.CULTIVATED, 'breedCULTIVATED'),
-            (BeeSpecies.NOBLE, 'breedNOBLE'),
-            (BeeSpecies.MAJESTIC, 'breedMAJESTIC'),
-            (BeeSpecies.IMPERIAL, 'breedIMPERIAL'),
-            (BeeSpecies.DILIGENT, 'breedDILIGENT'),
-            (BeeSpecies.UNWEARY, 'breedUNWEARY'),
-            (BeeSpecies.INDUSTRIOUS, 'breedINDUSTRIOUS'),
-        ]
-        species_achievements = [BredSpecies(species, **local[text]) for species, text in achievement_species]
+
         self.achievement_manager = AchievementManager(
             self,
-            product_achievements + species_achievements,
+            construct_achievements(),
             self.notify_achievement
         )
 
@@ -1091,6 +1097,7 @@ class Game:
 
         try:
             if state.get('back_version', 0) < CURRENT_BACK_VERSION:
+                logging.info(f'updating because back_version={state.get("back_version", 0)} < {CURRENT_BACK_VERSION=}')
                 for update_back_func in update_back_versions[state.get('back_version', 0):]:
                     state = update_back_func(state)
         except Exception as e:

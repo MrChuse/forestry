@@ -1,6 +1,6 @@
 from config import config_production_modifier, ResourceTypes, local
 from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
-                      Queen, Slot)
+                      Queen, Slot, construct_achievements)
 
 CURRENT_BACK_VERSION = 8
 
@@ -84,6 +84,9 @@ def update_back_state_6_7(state: dict) -> dict:
     return state
 
 def update_achievements_split_text(state: dict) -> dict:
+    if 'achievements' not in state:
+        state['achievements'] = construct_achievements()
+
     for achievement in state['achievements']:
         for ach in local.values():
             if isinstance(ach, dict):

@@ -744,6 +744,1266 @@
       }
     }
   },
+  "#TECHNOLOGICAL_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/TECHNOLOGICAL_Princess.png"
+      }
+    }
+  },
+  "#TECHNOLOGICAL_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/TECHNOLOGICAL_Princess.png"
+      }
+    }
+  },
+  "#TECHNOLOGICAL_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/TECHNOLOGICAL_Drone.png"
+      }
+    }
+  },
+  "#TECHNOLOGICAL_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/TECHNOLOGICAL_Drone.png"
+      }
+    }
+  },
+  "#TECHNOLOGICAL_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/TECHNOLOGICAL_Queen.png"
+      }
+    }
+  },
+  "#TECHNOLOGICAL_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/TECHNOLOGICAL_Queen.png"
+      }
+    }
+  },
+  "#FRAME_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FRAME_Princess.png"
+      }
+    }
+  },
+  "#FRAME_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FRAME_Princess.png"
+      }
+    }
+  },
+  "#FRAME_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FRAME_Drone.png"
+      }
+    }
+  },
+  "#FRAME_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FRAME_Drone.png"
+      }
+    }
+  },
+  "#FRAME_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FRAME_Queen.png"
+      }
+    }
+  },
+  "#FRAME_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FRAME_Queen.png"
+      }
+    }
+  },
+  "#RESOURCEFUL_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/RESOURCEFUL_Princess.png"
+      }
+    }
+  },
+  "#RESOURCEFUL_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/RESOURCEFUL_Princess.png"
+      }
+    }
+  },
+  "#RESOURCEFUL_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/RESOURCEFUL_Drone.png"
+      }
+    }
+  },
+  "#RESOURCEFUL_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/RESOURCEFUL_Drone.png"
+      }
+    }
+  },
+  "#RESOURCEFUL_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/RESOURCEFUL_Queen.png"
+      }
+    }
+  },
+  "#RESOURCEFUL_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/RESOURCEFUL_Queen.png"
+      }
+    }
+  },
+  "#FERTILE_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERTILE_Princess.png"
+      }
+    }
+  },
+  "#FERTILE_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERTILE_Princess.png"
+      }
+    }
+  },
+  "#FERTILE_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERTILE_Drone.png"
+      }
+    }
+  },
+  "#FERTILE_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERTILE_Drone.png"
+      }
+    }
+  },
+  "#FERTILE_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERTILE_Queen.png"
+      }
+    }
+  },
+  "#FERTILE_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERTILE_Queen.png"
+      }
+    }
+  },
+  "#LIVELY_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/LIVELY_Princess.png"
+      }
+    }
+  },
+  "#LIVELY_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/LIVELY_Princess.png"
+      }
+    }
+  },
+  "#LIVELY_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/LIVELY_Drone.png"
+      }
+    }
+  },
+  "#LIVELY_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/LIVELY_Drone.png"
+      }
+    }
+  },
+  "#LIVELY_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/LIVELY_Queen.png"
+      }
+    }
+  },
+  "#LIVELY_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/LIVELY_Queen.png"
+      }
+    }
+  },
+  "#MINING_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MINING_Princess.png"
+      }
+    }
+  },
+  "#MINING_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MINING_Princess.png"
+      }
+    }
+  },
+  "#MINING_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MINING_Drone.png"
+      }
+    }
+  },
+  "#MINING_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MINING_Drone.png"
+      }
+    }
+  },
+  "#MINING_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MINING_Queen.png"
+      }
+    }
+  },
+  "#MINING_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MINING_Queen.png"
+      }
+    }
+  },
+  "#ROCKY_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ROCKY_Princess.png"
+      }
+    }
+  },
+  "#ROCKY_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ROCKY_Princess.png"
+      }
+    }
+  },
+  "#ROCKY_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ROCKY_Drone.png"
+      }
+    }
+  },
+  "#ROCKY_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ROCKY_Drone.png"
+      }
+    }
+  },
+  "#ROCKY_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ROCKY_Queen.png"
+      }
+    }
+  },
+  "#ROCKY_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ROCKY_Queen.png"
+      }
+    }
+  },
+  "#FERROUS_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERROUS_Princess.png"
+      }
+    }
+  },
+  "#FERROUS_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERROUS_Princess.png"
+      }
+    }
+  },
+  "#FERROUS_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERROUS_Drone.png"
+      }
+    }
+  },
+  "#FERROUS_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERROUS_Drone.png"
+      }
+    }
+  },
+  "#FERROUS_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERROUS_Queen.png"
+      }
+    }
+  },
+  "#FERROUS_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FERROUS_Queen.png"
+      }
+    }
+  },
+  "#AURIC_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AURIC_Princess.png"
+      }
+    }
+  },
+  "#AURIC_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AURIC_Princess.png"
+      }
+    }
+  },
+  "#AURIC_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AURIC_Drone.png"
+      }
+    }
+  },
+  "#AURIC_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AURIC_Drone.png"
+      }
+    }
+  },
+  "#AURIC_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AURIC_Queen.png"
+      }
+    }
+  },
+  "#AURIC_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AURIC_Queen.png"
+      }
+    }
+  },
+  "#AWARE_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AWARE_Princess.png"
+      }
+    }
+  },
+  "#AWARE_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AWARE_Princess.png"
+      }
+    }
+  },
+  "#AWARE_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AWARE_Drone.png"
+      }
+    }
+  },
+  "#AWARE_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AWARE_Drone.png"
+      }
+    }
+  },
+  "#AWARE_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AWARE_Queen.png"
+      }
+    }
+  },
+  "#AWARE_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AWARE_Queen.png"
+      }
+    }
+  },
+  "#SMART_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SMART_Princess.png"
+      }
+    }
+  },
+  "#SMART_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SMART_Princess.png"
+      }
+    }
+  },
+  "#SMART_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SMART_Drone.png"
+      }
+    }
+  },
+  "#SMART_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SMART_Drone.png"
+      }
+    }
+  },
+  "#SMART_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SMART_Queen.png"
+      }
+    }
+  },
+  "#SMART_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SMART_Queen.png"
+      }
+    }
+  },
+  "#CONSCIOUS_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/CONSCIOUS_Princess.png"
+      }
+    }
+  },
+  "#CONSCIOUS_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/CONSCIOUS_Princess.png"
+      }
+    }
+  },
+  "#CONSCIOUS_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/CONSCIOUS_Drone.png"
+      }
+    }
+  },
+  "#CONSCIOUS_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/CONSCIOUS_Drone.png"
+      }
+    }
+  },
+  "#CONSCIOUS_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/CONSCIOUS_Queen.png"
+      }
+    }
+  },
+  "#CONSCIOUS_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/CONSCIOUS_Queen.png"
+      }
+    }
+  },
+  "#SENTIENT_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SENTIENT_Princess.png"
+      }
+    }
+  },
+  "#SENTIENT_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SENTIENT_Princess.png"
+      }
+    }
+  },
+  "#SENTIENT_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SENTIENT_Drone.png"
+      }
+    }
+  },
+  "#SENTIENT_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SENTIENT_Drone.png"
+      }
+    }
+  },
+  "#SENTIENT_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SENTIENT_Queen.png"
+      }
+    }
+  },
+  "#SENTIENT_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/SENTIENT_Queen.png"
+      }
+    }
+  },
+  "#MANUFACTURING_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MANUFACTURING_Princess.png"
+      }
+    }
+  },
+  "#MANUFACTURING_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MANUFACTURING_Princess.png"
+      }
+    }
+  },
+  "#MANUFACTURING_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MANUFACTURING_Drone.png"
+      }
+    }
+  },
+  "#MANUFACTURING_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MANUFACTURING_Drone.png"
+      }
+    }
+  },
+  "#MANUFACTURING_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MANUFACTURING_Queen.png"
+      }
+    }
+  },
+  "#MANUFACTURING_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/MANUFACTURING_Queen.png"
+      }
+    }
+  },
+  "#FABRICATING_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FABRICATING_Princess.png"
+      }
+    }
+  },
+  "#FABRICATING_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FABRICATING_Princess.png"
+      }
+    }
+  },
+  "#FABRICATING_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FABRICATING_Drone.png"
+      }
+    }
+  },
+  "#FABRICATING_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FABRICATING_Drone.png"
+      }
+    }
+  },
+  "#FABRICATING_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FABRICATING_Queen.png"
+      }
+    }
+  },
+  "#FABRICATING_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/FABRICATING_Queen.png"
+      }
+    }
+  },
+  "#ASSEMBLING_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ASSEMBLING_Princess.png"
+      }
+    }
+  },
+  "#ASSEMBLING_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ASSEMBLING_Princess.png"
+      }
+    }
+  },
+  "#ASSEMBLING_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ASSEMBLING_Drone.png"
+      }
+    }
+  },
+  "#ASSEMBLING_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ASSEMBLING_Drone.png"
+      }
+    }
+  },
+  "#ASSEMBLING_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ASSEMBLING_Queen.png"
+      }
+    }
+  },
+  "#ASSEMBLING_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ASSEMBLING_Queen.png"
+      }
+    }
+  },
+  "#AUTOMATING_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AUTOMATING_Princess.png"
+      }
+    }
+  },
+  "#AUTOMATING_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AUTOMATING_Princess.png"
+      }
+    }
+  },
+  "#AUTOMATING_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AUTOMATING_Drone.png"
+      }
+    }
+  },
+  "#AUTOMATING_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AUTOMATING_Drone.png"
+      }
+    }
+  },
+  "#AUTOMATING_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AUTOMATING_Queen.png"
+      }
+    }
+  },
+  "#AUTOMATING_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AUTOMATING_Queen.png"
+      }
+    }
+  },
+  "#EXCITED_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/EXCITED_Princess.png"
+      }
+    }
+  },
+  "#EXCITED_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/EXCITED_Princess.png"
+      }
+    }
+  },
+  "#EXCITED_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/EXCITED_Drone.png"
+      }
+    }
+  },
+  "#EXCITED_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/EXCITED_Drone.png"
+      }
+    }
+  },
+  "#EXCITED_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/EXCITED_Queen.png"
+      }
+    }
+  },
+  "#EXCITED_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/EXCITED_Queen.png"
+      }
+    }
+  },
+  "#ENERGETIC_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ENERGETIC_Princess.png"
+      }
+    }
+  },
+  "#ENERGETIC_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ENERGETIC_Princess.png"
+      }
+    }
+  },
+  "#ENERGETIC_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ENERGETIC_Drone.png"
+      }
+    }
+  },
+  "#ENERGETIC_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ENERGETIC_Drone.png"
+      }
+    }
+  },
+  "#ENERGETIC_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ENERGETIC_Queen.png"
+      }
+    }
+  },
+  "#ENERGETIC_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ENERGETIC_Queen.png"
+      }
+    }
+  },
+  "#AMPED_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AMPED_Princess.png"
+      }
+    }
+  },
+  "#AMPED_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AMPED_Princess.png"
+      }
+    }
+  },
+  "#AMPED_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AMPED_Drone.png"
+      }
+    }
+  },
+  "#AMPED_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AMPED_Drone.png"
+      }
+    }
+  },
+  "#AMPED_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AMPED_Queen.png"
+      }
+    }
+  },
+  "#AMPED_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/AMPED_Queen.png"
+      }
+    }
+  },
+  "#ELECTRIC_Princess": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ELECTRIC_Princess.png"
+      }
+    }
+  },
+  "#ELECTRIC_Princess_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ELECTRIC_Princess.png"
+      }
+    }
+  },
+  "#ELECTRIC_Drone": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ELECTRIC_Drone.png"
+      }
+    }
+  },
+  "#ELECTRIC_Drone_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ELECTRIC_Drone.png"
+      }
+    }
+  },
+  "#ELECTRIC_Queen": {
+    "prototype": "#BeeButton",
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ELECTRIC_Queen.png"
+      }
+    }
+  },
+  "#ELECTRIC_Queen_highlighted": {
+    "prototype": "#BeeButton",
+    "colours": {
+      "normal_bg": "#686c6c",
+      "hovered_bg": "#686c6c"
+    },
+    "images": {
+      "normal_image": {
+        "path": "assets/bees2/ELECTRIC_Queen.png"
+      }
+    }
+  },
   "#WOOD": {
     "prototype": "@TooltipDelay",
     "images": {
@@ -768,11 +2028,11 @@
       }
     }
   },
-  "#GOLD": {
+  "#STINGER": {
     "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
-        "path": "assets/icons/GOLD.png"
+        "path": "assets/icons/STINGER.png"
       }
     }
   },
@@ -797,6 +2057,174 @@
     "images": {
       "normal_image": {
         "path": "assets/icons/POLLEN_CLUSTER.png"
+      }
+    }
+  },
+  "#TOOL": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/TOOL.png"
+      }
+    }
+  },
+  "#FRAME": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/FRAME.png"
+      }
+    }
+  },
+  "#ACCELERATIUM": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/ACCELERATIUM.png"
+      }
+    }
+  },
+  "#PHEROMONE": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/PHEROMONE.png"
+      }
+    }
+  },
+  "#AMBROSIA": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/AMBROSIA.png"
+      }
+    }
+  },
+  "#ORE": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/ORE.png"
+      }
+    }
+  },
+  "#STONE": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/STONE.png"
+      }
+    }
+  },
+  "#IRON": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/IRON.png"
+      }
+    }
+  },
+  "#GOLD": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/GOLD.png"
+      }
+    }
+  },
+  "#REACTION": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/REACTION.png"
+      }
+    }
+  },
+  "#THOUGHT": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/THOUGHT.png"
+      }
+    }
+  },
+  "#MIND": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/MIND.png"
+      }
+    }
+  },
+  "#KNOWLEDGE": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/KNOWLEDGE.png"
+      }
+    }
+  },
+  "#WHEEL": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/WHEEL.png"
+      }
+    }
+  },
+  "#GEAR": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/GEAR.png"
+      }
+    }
+  },
+  "#SHAFT": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/SHAFT.png"
+      }
+    }
+  },
+  "#MECHANISM": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/MECHANISM.png"
+      }
+    }
+  },
+  "#ELECTRON": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/ELECTRON.png"
+      }
+    }
+  },
+  "#PROTON": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/PROTON.png"
+      }
+    }
+  },
+  "#FORCE": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/FORCE.png"
+      }
+    }
+  },
+  "#ELECTRICITY": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/ELECTRICITY.png"
       }
     }
   }
