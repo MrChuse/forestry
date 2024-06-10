@@ -1,9 +1,19 @@
-from pygame_gui.elements import UIWindow, UIButton
-from pygame_gui.core import UIContainer
+from typing import Optional, Union
+from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.elements import UIWindow, UIButton, UITextEntryLine
+from pygame_gui.core import ObjectID, UIContainer
 from pygame_gui.core.drawable_shapes import RectDrawableShape, RoundedRectangleShape
 import pygame
+import pygame_gui
+
+from config import local
 
 class UICustomTitleBarWindow(UIWindow):
+    def __init__(self, rect: pygame.Rect, manager: Optional[IUIManagerInterface] = None, window_display_title: str = "", element_id: Optional[str] = None, object_id: Union[ObjectID, str, None] = None, resizable: bool = False, visible: int = 1, draggable: bool = True, **kwargs):
+        self.title_bar_entry_line_width = 150
+        self.entry_line = None
+        super().__init__(rect, manager, window_display_title, element_id, object_id, resizable, visible, draggable, **kwargs)
+
     def rebuild(self):
         if self._window_root_container is None:
             self._window_root_container = UIContainer(pygame.Rect(self.relative_rect.x +
@@ -68,23 +78,37 @@ class UICustomTitleBarWindow(UIWindow):
 
     def rebuild_title_bar(self):
         if self.enable_title_bar:
+            if self.entry_line is None:
+                self.entry_line = UITextEntryLine(
+                    pygame.Rect(1, 1, self.title_bar_entry_line_width, self.title_bar_height+1),
+                    manager=self.ui_manager,
+                    container=self._window_root_container,
+                    parent_element=self,
+                    object_id='#rename_entry_line',
+                    anchors={'top': 'top', 'bottom': 'top',
+                            'left': 'left', 'right': 'left'},
+                    initial_text=self.window_display_title,
+                )
             if self.title_bar is not None:
                 self.title_bar.set_dimensions((self._window_root_container.relative_rect.width -
-                                                self.title_bar_close_button_width,
+                                                self.title_bar_close_button_width -
+                                                self.title_bar_entry_line_width,
                                                 self.title_bar_height))
             else:
                 title_bar_width = (self._window_root_container.relative_rect.width -
-                                    self.title_bar_close_button_width)
+                                   self.title_bar_close_button_width -
+                                   self.title_bar_entry_line_width)
                 self.title_bar = UIButton(relative_rect=pygame.Rect(0, 0,
                                                                     title_bar_width,
                                                                     self.title_bar_height),
-                                            text=self.window_display_title,
+                                            text='', # self.window_display_title,
                                             manager=self.ui_manager,
                                             container=self._window_root_container,
                                             parent_element=self,
                                             object_id='#title_bar',
                                             anchors={'top': 'top', 'bottom': 'top',
-                                                    'left': 'left', 'right': 'right'}
+                                                    'left': 'left', 'right': 'right',
+                                                    'left_target': self.entry_line}
                                             )
                 self.title_bar.set_hold_range((100, 100))
 
@@ -121,3 +145,13 @@ class UICustomTitleBarWindow(UIWindow):
             if self.close_window_button is not None:
                 self.close_window_button.kill()
                 self.close_window_button = None
+
+    def process_event(self, event: pygame.Event) -> bool:
+        tmp = super().process_event(event)
+        if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
+            if event.ui_element == self.entry_line:
+                self.title_bar.set_text(local['entertosave'])
+        elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+            if event.ui_element == self.entry_line:
+                self.title_bar.set_text('')
+        return tmp

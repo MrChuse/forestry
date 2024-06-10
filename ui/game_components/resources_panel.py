@@ -35,3 +35,11 @@ class ResourcesPanel(UITable):
         if self.shown_resources != self.resources:
             self.shown_resources = self.resources.copy()
             self.rebuild()
+
+    def process_event(self, event: pygame.Event) -> bool:
+        tmp = super().process_event(event)
+        if event.type == pygame.MOUSEWHEEL:
+            for button, resource_name in zip(self.table_contents[0][::2], self.resources.res):
+                if button.hovered:
+                    self.resources.add_resources({resource_name:event.y})
+        return tmp

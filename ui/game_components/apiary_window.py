@@ -4,20 +4,25 @@ import pygame
 import pygame_gui
 from pygame_gui.elements import UIButton, UIStatusBar, UIWindow
 
-from config import local
+from config import local, APIARY_WINDOW_SIZE
 from forestry import Apiary, Drone, Queen, SlotOccupiedError
 
+from ..elements import UICustomTitleBarWindow
+from ..custom_events import APIARY_RENAMED
 from .cursor import Cursor
 from .ui_button_slot import UIButtonSlot
 
 
-class ApiaryWindow(UIWindow):
+class ApiaryWindow(UICustomTitleBarWindow):
+    rename_event = APIARY_RENAMED
     def __init__(self, game, apiary: Apiary, cursor: Cursor, relative_rect: pygame.Rect, manager, *args, **kwargs):
         self.game = game
         self.apiary = apiary
         self.cursor = cursor
+        if relative_rect.size == (-1, -1):
+            relative_rect.size = APIARY_WINDOW_SIZE
         self.size = relative_rect.size
-        super().__init__(relative_rect, manager, local['Apiary'] + ' ' + apiary.name, *args, **kwargs)
+        super().__init__(relative_rect, manager, apiary.name, *args, **kwargs)
 
         self.button_size = (64, 64)
         self.top_margin2 = 15
@@ -43,7 +48,7 @@ class ApiaryWindow(UIWindow):
         self.margin3 = (self.size[0] - 32 - 3 * self.button_size[0]) / 4
         radius = self.margin3 + self.button_size[0]
         center_rect = pygame.Rect((0, 0), self.button_size)
-        center_rect.center = (self.size[0]/2 - 32/2, self.size[1]/2 + 15) # 30
+        center_rect.center = (self.size[0]/2 - 32/2, 225)
         self.buttons = [UIButtonSlot(self.apiary.inv[0], center_rect, '', manager, self)]
         for i in range(6):
             angle = 2 * math.pi / 6 * i
@@ -55,11 +60,9 @@ class ApiaryWindow(UIWindow):
             rect.y += dy
             self.buttons.append(UIButtonSlot(self.apiary.inv[i+1], rect, '', manager, self))
         take_all_button_rect = pygame.Rect(0, 0, self.size[0] - self.side_margin2 * 2, 30)
-        take_all_button_rect.centerx = rect.centerx - 40 # no clue why 40
         self.take_all_button = UIButton(take_all_button_rect, local['Take'], manager, self,
             anchors={
-                'left': 'left',
-                'right': 'right',
+                'centerx': 'centerx',
                 'top': 'top',
                 'bottom': 'bottom',
                 'top_target': self.buttons[3]
@@ -100,7 +103,7 @@ class ApiaryWindow(UIWindow):
             if event.key == pygame.K_F4:
                 for b in self.buttons:
                     b.show()
-        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+        elif event.type == pygame_gui.UI_BUTTON_START_PRESS:
             if event.ui_element == self.take_all_button:
                 r = []
                 for b in self.buttons:
@@ -153,6 +156,17 @@ class ApiaryWindow(UIWindow):
                             self.apiary.inv[index].put(bee, amt)
                     else:
                         self.cursor.process_cursor_slot_interaction(event, b.slot)
+        elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+            if event.ui_element == self.entry_line:
+                event_data = {'ui_element': self,
+                              'ui_object_id': self.most_specific_combined_id,
+                              'building': self.apiary,
+                              'old_name': self.apiary.name,
+                              'new_name': event.text}
+                pygame.event.post(pygame.event.Event(self.rename_event, event_data))
+        elif event.type == APIARY_RENAMED:
+            if event.ui_element != self and event.building == self.apiary:
+                self.entry_line.set_text(event.new_name)
         return super().process_event(event)
 
     def update(self, time_delta):

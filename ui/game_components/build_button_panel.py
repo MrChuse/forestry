@@ -99,7 +99,7 @@ class BuildButtonPanel(UITable):
                 self.local_build_options.append(local[option])
 
                 # resources_row = create_resources_row(cost, self)
-                button = BuildButton(cost, pygame.Rect(0, 0, self.get_container().get_rect().w, self.button_height), local[option], container=self)
+                button = BuildButton(cost, pygame.Rect(0, 0, self.get_container().get_rect().w, self.button_height), local[option], container=self, object_id='@TooltipDelay')
                 self.buttons.append(button)
                 self.add_row([button])
                 need_to_rebuild = True

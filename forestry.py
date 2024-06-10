@@ -11,7 +11,7 @@ from dataclasses import dataclass, fields
 from enum import Enum, IntEnum, auto
 from pprint import pprint
 from traceback import print_exc
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from config import (BeeFertility, BeeLifespan, BeeSpecies, BeeSpeed,
                     ResourceTypes, config_production_modifier, dominant,
@@ -270,7 +270,9 @@ class Bestiary:
             self.produced_resources[bee_species][res] += resources[res]
 
     def add_offspring(self, bee_species: BeeSpecies, amount=1):
+        logging.info('trying to add offspring')
         self.known_bees[bee_species] += amount
+        logging.info('added offspring')
 
     def copy(self):
         new_bestiary = Bestiary()
@@ -360,12 +362,12 @@ def construct_achievements():
 
 @dataclass
 class MatingEntry:
-    parent1_dom : BeeSpecies
-    parent1_rec : Union[BeeSpecies, None]
-    parent2_dom : BeeSpecies
-    parent2_rec : Union[BeeSpecies, None]
-    child_dom : BeeSpecies
-    child_rec : Union[BeeSpecies, None]
+    parent1_dom : BeeSpecies # type: ignore
+    parent1_rec : Union[BeeSpecies, None] # type: ignore
+    parent2_dom : BeeSpecies # type: ignore
+    parent2_rec : Union[BeeSpecies, None] # type: ignore
+    child_dom : BeeSpecies # type: ignore
+    child_rec : Union[BeeSpecies, None] # type: ignore
     parent1_inspected : bool = False
     parent2_inspected : bool = False
     child_inspected : bool = False
@@ -400,7 +402,7 @@ class MatingEntry:
 
 class MatingHistory:
     def __init__(self):
-        self.history = []
+        self.history : List[MatingEntry] = []
         self.counts = []
         self.something_changed = False
 
@@ -661,7 +663,7 @@ class ApiaryProblems(Enum):
 class Apiary(Building):
     cost = {ResourceTypes.HONEY: 100, ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     production_modifier = 1/3
-    def __init__(self, name, add_resources, add_mating_entry, bestiary: Bestiary):
+    def __init__(self, name, add_resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
         super().__init__()
         self.inv = Inventory(7)
         self.princess = Slot()
@@ -764,32 +766,82 @@ class Apiary(Building):
 
     @except_print(Exception)
     def update(self):
-        if isinstance(self.princess.slot, Queen):
-            queen_died = self.try_queen_die()
-            if not queen_died and self.princess.slot.remaining_lifespan > 0:
-                self.problem = ApiaryProblems.ALL_OK
-                self.princess.slot.remaining_lifespan -= 1
-                res = products.get(self.princess.slot.genes.species[0])
-                if res is not None:
-                    resources_to_add = defaultdict(int)
-                    for res_name in res:
-                        amt, prob = res[res_name]
-                        probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * config_production_modifier * (prob)
-                        # print(self.princess.slot.genes.speed[0], prob, probability)
-                        if probability > 1:
-                            resources_to_add[res_name] = int(probability)
-                            probability -= int(probability)
-                        if random.random() < probability:
-                            resources_to_add[res_name] += 1
-                    self.add_resources(resources_to_add)
-                    self.bestiary.add_produced_resources(self.princess.slot.genes.species[0], resources_to_add)
-                else:
-                    assert False, 'Should be unreachable'
-        else:
+        if self.princess.is_empty():
             self.problem = ApiaryProblems.NO_QUEEN
+            return
+        queen_died = self.try_queen_die()
+        if not queen_died and self.princess.slot.remaining_lifespan > 0:
+            self.problem = ApiaryProblems.ALL_OK
+            self.princess.slot.remaining_lifespan -= 1
+            res = products[self.princess.slot.genes.species[0]]
+            resources_to_add = defaultdict(int)
+            for res_name in res:
+                amt, prob = res[res_name]
+                probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * config_production_modifier * (prob)
+                # print(self.princess.slot.genes.speed[0], prob, probability)
+                if probability > 1:
+                    resources_to_add[res_name] = int(probability)
+                    probability -= int(probability)
+                if random.random() < probability:
+                    resources_to_add[res_name] += 1
+            self.add_resources(resources_to_add)
+            self.bestiary.add_produced_resources(self.princess.slot.genes.species[0], resources_to_add)
 
+class AlvearyUpgrades(Enum):
+    AUTOREPLACE = auto()
+    BETTERMUTATION = auto()
+    MAKEPRISTINE = auto()
 class Alveary(Apiary):
     cost = {ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250}
+
+    def __init__(self, name, add_resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
+        super().__init__(name, add_resources, add_mating_entry, bestiary)
+        self.upgrade : Optional[AlvearyUpgrades] = None
+
+    def set_upgrage(self, upgrade: AlvearyUpgrades):
+        if self.upgrade is not None: return
+        self.upgrade = upgrade
+
+    def try_queen_die(self):
+        if self.upgrade == AlvearyUpgrades.AUTOREPLACE:
+            logging.info('autoreplace success')
+            if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
+                logging.info('certainly a queen')
+                bees = self.princess.slot.die()[:2]
+                queen : Queen = self.princess.take()
+                logging.info(f'{bees}')
+                for child in bees:
+                    logging.info(f'{child}')
+                    entry = MatingEntry(
+                        *queen.parent1.genes.species,
+                        *queen.parent2.genes.species,
+                        *child.genes.species,
+                        queen.parent1.inspected,
+                        queen.parent2.inspected,
+                        child.inspected,
+                    )
+                    logging.info(f'mating entry created')
+                    entry = self.add_mating_entry(entry)
+                    logging.info(f'added')
+                    queen.parent1.mating_entries.append(entry.set_parent1_inspected)
+                    queen.parent2.mating_entries.append(entry.set_parent2_inspected)
+                    child.mating_entries.append(entry.set_child_inspected)
+                    logging.info(f'links set')
+
+                    self.bestiary.add_offspring(child.genes.species[0])
+                    logging.info(f'offspring set')
+                logging.info(f'somehting mating entries')
+
+                princess = bees[0]
+                drone = bees[1]
+                self.put_princess(princess)
+                self.put_drone(drone)
+                logging.info(f'succesfully put')
+                return True
+            return False
+        else:
+            super().try_queen_die()
+
 
 class Analyzer(Building):
     cost = {ResourceTypes.STRING: 10, ResourceTypes.GOLD: 10}
@@ -880,7 +932,8 @@ class Game:
         self.inventories : dict[str, Inventory] = {}
         self.build('inventory', free=True)
         self.inv = self.inventories[local['Inventory'] + ' 1']
-        self.apiaries : List[Apiary] = []
+        self.apiaries : dict[str, Apiary] = {}
+        self.alvearies : dict[str, Alveary] = {}
         self.build('apiary', free=True)
         self.analyzers: List[Analyzer] = []
         self.total_inspections = 0
@@ -987,19 +1040,21 @@ class Game:
         if params[0] in ['apiary', 'api', 'a']:  # tested
             if not free:
                 self.resources.remove_resources(Apiary.cost)
-            self.apiaries.append(Apiary(str(len(self.apiaries)), self.resources.add_resources, self.mating_history.append, self.bestiary))
-            return self.apiaries[-1]
+            name = local['Apiary'] + ' ' + str(len(self.apiaries)+1)
+            self.apiaries[name] = Apiary(name, self.resources.add_resources, self.mating_history.append, self.bestiary)
+            return self.apiaries[name]
         elif params[0] in ['inventory', 'inv', 'i']:
             if not free:
                 self.resources.remove_resources(Inventory.cost)
-            name = local['Inventory'] +' ' + str(len(self.inventories)+1)
-            self.inventories[name] = (Inventory(49, name))
+            name = local['Inventory'] + ' ' + str(len(self.inventories)+1)
+            self.inventories[name] = Inventory(49, name)
             return self.inventories[name]
         elif params[0] == 'alveary':
             if not free:
                 self.resources.remove_resources(Alveary.cost)
-            self.print(f'{local["won_the_demo"]}', out=self.command_out, flush=True)
-            return Alveary('Alveary', self.resources.add_resources, self.mating_history.append, self.bestiary)
+            name = local['Alveary'] + ' ' + str(len(self.alvearies)+1)
+            self.alvearies[name] = Alveary(name, self.resources.add_resources, self.mating_history.append, self.bestiary)
+            return self.alvearies[name]
         elif params[0] == 'analyzer':
             if not free:
                 self.resources.remove_resources(Analyzer.cost)
@@ -1018,16 +1073,26 @@ class Game:
         else:
             raise ValueError('Tried to build unknown building')
 
-    def rename_inventory(self, from_str, to_str):
+    def rename_thing(self, from_str, to_str, things: Dict[str, Union[Inventory, Apiary, Alveary]], things_name):
         if to_str == '':
-            raise ValueError('Cannot save empty inventory name')
+            raise ValueError(f'Cannot save empty {things_name} name')
         if from_str == to_str:
             return
-        if to_str in self.inventories:
+        if to_str in things:
             raise ValueError('This name is already in use')
-        inv = self.inventories.pop(from_str)
-        self.inventories[to_str] = inv
-        inv.name = to_str
+        logging.info(things)
+        thing = things.pop(from_str)
+        things[to_str] = thing
+        thing.name = to_str
+
+    def rename_inventory(self, from_str, to_str):
+        self.rename_thing(from_str, to_str, self.inventories, 'inventory')
+
+    def rename_apiary(self, from_str, to_str):
+        self.rename_thing(from_str, to_str, self.apiaries, 'apiary')
+
+    def rename_alveary(self, from_str, to_str):
+        self.rename_thing(from_str, to_str, self.alvearies, 'alveary')
 
     def get_available_build_options(self):
         options = []
@@ -1042,8 +1107,10 @@ class Game:
             if self.exit_event.is_set():
                 break
 
-            for apiary in self.apiaries:
+            for apiary in self.apiaries.values():
                 apiary.update()
+            for alveary in self.alvearies.values():
+                alveary.update()
             for analyzer in self.analyzers:
                 analyzer.update()
 
@@ -1062,6 +1129,7 @@ class Game:
             'resources': self.resources,
             'inventories': self.inventories,
             'apiaries': self.apiaries,
+            'alvearies': self.alvearies,
             'analyzers':self.analyzers,
             'total_inspections': self.total_inspections,
             'mating_history': self.mating_history,
@@ -1107,6 +1175,7 @@ class Game:
         self.resources = state['resources']
         self.inventories = state['inventories']
         self.apiaries = state['apiaries']
+        self.alvearies = state['alvearies']
         self.analyzers = state.get('analyzers', [])
         self.total_inspections = state['total_inspections']
         self.mating_history = state['mating_history']

@@ -1,8 +1,9 @@
-from config import config_production_modifier, ResourceTypes, local
+from collections import defaultdict
+from config import BeeSpecies, config_production_modifier, ResourceTypes, local
 from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
                       Queen, Slot, construct_achievements)
 
-CURRENT_BACK_VERSION = 8
+CURRENT_BACK_VERSION = 12
 
 def update_bee(slot: Slot):
     bee, amount = slot.take_all()
@@ -96,6 +97,35 @@ def update_achievements_split_text(state: dict) -> dict:
                     achievement.comment_str = ach['comment']
     return state
 
+def update_bestiary_known_bees(state: dict) -> dict:
+    old = state['bestiary'].known_bees
+    state['bestiary'].known_bees = defaultdict(int)
+    state['bestiary'].known_bees.update(old)
+    return state
+
+def update_apiaries_to_dict(state: dict) -> dict:
+    if not isinstance(state['apiaries'], list):
+        raise ValueError(f'State update cancelled: apiaries was not a list, but {type(state["apiaries"])}')
+    state['apiaries'] = {
+        api.name: api for api in state['apiaries']
+    }
+    if 'alvearies' not in state:
+        state['alvearies'] = {}
+    return state
+
+def update_bestiary_to_use_resourcetypes(state: dict) -> dict:
+    b : Bestiary = state['bestiary']
+    b.produced_resources = {beetype: {ResourceTypes[res.upper() if res != 'pollen cluster' else 'POLLEN_CLUSTER']: amt}
+                            for beetype, things in b.produced_resources.items()
+                            for res, amt in things.items()}
+    return state
+
+def add_all_bees_to_bestiary(state: dict) -> dict:
+    b: Bestiary = state['bestiary']
+    for i in BeeSpecies:
+        b.produced_resources[i] = b.produced_resources.get(i, {})
+    return state
+
 def check_dict_have_current_keys(state):
     for key in current_keys:
         if key not in state:
@@ -122,4 +152,8 @@ update_back_versions = [update_back_state_0_1,
                         update_back_state_5_6,
                         update_back_state_6_7,
                         update_achievements_split_text,
+                        update_bestiary_known_bees,
+                        update_apiaries_to_dict,
+                        update_bestiary_to_use_resourcetypes,
+                        add_all_bees_to_bestiary,
                         ]

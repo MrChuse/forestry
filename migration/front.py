@@ -1,9 +1,9 @@
 import pygame
 
-from forestry import Slot
+from forestry import Slot, Alveary
 from .back import update_bees_in_apiary, update_bees_in_inventory
 
-CURRENT_FRONT_VERSION = 4
+CURRENT_FRONT_VERSION = 5
 
 def update_front_state_0_1(state: dict) -> dict:
     state['inspect_windows'] = []
@@ -37,7 +37,17 @@ def update_front_state_3_4(state: dict) -> dict:
     state['inventory_windows'] = [(inv.name, rect) for inv, rect in state['inventory_windows']]
     return state
 
+def add_alveary_windows(state: dict) -> dict:
+    al = state.get('alveary_windows')
+    if al is None:
+        state['alveary_windows'] = []
+        for w, r in state.get('apiary_windows', []):
+            if isinstance(w, Alveary):
+                state['alveary_windows'].append((w, r))
+    return state
+
 update_front_versions = [update_front_state_0_1,
                          update_front_state_1_2,
                          update_front_state_2_3,
-                         update_front_state_3_4]
+                         update_front_state_3_4,
+                         add_alveary_windows]

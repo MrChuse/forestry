@@ -9,18 +9,18 @@ import pygame_gui
 from pygame_gui.elements import UIButton, UITextBox, UITextEntryLine
 from pygame_gui.windows import UIMessageWindow
 
-from config import (ANALYZER_WINDOW_SIZE, INVENTORY_WINDOW_SIZE, APIARY_WINDOW_SIZE,
+from config import (ALVEARY_WINDOW_SIZE, ANALYZER_WINDOW_SIZE, INVENTORY_WINDOW_SIZE, APIARY_WINDOW_SIZE,
                     UI_MESSAGE_SIZE, ResourceTypes,
                     config_production_modifier, helper_text, local)
 from forestry import Achievement, Alveary, Analyzer, Apiary, Game, Inventory, Slot
 from migration import CURRENT_FRONT_VERSION, update_front_versions
 
-from ..custom_events import (INSPECT_BEE, INVENTORY_RENAMED,
+from ..custom_events import (INSPECT_BEE, INVENTORY_RENAMED, APIARY_RENAMED, ALVEARY_RENAMED,
                              TUTORIAL_STAGE_CHANGED, SET_MOST_RECENT_INVENTORY)
 from ..elements import (UIFloatingTextBox, UILocationFindingConfirmationDialog,
                         UILocationFindingMessageWindow,
                         UIPickList)
-from . import (AchievementsWindow, ApiaryWindow, BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
+from . import (AchievementsWindow, ApiaryWindow, AlvearyWindow, BestiaryWindow, Cursor, InspectWindow, InventoryWindow,
                AnalyzerWindow, MatingHistoryWindow, MendelTutorialWindow, ResourcesPanel,
                SettingsWindow, CurrentTutorialStage, TutorialStage, BuildButtonPanel)
 
@@ -121,6 +121,8 @@ class GUI(Game):
 
         for w in self.apiary_windows:
             w.kill()
+        for w in self.alveary_windows:
+            w.kill()
         for w in self.inventory_windows:
             w.kill()
         for w in self.inspect_windows:
@@ -198,6 +200,7 @@ class GUI(Game):
         self.menu_button = None
 
         self.apiary_windows = []
+        self.alveary_windows = []
         self.inventory_windows = []
         self.inspect_windows = []
         self.analyzer_windows = []
@@ -327,6 +330,7 @@ class GUI(Game):
 
     def print(self, *strings, sep=' ', end='\n', flush=False, out=None, floating_text_box_time=1.3):
         print(*strings, sep=sep, end=end, flush=flush)
+        logging.info(sep.join(map(str, strings))+end)
 
         thing = sep.join(map(str, strings)) + end
         if out is not None:
@@ -335,11 +339,12 @@ class GUI(Game):
 
     def update_windows_list(self):
         if self.apiary_selection_list is not None:
-            self.apiary_selection_list.set_item_list(
-                [i.name for i in self.inventories.values()] +\
-                [local['Apiary'] + ' ' + a.name for a in self.apiaries] +\
-                [local['Analyzer'] + ' ' + a.name for a in self.analyzers]
-            )
+            i = [i for i in self.inventories]
+            a1 = [a for a in self.apiaries]
+            a2 = [a for a in self.alvearies]
+            a3 = [local['Analyzer'] + ' ' + a.name for a in self.analyzers]
+            logging.info(f'{i}, {a1}, {a2}, {a3}')
+            self.apiary_selection_list.set_item_list(i+a1+a2+a3)
 
     def update(self, time_delta):
         if CurrentTutorialStage.current_tutorial_stage == TutorialStage.NO_RESOURCES and len(self.resources) > 0:
@@ -384,21 +389,24 @@ class GUI(Game):
                         self.toggle_esc_menu()
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             if event.ui_element == self.apiary_selection_list:
-                if event.text.startswith(local['Apiary']):
-                    index = int(event.text.split()[-1])
+                if event.text in self.apiaries:
                     mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
                     self.apiary_windows.append(
-                        ApiaryWindow(self, self.apiaries[index], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), APIARY_WINDOW_SIZE), self.ui_manager)
+                        ApiaryWindow(self, self.apiaries[event.text], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), APIARY_WINDOW_SIZE), self.ui_manager)
                     )
-                elif event.text in self.inventories:
-                    index = event.text
+                if event.text in self.alvearies:
+                    mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
+                    self.apiary_windows.append(
+                        AlvearyWindow(self, self.alvearies[event.text], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), ALVEARY_WINDOW_SIZE), self.ui_manager)
+                    )
+                if event.text in self.inventories:
                     mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
                     self.inventory_windows.append(
-                        InventoryWindow(self.inventories[index], self.cursor,
+                        InventoryWindow(self.inventories[event.text], self.cursor,
                             pygame.Rect((mouse_pos_x - 486, mouse_pos_y), INVENTORY_WINDOW_SIZE), #type: ignore
                             self.ui_manager, resizable=True)
                         )
-                elif event.text.startswith(local['Analyzer']):
+                if event.text.startswith(local['Analyzer']):
                     index = int(event.text.split()[-1])
                     analyzer = self.analyzers[index]
                     mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
@@ -507,6 +515,12 @@ class GUI(Game):
         elif event.type == INVENTORY_RENAMED:
             self.rename_inventory(event.old_name, event.new_name)
             self.update_windows_list()
+        elif event.type == APIARY_RENAMED:
+            self.rename_apiary(event.old_name, event.new_name)
+            self.update_windows_list()
+        elif event.type == ALVEARY_RENAMED:
+            self.rename_alveary(event.old_name, event.new_name)
+            self.update_windows_list()
         elif event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
             if event.ui_element == self.load_confirm:
                 self.load(self.load_confirm.filename)
@@ -528,7 +542,7 @@ class GUI(Game):
                 if CurrentTutorialStage.current_tutorial_stage == TutorialStage.BEFORE_FORAGE:
                     CurrentTutorialStage.current_tutorial_stage = TutorialStage.NO_RESOURCES # progress the tutorial
 
-                    self.apiary_windows.append(ApiaryWindow(self, self.apiaries[0], self.cursor, pygame.Rect((self.resources_panel_width, 0), APIARY_WINDOW_SIZE), self.ui_manager))
+                    self.apiary_windows.append(ApiaryWindow(self, self.apiaries[local['Apiary'] + ' 1'], self.cursor, pygame.Rect((self.resources_panel_width, 0), APIARY_WINDOW_SIZE), self.ui_manager))
 
                     self.inv_window = InventoryWindow(self.inv, self.cursor,
                         pygame.Rect((self.apiary_windows[0].rect.right, 0), INVENTORY_WINDOW_SIZE),
@@ -551,10 +565,13 @@ class GUI(Game):
                 building_name = self.build_dropdown.known_build_options[index]
                 building = self.build(building_name.lower())
                 if isinstance(building, Alveary):
-                    win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), f'<effect id=bounce><font size=7.0>{local["won_the_demo"]}</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
-                    win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
+                    window = AlvearyWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (-1, -1)), self.ui_manager)
+                    self.alveary_windows.append(window)
+                    self.update_windows_list()
+                    #win_window = UIMessageWindow(pygame.Rect((0,0), self.window_size), f'<effect id=bounce><font size=7.0>{local["won_the_demo"]}</font></effect>', self.ui_manager, window_title='You won the demo!', object_id='#WinWindow')
+                    #win_window.text_block.set_active_effect(pygame_gui.TEXT_EFFECT_BOUNCE, effect_tag='bounce')
                 elif isinstance(building, Apiary):
-                    window = ApiaryWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), APIARY_WINDOW_SIZE), self.ui_manager)
+                    window = ApiaryWindow(self, building, self.cursor, pygame.Rect(pygame.mouse.get_pos(), (-1, -1)), self.ui_manager)
                     self.apiary_windows.append(window)
                     self.update_windows_list()
                 elif isinstance(building, Inventory):
@@ -596,7 +613,8 @@ class GUI(Game):
             insp_slots.append(window.bee_button.slot)
         state['inspect_windows'] = insp_win
         state['inspect_slots'] = insp_slots
-        state['apiary_windows'] = [(window.apiary, window.relative_rect) for window in self.apiary_windows]
+        state['apiary_windows'] = [(window.apiary.name, window.relative_rect) for window in self.apiary_windows]
+        state['alveary_windows'] = [(window.alveary.name, window.relative_rect) for window in self.alveary_windows]
         state['inventory_windows'] = [(window.inv.name, window.relative_rect) for window in self.inventory_windows]
         state['analyzer_windows'] = [window.relative_rect for window in self.analyzer_windows]
         return state
@@ -648,8 +666,11 @@ class GUI(Game):
             window.bee_button.slot = slot
             window.bee_stats.bee = slot.slot # TODO: some stupid initialization here, rework?
             window.reshape_according_to_bee_stats()
-        self.inventory_windows = [InventoryWindow(state['inventories'][inv_name], self.cursor, rect, self.ui_manager) for inv_name, rect in state['inventory_windows']]
-        self.apiary_windows = [ApiaryWindow(self, api, self.cursor, rect, self.ui_manager) for api, rect in state['apiary_windows']]
+        self.inventory_windows = [InventoryWindow(state['inventories'][name], self.cursor, rect, self.ui_manager) for name, rect in state['inventory_windows']]
+        self.apiary_windows = [ApiaryWindow(self, state['apiaries'][name], self.cursor, rect, self.ui_manager) for name, rect in state['apiary_windows']]
+        # self.apiary_windows = [ApiaryWindow(self, name, self.cursor, rect, self.ui_manager) for name, rect in state['apiary_windows']]
+        self.alveary_windows = [AlvearyWindow(self, state['alvearies'][name], self.cursor, rect, self.ui_manager) for name, rect in state['alveary_windows']]
+        # self.alveary_windows = [AlvearyWindow(self, name, self.cursor, rect, self.ui_manager) for name, rect in state['alveary_windows']]
         self.analyzer_windows = [AnalyzerWindow(self.analyzers[index], self.cursor, rect, self.ui_manager) for index, rect in enumerate(state.get('analyzer_windows', []))]
         if self.mating_history_window is not None:
             self.mating_history_window.mating_history = self.mating_history

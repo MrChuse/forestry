@@ -129,6 +129,12 @@ theme = {
                 'path': f'{assets_dir}/mating_history_plus.png'
             }
         }
+    },
+    '#upgrade_panel':{
+        "misc":{
+            "border_width": "0",
+            "shadow_width": "0"
+        }
     }
 }
 

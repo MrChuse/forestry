@@ -1,6 +1,7 @@
 from .ui_button_slot import UIButtonSlot
 from .cursor import Cursor
 from .apiary_window import ApiaryWindow
+from .alveary_window import AlvearyWindow
 from .bee_stats import BeeStats
 from .bestiary_window import BestiaryWindow
 from .achievements_window import AchievementsWindow
