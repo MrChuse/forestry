@@ -43,22 +43,27 @@ class Genes:
         return d
 
     @staticmethod
-    def mutate(allele1, allele2):
+    def mutate(allele1, allele2, mutation_chance_multiplier=1):
         mut = mutations.get((allele1, allele2))
         if mut is not None:  # mutation found in mutation map
-            allele = random.choices(mut[0], weights=mut[1])[
-                0
-            ]  # sample with weights from mutation map
+            new_species_list = mut[0].copy()
+            weights = mut[1]
+            weights_chance_applied = [m*mutation_chance_multiplier for m in weights]
+            sum_ = sum(weights_chance_applied)
+            if sum_ < 1:
+                new_species_list.append(None)
+                weights_chance_applied.append(1 - sum_)
+            allele = random.choices(new_species_list, weights=weights_chance_applied)[0] # sample with weights from mutation map
             if allele is not None:
                 return weighted_if(
                     0.5, (allele, allele2), (allele1, allele)
                 )  # gene from mutation
         return (allele1, allele2)  # same genes if not mutated
 
-    def crossingover(self, genes2: 'Genes'):
+    def crossingover(self, genes2: 'Genes', mutation_chance_multiplier=1):
         spec1 = weighted_if(0.5, *(self.species))
         spec2 = weighted_if(0.5, *(genes2.species))
-        new_spec1, new_spec2 = Genes.mutate(spec1, spec2)
+        new_spec1, new_spec2 = Genes.mutate(spec1, spec2, mutation_chance_multiplier)
         species = None
         mutated_1 = False
         mutated_2 = False
@@ -179,10 +184,14 @@ class Queen(Bee):
     def small_str(self):
         return super().small_str() + ', rem: ' + str(self.remaining_lifespan)
 
-    def die(self):
+    def die(self, mutation_chance_multiplier=1, largest_possible_offspring=None):
         if self.children is None:
-            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes), generation=self.generation+1)] + [
-                Drone(self.parent1.genes.crossingover(self.parent2.genes)) for i in range(self.genes.fertility[0].value)
+            if largest_possible_offspring is None:
+                amount = self.genes.fertility[0].value
+            else:
+                amount = largest_possible_offspring - 1
+            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier), generation=self.generation+1)] + [
+                Drone(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier)) for i in range(amount)
             ]
         return self.children
 
@@ -663,6 +672,8 @@ class ApiaryProblems(Enum):
 class Apiary(Building):
     cost = {ResourceTypes.HONEY: 100, ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
     production_modifier = 1/3
+    mutation_chance_multiplier = 1
+    largest_possible_offspring = None
     def __init__(self, name, add_resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
         super().__init__()
         self.inv = Inventory(7)
@@ -737,16 +748,23 @@ class Apiary(Building):
             else:
                 raise ValueError('Can mate only when 1 Princess in slot')
 
+    def modify_children(self, children: List[Union[Drone, Princess]]):
+        return children
+
     def try_queen_die(self):
         if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
             try:
-                self.inv.place_bees(self.princess.slot.die())
+                children = self.princess.slot.die(
+                    mutation_chance_multiplier=self.mutation_chance_multiplier,
+                    largest_possible_offspring=self.largest_possible_offspring
+                )
+
+                self.inv.place_bees(children)
             except SlotOccupiedError:
                 self.problem = ApiaryProblems.NO_SPACE
                 return False
             queen : Queen = self.princess.take()
-
-            for child in queen.children:
+            for child in children:
                 entry = MatingEntry(
                     *queen.parent1.genes.species,
                     *queen.parent2.genes.species,
@@ -801,46 +819,24 @@ class Alveary(Apiary):
     def set_upgrage(self, upgrade: AlvearyUpgrades):
         if self.upgrade is not None: return
         self.upgrade = upgrade
+        if self.upgrade == AlvearyUpgrades.BETTERMUTATION:
+            self.mutation_chance_multiplier = 2 # for use in queen.die
+        elif self.upgrade == AlvearyUpgrades.AUTOREPLACE:
+            self.largest_possible_offspring = 2
 
     def try_queen_die(self):
         if self.upgrade == AlvearyUpgrades.AUTOREPLACE:
-            logging.info('autoreplace success')
-            if isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan == 0:
-                logging.info('certainly a queen')
-                bees = self.princess.slot.die()[:2]
-                queen : Queen = self.princess.take()
-                logging.info(f'{bees}')
-                for child in bees:
-                    logging.info(f'{child}')
-                    entry = MatingEntry(
-                        *queen.parent1.genes.species,
-                        *queen.parent2.genes.species,
-                        *child.genes.species,
-                        queen.parent1.inspected,
-                        queen.parent2.inspected,
-                        child.inspected,
-                    )
-                    logging.info(f'mating entry created')
-                    entry = self.add_mating_entry(entry)
-                    logging.info(f'added')
-                    queen.parent1.mating_entries.append(entry.set_parent1_inspected)
-                    queen.parent2.mating_entries.append(entry.set_parent2_inspected)
-                    child.mating_entries.append(entry.set_child_inspected)
-                    logging.info(f'links set')
-
-                    self.bestiary.add_offspring(child.genes.species[0])
-                    logging.info(f'offspring set')
-                logging.info(f'somehting mating entries')
-
-                princess = bees[0]
-                drone = bees[1]
+            success = super().try_queen_die()
+            if success:
+                princess = self.inv.take(0)
+                drone = self.inv.take(1)
                 self.put_princess(princess)
                 self.put_drone(drone)
                 logging.info(f'succesfully put')
                 return True
             return False
         else:
-            super().try_queen_die()
+            return super().try_queen_die()
 
 
 class Analyzer(Building):

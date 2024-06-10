@@ -81,10 +81,6 @@ for gene_name, list_of_mutations in mutations_conf.items():
         mutations[(parent2, parent1)][0].append(offspring)
         mutations[(parent1, parent2)][1].append(probability)
         mutations[(parent2, parent1)][1].append(probability)
-# appends None with weight that sums up to 1 in order to use random.choices later
-for k in mutations:
-    mutations[k][0].append(None)
-    mutations[k][1].append(1 - sum(mutations[k][1]))
 
 # resources and products
 ResourceTypes = NameEnum('ResourceTypes', zip(config['resources'], range(len(config['resources']))))

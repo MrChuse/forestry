@@ -396,7 +396,7 @@ class GUI(Game):
                     )
                 if event.text in self.alvearies:
                     mouse_pos_x, mouse_pos_y = self.ui_manager.get_mouse_position()
-                    self.apiary_windows.append(
+                    self.alveary_windows.append(
                         AlvearyWindow(self, self.alvearies[event.text], self.cursor, pygame.Rect((mouse_pos_x - 300, mouse_pos_y), ALVEARY_WINDOW_SIZE), self.ui_manager)
                     )
                 if event.text in self.inventories:

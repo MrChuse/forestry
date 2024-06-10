@@ -8,7 +8,7 @@ from ..custom_events import ALVEARY_RENAMED
 from ..game_components.cursor import Cursor
 from .apiary_window import ApiaryWindow
 
-from config import ALVEARY_WINDOW_SIZE, ALVEARY_AUTOREPLACE_UPGRADED_WINDOW_SIZE
+from config import ALVEARY_WINDOW_SIZE, ALVEARY_AUTOREPLACE_UPGRADED_WINDOW_SIZE, APIARY_WINDOW_SIZE
 
 class AlvearyWindow(ApiaryWindow):
     rename_event = ALVEARY_RENAMED
@@ -28,12 +28,18 @@ class AlvearyWindow(ApiaryWindow):
             self.set_upgrage(self.alveary.upgrade)
 
     def set_upgrage(self, upgrade: AlvearyUpgrades):
-        self.alveary.set_upgrage(upgrade)
         if upgrade == AlvearyUpgrades.AUTOREPLACE:
+            if self.alveary.inv.empty_slots() != 7: raise RuntimeError('Empty the inventory first')
+            self.alveary.set_upgrage(upgrade)
             self.set_dimensions(ALVEARY_AUTOREPLACE_UPGRADED_WINDOW_SIZE)
             self.upgrade_table.kill()
             for b in self.buttons:
                 b.kill()
+            self.take_all_button.kill()
+        elif upgrade == AlvearyUpgrades.BETTERMUTATION:
+            self.alveary.set_upgrage(upgrade)
+            self.set_dimensions(APIARY_WINDOW_SIZE)
+            self.upgrade_table.kill()
 
     def process_event(self, event: pygame.Event) -> bool:
         tmp = super().process_event(event)
