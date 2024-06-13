@@ -130,7 +130,7 @@ theme = {
             }
         }
     },
-    '#upgrade_panel':{
+    '#panel_no_borders':{
         "misc":{
             "border_width": "0",
             "shadow_width": "0"

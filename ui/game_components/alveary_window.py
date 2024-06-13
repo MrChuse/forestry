@@ -19,7 +19,7 @@ class AlvearyWindow(ApiaryWindow):
         super().__init__(game, alveary, cursor, relative_rect, manager, *args, **kwargs)
         self.upgrade_buttons = []
         m = 16
-        self.upgrade_table = UITable(pygame.Rect(0, 0, relative_rect.width, 64), container=self, anchors={'top_target': self.take_all_button, 'centerx': 'centerx'}, kill_on_repopulation=False, object_id='#upgrade_panel', resizable=True)
+        self.upgrade_table = UITable(pygame.Rect(0, 0, relative_rect.width, 64), container=self, anchors={'top_target': self.take_all_button, 'centerx': 'centerx'}, kill_on_repopulation=False, object_id='#panel_no_borders', resizable=True)
         for i, upgrade in enumerate(AlvearyUpgrades):
             self.upgrade_buttons.append(UIButton(pygame.Rect(0, 0, 60, 60), upgrade.name, container=self.upgrade_table, tool_tip_text=upgrade.name))
         self.upgrade_table.add_row(self.upgrade_buttons)
@@ -36,7 +36,7 @@ class AlvearyWindow(ApiaryWindow):
             for b in self.buttons:
                 b.kill()
             self.take_all_button.kill()
-        elif upgrade == AlvearyUpgrades.BETTERMUTATION:
+        elif upgrade == AlvearyUpgrades.BETTERMUTATION or upgrade == AlvearyUpgrades.MAKEPRISTINE:
             self.alveary.set_upgrage(upgrade)
             self.set_dimensions(APIARY_WINDOW_SIZE)
             self.upgrade_table.kill()

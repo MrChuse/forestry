@@ -1,18 +1,18 @@
 from collections import defaultdict
 from config import BeeSpecies, config_production_modifier, ResourceTypes, local
 from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
-                      Queen, Slot, construct_achievements)
+                      Queen, Slot, construct_achievements, generate_die_after)
 
-CURRENT_BACK_VERSION = 12
+CURRENT_BACK_VERSION = 14
 
 def update_bee(slot: Slot):
     bee, amount = slot.take_all()
     if isinstance(bee, Princess):
-        bee = Princess(bee.genes, bee.inspected)
+        bee = Princess(bee.genes, bee.inspected, generation=bee.generation, die_after=generate_die_after())
     elif isinstance(bee, Drone):
         bee = Drone(bee.genes, bee.inspected)
     elif isinstance(bee, Queen):
-        bee = Queen(bee.parent1, bee.parent2, bee.inspected)
+        bee = Queen(bee.parent1, bee.parent2, bee.inspected, die_after=generate_die_after())
     else:
         raise TypeError(f'Update failed, bee was not a Princess, Drone or Queen but {type(bee)}')
     slot.put(bee, amount)
@@ -32,11 +32,14 @@ def update_bees_in_apiary(apiary: Apiary):
             update_bee(slot)
 
 def update_bees_in_state(state: dict) -> dict:
-    for i, inventory in enumerate(state['inventories']):
+    for i, inventory in enumerate(state['inventories'].values()):
         update_bees_in_inventory(inventory)
-    for i, apiary in enumerate(state['apiaries']):
+    for i, apiary in enumerate(state['apiaries'].values()):
         apiary.add_mating_entry = state['mating_history'].append
         update_bees_in_apiary(apiary)
+    for i, alveary in enumerate(state['alvearies'].values()):
+        alveary.add_mating_entry = state['mating_history'].append
+        update_bees_in_apiary(alveary)
     return state
 
 def update_back_state_0_1(state: dict) -> dict:
@@ -126,6 +129,15 @@ def add_all_bees_to_bestiary(state: dict) -> dict:
         b.produced_resources[i] = b.produced_resources.get(i, {})
     return state
 
+def update_bestiary_produced_resources(state: dict) -> dict:
+    b: Bestiary = state['bestiary']
+    for i in BeeSpecies:
+        old = b.produced_resources.get(i, {})
+        b.produced_resources[i] = defaultdict(int)
+        b.produced_resources[i].update(old)
+    return state
+
+
 def check_dict_have_current_keys(state):
     for key in current_keys:
         if key not in state:
@@ -156,4 +168,6 @@ update_back_versions = [update_back_state_0_1,
                         update_apiaries_to_dict,
                         update_bestiary_to_use_resourcetypes,
                         add_all_bees_to_bestiary,
+                        update_bestiary_produced_resources,
+                        update_bees_in_state,
                         ]

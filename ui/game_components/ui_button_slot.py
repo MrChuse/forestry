@@ -1,3 +1,4 @@
+import logging
 import warnings
 from typing import Dict, Tuple, Union
 
@@ -62,6 +63,8 @@ class InspectPopup(UITooltip):
         else:
             width = 170
             height = 40
+        width *= 10
+        height *= 10 # idk why this is needed at all, at smaller w,h labels just dont render
         self.inspect_button_height = 32
 
         self.container = UIContainer(pygame.Rect(0, 0, width, height), self.ui_manager, starting_height=self.ui_manager.get_sprite_group().get_top_layer()+1, parent_element=self)
@@ -76,7 +79,7 @@ class InspectPopup(UITooltip):
                                                         self.top_margin,
                                                         self.inspect_button_height,
                                                         self.inspect_button_height),
-                                            False, '', container=self.container, object_id='#unpinned', starting_height=2,
+                                            False, '', container=self.container, object_id='#unpinned', starting_height=3,
                                             anchors={
                                                 'left': 'right',
                                                 'right': 'right'

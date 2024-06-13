@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List, Optional, Union
 
 import pygame
@@ -18,42 +19,63 @@ from .tutorial_stage import CurrentTutorialStage, TutorialStage
 def colorize(text, color):
     return f'<font color={color}>{text}</font>'
 
-class BeeStats(UITable):
-    def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: Optional[IUIManagerInterface] = None, *, element_id: str = 'panel', margins: Optional[Dict[str, int]]  = None, container: Optional[IContainerLikeInterface]  = None, parent_element: Optional[UIElement]  = None, object_id: Union[ObjectID, str, None]  = None, anchors: Optional[Dict[str, Union[str, UIElement]]]  = None, visible: int = 1, resizable: bool = False):
+class BeeStats(UIPanel):
+    def __init__(self, bee: Bee, relative_rect: pygame.Rect, starting_height: int = 1, manager: Optional[IUIManagerInterface] = None, *, element_id: str = 'panel', margins: Optional[Dict[str, int]] = None, container: Optional[IContainerLikeInterface] = None, parent_element: Optional[UIElement] = None, object_id: Union[ObjectID, str, None] = None, anchors: Optional[Dict[str, Union[str, UIElement]]] = None, visible: int = 1, resizable=False):
         self.bee = bee
-        self.resizable = resizable
-        self.table_contents : Optional[List[List[UIElement]]] = None
-        self.original_rect = relative_rect
         self.buttons = []
-        super().__init__(relative_rect, starting_layer_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible, resizable=resizable)
-        self.rebuild()
+        super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
+        generations_label = None
+        if isinstance(self.bee, (Queen, Princess)): # TODO: think about merging cells in UITable
+            generations_label = UILabel(pygame.Rect(0,0,-1,-1), f'{local["generations"]}: {self.bee.generation}', container=self, object_id=ObjectID('@SmallFont', object_id))
+            text = f'{local["Pristine" if self.bee.is_pristine else "Ignoble"]}'
+            if self.bee.inspected and not self.bee.is_pristine:
+                text += f' ({self.bee.die_after})'
+            pristine_label = UILabel(pygame.Rect(0,0,-1,-1), text, container=self, object_id=ObjectID('@SmallFont', object_id),
+                                     anchors={'top_target':generations_label})
+            anchors = {'top_target': pristine_label}
+        else:
+            anchors = None
+        self.table = UITable(pygame.Rect(0, 0, relative_rect.width*2, relative_rect.height*2),
+                             container=self,
+                             kill_on_repopulation=False,
+                             resizable=resizable,
+                             object_id='#panel_no_borders',
+                             visible=True,
+                             anchors=anchors) # major hack with table being invisible but still moving elements in the table arrangement
+        self.populate_table_contents()
+        self.table.rebuild()
+        if resizable:
+            s = self.table.get_abs_rect().size
+            s = s[0], s[1]+4
+            if generations_label is not None:
+                width = generations_label.get_abs_rect().width
+                s = max(s[0], width) + 6, s[1]+generations_label.get_abs_rect().height+pristine_label.get_abs_rect().height
+            self.set_dimensions(s)
+
+    def create_uilabel(self, text='', is_local=False, object_id=None, visible=True, set_32=False):
+        label = UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self.table, object_id=ObjectID('@SmallFont', object_id), visible=visible)
+        if set_32:
+            rect = label.get_relative_rect()
+            label.set_dimensions((rect.width + 32, rect.height)) # 32 is the inspect_button_height
+        return label
+    def create_button(self, gene_name='', text='?', is_local=False, object_id=None, visible=True):
+        b = UIButton(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self.table, object_id=ObjectID('@SmallFont', object_id), visible=visible)
+        b._gene_name = gene_name
+        self.buttons.append(b)
+        return b
 
     def populate_table_contents(self):
-        super().populate_table_contents()
-
         if self.bee is None:
             return # set table contents to []
 
-        def create_uilabel(text='', is_local=False, object_id=None, visible=True, set_32=False):
-            label = UILabel(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
-            if set_32:
-                rect = label.get_abs_rect()
-                label.set_dimensions((rect.width + 32, rect.height)) # 32 is the inspect_button_height
-            return label
-        def create_button(gene_name='', text='?', is_local=False, object_id=None, visible=True):
-            b = UIButton(pygame.Rect(0,0,-1,-1), local[text] if is_local else text, container=self, object_id=ObjectID('@SmallFont', object_id), visible=visible)
-            b._gene_name = gene_name
-            self.buttons.append(b)
-            return b
+
 
         if not self.bee.inspected:
-            self.table_contents.append([create_uilabel(self.bee.small_str(), set_32=True)])
-            # if isinstance(self.bee, (Queen, Princess)):
-            #     self.table_contents.append([create_uilabel(f'{local["generations"]}: {self.bee.generation}', False)])
+            self.table.add_row([self.create_uilabel(self.bee.small_str(), set_32=True)])
         else:
             name, bee_species_index = local[self.bee.type_str]
-            self.table_contents.append([create_uilabel(name), create_uilabel(visible=False), create_button('active_allele'), create_button('inactive_allele')])
-            self.table_contents.append([create_uilabel('trait', True), create_button('dominance'), create_uilabel('active', True), create_uilabel('inactive', True)])
+            self.table.add_row([self.create_uilabel(name), self.create_uilabel(visible=False), self.create_button('active_allele'), self.create_button('inactive_allele')])
+            self.table.add_row([self.create_uilabel('trait', True), self.create_button('dominance'), self.create_uilabel('active', True), self.create_uilabel('inactive', True)])
             genes = self.bee.genes.asdict()
             for key in genes:
                 try:
@@ -67,12 +89,10 @@ class BeeStats(UITable):
                     allele1 = genes[key][1].name
                 dom0 = dominant[genes[key][0]]
                 dom1 = dominant[genes[key][1]]
-                self.table_contents.append([create_uilabel(key, True),
-                                            create_button(key),
-                                            create_uilabel(dom_local(allele0, dom0), False, '@Dominant' if dom0 else '@Recessive'),
-                                            create_uilabel(dom_local(allele1, dom1), False, '@Dominant' if dom1 else '@Recessive')])
-            # if isinstance(self.bee, (Queen, Princess)): # TODO: think about merging cells in UITable
-            #     self.table_contents.append([create_uilabel(f'{local["generations"]}: {self.bee.generation}', False), create_uilabel('', visible=False), create_uilabel('', visible=False), create_uilabel('', visible=False)])
+                self.table.add_row([self.create_uilabel(key, True),
+                                            self.create_button(key),
+                                            self.create_uilabel(dom_local(allele0, dom0), False, '@Dominant' if dom0 else '@Recessive'),
+                                            self.create_uilabel(dom_local(allele1, dom1), False, '@Dominant' if dom1 else '@Recessive')])
 
     def open_gene_helper(self, gene):
         if CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
@@ -91,7 +111,7 @@ class BeeStats(UITable):
     def process_event(self, event: pygame.event.Event) -> bool:
         consumed = super().process_event(event)
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if self.table_contents is None:
+            if self.table.table_contents == []:
                 return
             for button in self.buttons:
                 if event.ui_element == button:

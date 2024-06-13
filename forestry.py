@@ -169,43 +169,68 @@ class Bee:
             set_inspected()
         self.mating_entries.clear()
 
-
+def generate_die_after():
+    return max(int(random.gauss(50, 14)), 20)
 class Queen(Bee):
     type_str = 'Queen'
-    def __init__(self, parent1: 'Princess', parent2: 'Drone', inspected: bool = False):
+    def __init__(self, parent1: 'Princess', parent2: 'Drone', inspected: bool = False, is_pristine=False, die_after=None):
         self.parent1 = parent1
         self.parent2 = parent2
         self.generation = self.parent1.generation
+        self.is_pristine = is_pristine
+        self.die_after = die_after
         super().__init__(parent1.genes, inspected)
         self.lifespan = parent1.genes.lifespan[0].value
         self.remaining_lifespan = self.lifespan
         self.children = None
 
+    def __eq__(self, other: 'Queen'):
+        return super().__eq__(other) and self.generation == other.generation and self.is_pristine == other.is_pristine
+
     def small_str(self):
         return super().small_str() + ', rem: ' + str(self.remaining_lifespan)
 
-    def die(self, mutation_chance_multiplier=1, largest_possible_offspring=None):
+    def die(self, mutation_chance_multiplier=1, largest_possible_offspring=None, make_pristine_chance=0):
         if self.children is None:
             if largest_possible_offspring is None:
                 amount = self.genes.fertility[0].value
             else:
                 amount = largest_possible_offspring - 1
-            self.children = [Princess(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier), generation=self.generation+1)] + [
-                Drone(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier)) for i in range(amount)
+            if random.random() < make_pristine_chance:
+                is_pristine = True
+                die_after = None
+            else:
+                is_pristine = self.is_pristine
+                die_after = self.die_after
+            self.children = [
+                Princess(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier),
+                         generation=self.generation+1,
+                         die_after=die_after,
+                         is_pristine=is_pristine)
+            ] + [
+                Drone(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier))
+                  for i in range(amount)
             ]
+            if self.generation >= self.die_after:
+                self.children.pop(0)
         return self.children
 
 
 class Princess(Bee):
     type_str = 'Princess'
-    def __init__(self, genes, inspected: bool = False, generation: int = 0):
+    def __init__(self, genes, inspected: bool = False, generation: int = 0, is_pristine=False, die_after=None):
         self.generation = generation
+        self.is_pristine = is_pristine
+        self.die_after = die_after
         super().__init__(genes, inspected)
+
+    def __eq__(self, other: 'Queen'):
+        return super().__eq__(other) and self.generation == other.generation and self.is_pristine == other.is_pristine
 
     def mate(self, other: 'Drone') -> Queen:
         if not isinstance(other, Drone):
             raise TypeError('Princesses can only mate drones')
-        return Queen(self, other)
+        return Queen(self, other, is_pristine=self.is_pristine, die_after=self.die_after)
 
 
 class Drone(Bee):
@@ -279,9 +304,7 @@ class Bestiary:
             self.produced_resources[bee_species][res] += resources[res]
 
     def add_offspring(self, bee_species: BeeSpecies, amount=1):
-        logging.info('trying to add offspring')
         self.known_bees[bee_species] += amount
-        logging.info('added offspring')
 
     def copy(self):
         new_bestiary = Bestiary()
@@ -657,7 +680,7 @@ def except_print(*exceptions):
                 try:
                     self.print(e, out=self.command_out, flush=True)
                 except AttributeError:
-                    print(e)
+                    logging.exception(e)
 
         return wrapper
 
@@ -674,6 +697,7 @@ class Apiary(Building):
     production_modifier = 1/3
     mutation_chance_multiplier = 1
     largest_possible_offspring = None
+    make_pristine_chance = 0
     def __init__(self, name, add_resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
         super().__init__()
         self.inv = Inventory(7)
@@ -719,7 +743,7 @@ class Apiary(Building):
         return self.drone.take_all()
 
     def put(self, bee, amount=1):
-        if isinstance(bee, Princess) or isinstance(bee, Queen):
+        if isinstance(bee, (Princess, Queen)):
             self.put_princess(bee, amount)
         elif isinstance(bee, Drone):
             self.put_drone(bee, amount)
@@ -756,7 +780,8 @@ class Apiary(Building):
             try:
                 children = self.princess.slot.die(
                     mutation_chance_multiplier=self.mutation_chance_multiplier,
-                    largest_possible_offspring=self.largest_possible_offspring
+                    largest_possible_offspring=self.largest_possible_offspring,
+                    make_pristine_chance=self.make_pristine_chance
                 )
 
                 self.inv.place_bees(children)
@@ -819,10 +844,12 @@ class Alveary(Apiary):
     def set_upgrage(self, upgrade: AlvearyUpgrades):
         if self.upgrade is not None: return
         self.upgrade = upgrade
-        if self.upgrade == AlvearyUpgrades.BETTERMUTATION:
+        if upgrade == AlvearyUpgrades.BETTERMUTATION:
             self.mutation_chance_multiplier = 2 # for use in queen.die
-        elif self.upgrade == AlvearyUpgrades.AUTOREPLACE:
+        elif upgrade == AlvearyUpgrades.AUTOREPLACE:
             self.largest_possible_offspring = 2
+        elif upgrade == AlvearyUpgrades.MAKEPRISTINE:
+            self.make_pristine_chance = 0.02
 
     def try_queen_die(self):
         if self.upgrade == AlvearyUpgrades.AUTOREPLACE:
@@ -830,9 +857,8 @@ class Alveary(Apiary):
             if success:
                 princess = self.inv.take(0)
                 drone = self.inv.take(1)
-                self.put_princess(princess)
-                self.put_drone(drone)
-                logging.info(f'succesfully put')
+                self.put(princess)
+                self.put(drone)
                 return True
             return False
         else:
@@ -876,7 +902,7 @@ class Analyzer(Building):
                 self.time_left = None
             logging.info(f'{self.consumed_amount=}')
         if self.consumed_amount >= self.amount_needed_to_consume:
-            print(local[self.species][0])
+            logging.info(local[self.species][0])
 
 
     def put(self, bee: Bee, amount=1):
@@ -1017,7 +1043,7 @@ class Game:
     @staticmethod
     def forage(inventory: Inventory):
         genes = Genes.sample()
-        inventory.place_bees([Princess(genes), Drone(genes)])
+        inventory.place_bees([Princess(genes, die_after=generate_die_after()), Drone(genes)])
 
     @except_print(IndexError, ValueError)
     def inspect(self, *params):  # tested
