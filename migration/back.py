@@ -1,6 +1,6 @@
 from collections import defaultdict
 from config import BeeSpecies, config_production_modifier, ResourceTypes, local
-from forestry import (Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
+from forestry import (Alveary, Apiary, ApiaryProblems, Bestiary, Drone, Inventory, MatingHistory, Princess,
                       Queen, Slot, construct_achievements, generate_die_after)
 
 CURRENT_BACK_VERSION = 14
@@ -31,6 +31,10 @@ def update_bees_in_apiary(apiary: Apiary):
         if not slot.is_empty():
             update_bee(slot)
 
+def update_alveary(alveary: Alveary):
+    if alveary.upgrade is not None:
+        alveary.set_upgrage(alveary.upgrade, force=True)
+
 def update_bees_in_state(state: dict) -> dict:
     for i, inventory in enumerate(state['inventories'].values()):
         update_bees_in_inventory(inventory)
@@ -40,6 +44,7 @@ def update_bees_in_state(state: dict) -> dict:
     for i, alveary in enumerate(state['alvearies'].values()):
         alveary.add_mating_entry = state['mating_history'].append
         update_bees_in_apiary(alveary)
+        update_alveary(alveary)
     return state
 
 def update_back_state_0_1(state: dict) -> dict:

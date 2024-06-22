@@ -841,8 +841,8 @@ class Alveary(Apiary):
         super().__init__(name, add_resources, add_mating_entry, bestiary)
         self.upgrade : Optional[AlvearyUpgrades] = None
 
-    def set_upgrage(self, upgrade: AlvearyUpgrades):
-        if self.upgrade is not None: return
+    def set_upgrage(self, upgrade: AlvearyUpgrades, force=False):
+        if self.upgrade is not None and not force: return
         self.upgrade = upgrade
         if upgrade == AlvearyUpgrades.BETTERMUTATION:
             self.mutation_chance_multiplier = 2 # for use in queen.die
