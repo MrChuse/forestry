@@ -56,10 +56,31 @@ resources:
   HONEY: Honey
   WOOD: Wood
   FLOWERS: Flowers
-  GOLD: Gold
+  STINGER: Stinger
   ROYAL_JELLY: Royal jelly
   STRING: String
   POLLEN_CLUSTER: Pollen cluster
+  TOOL: Tool
+  FRAME: Frame
+  ACCELERATIUM: Acceleratium
+  PHEROMONE: Pheromone
+  AMBROSIA: Ambrosia
+  ORE: Ore
+  STONE: Stone
+  IRON: Iron
+  GOLD: Gold
+  REACTION: Reaction
+  THOUGHT: Thought
+  MIND: Mind
+  KNOWLEDGE: Knowledge
+  WHEEL: Wheel
+  GEAR: Gear
+  SHAFT: Shaft
+  MECHANISM: Mechanism
+  ELECTRON: Electron
+  PROTON: Proton
+  FORCE: Force
+  ELECTRICITY: Electricity
 esc_menu:
   Greetings Window: Greetings Window
   Mendelian Inheritance: Mendelian Inheritance

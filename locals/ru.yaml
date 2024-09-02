@@ -55,10 +55,31 @@ resources:
   HONEY: Мед
   WOOD: Дерево
   FLOWERS: Цветы
-  GOLD: Золото
+  STINGER: Жало
   ROYAL_JELLY: Маточное молочко
   STRING: Нить
   POLLEN_CLUSTER: Скопление пыльцы
+  TOOL: Инструмент
+  FRAME: Рамка
+  ACCELERATIUM: Акселератиум
+  PHEROMONE: Феромон
+  AMBROSIA: Амброзия
+  ORE: Руда
+  STONE: Камень
+  IRON: Железо
+  GOLD: Золото
+  REACTION: Реакция
+  THOUGHT: Мысль
+  MIND: Разум
+  KNOWLEDGE: Знание
+  WHEEL: Колесо
+  GEAR: Шестерня
+  SHAFT: Вал
+  MECHANISM: Механизи
+  ELECTRON: Электрон
+  PROTON: Протон
+  FORCE: Сила
+  ELECTRICITY: Электричество
 esc_menu:
   Greetings Window: Окно Приветствия
   Mendelian Inheritance: Законы Менделя
