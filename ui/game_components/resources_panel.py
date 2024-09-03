@@ -127,6 +127,14 @@ class ResourcesPanelOptions(UIWindow):
                 self.change_resource_drop_down_menu = None
                 self.non_local_res_list = None
                 self.local_res_list = None
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                if self.change_resource_drop_down_menu is not None:
+                    if not self.change_resource_drop_down_menu.hover_point(*self.ui_manager.get_mouse_position()):
+                        self.change_resource_drop_down_menu.kill()
+                        self.change_resource_drop_down_menu = None
+                        self.non_local_res_list = None
+                        self.local_res_list = None
         return tmp
 class ResourcesPanel(UITable):
     def __init__(self, resources: Resources, relative_rect: pygame.Rect, starting_layer_height: int = 1, manager: Optional[IUIManagerInterface]  = None, *, element_id: str = 'panel', margins: Optional[Dict[str, int]]  = None, container: Optional[IContainerLikeInterface]  = None, parent_element: Optional[UIElement]  = None, object_id: Union[ObjectID, str, None]  = None, anchors: Optional[Dict[str, Union[str, UIElement]]]  = None, visible: int = 1):
