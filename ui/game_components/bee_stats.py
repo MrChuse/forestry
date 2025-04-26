@@ -25,16 +25,23 @@ class BeeStats(UIPanel):
         self.buttons = []
         super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
         generations_label = None
-        if isinstance(self.bee, (Queen, Princess)): # TODO: think about merging cells in UITable
-            generations_label = UILabel(pygame.Rect(0,0,-1,-1), f'{local["generations"]}: {self.bee.generation}', container=self, object_id=ObjectID('@SmallFont', object_id))
-            text = f'{local["Pristine" if self.bee.is_pristine else "Ignoble"]}'
-            if self.bee.inspected and not self.bee.is_pristine:
-                text += f' ({self.bee.die_after})'
-            pristine_label = UILabel(pygame.Rect(0,0,-1,-1), text, container=self, object_id=ObjectID('@SmallFont', object_id),
-                                     anchors={'top_target':generations_label})
-            anchors = {'top_target': pristine_label}
-        else:
-            anchors = None
+        bee_name_label = None
+        if self.bee is not None:
+            bee_name_label = UILabel(pygame.Rect(0,0,-1,-1), self.bee.small_str(), container=self, object_id=ObjectID('@SmallFont', object_id))
+            rect = bee_name_label.get_relative_rect()
+            bee_name_label.set_dimensions((rect.width + 32, rect.height))
+
+            if isinstance(self.bee, (Queen, Princess)): # TODO: think about merging cells in UITable
+                generations_label = UILabel(pygame.Rect(0,0,-1,-1), f'{local["generations"]}: {self.bee.generation}', container=self, object_id=ObjectID('@SmallFont', object_id),
+                                            anchors={'top_target':bee_name_label})
+                text = f'{local["Pristine" if self.bee.is_pristine else "Ignoble"]}'
+                if self.bee.inspected and not self.bee.is_pristine:
+                    text += f' ({self.bee.die_after})'
+                pristine_label = UILabel(pygame.Rect(0,0,-1,-1), text, container=self, object_id=ObjectID('@SmallFont', object_id),
+                                        anchors={'top_target':generations_label})
+                anchors = {'top_target': pristine_label}
+            else:
+                anchors = {'top_target': bee_name_label}
         self.table = UITable(pygame.Rect(0, 0, relative_rect.width*2, relative_rect.height*2),
                              container=self,
                              kill_on_repopulation=False,
@@ -47,9 +54,13 @@ class BeeStats(UIPanel):
         if resizable:
             s = self.table.get_abs_rect().size
             s = s[0], s[1]+4
+            if bee_name_label is not None:
+                s = max(s[0], bee_name_label.get_abs_rect().width), s[1]+4
             if generations_label is not None:
                 width = generations_label.get_abs_rect().width
                 s = max(s[0], width) + 6, s[1]+generations_label.get_abs_rect().height+pristine_label.get_abs_rect().height
+            if self.bee is not None and self.bee.inspected:
+                s = s[0], s[1]+29
             self.set_dimensions(s)
 
     def create_uilabel(self, text='', is_local=False, object_id=None, visible=True, set_32=False):
@@ -68,31 +79,30 @@ class BeeStats(UIPanel):
         if self.bee is None:
             return # set table contents to []
 
-
-
         if not self.bee.inspected:
-            self.table.add_row([self.create_uilabel(self.bee.small_str(), set_32=True)])
-        else:
-            name, bee_species_index = local[self.bee.type_str]
-            self.table.add_row([self.create_uilabel(name), self.create_uilabel(visible=False), self.create_button('active_allele'), self.create_button('inactive_allele')])
-            self.table.add_row([self.create_uilabel('trait', True), self.create_button('dominance'), self.create_uilabel('active', True), self.create_uilabel('inactive', True)])
-            genes = self.bee.genes.asdict()
-            for key in genes:
-                try:
-                    allele0 = local[genes[key][0]][bee_species_index]
-                    allele1 = local[genes[key][1]][bee_species_index]
-                except IndexError:
-                    allele0 = local[genes[key][0]][0] # TODO: remove [0]
-                    allele1 = local[genes[key][1]][0]
-                except KeyError:
-                    allele0 = genes[key][0].name
-                    allele1 = genes[key][1].name
-                dom0 = dominant[genes[key][0]]
-                dom1 = dominant[genes[key][1]]
-                self.table.add_row([self.create_uilabel(key, True),
-                                            self.create_button(key),
-                                            self.create_uilabel(dom_local(allele0, dom0), False, '@Dominant' if dom0 else '@Recessive'),
-                                            self.create_uilabel(dom_local(allele1, dom1), False, '@Dominant' if dom1 else '@Recessive')])
+            self.table.add_row([self.create_uilabel('', set_32=True)])
+            return
+        
+        name, bee_species_index = local[self.bee.type_str]
+        self.table.add_row([self.create_uilabel(name), self.create_uilabel(visible=False), self.create_button('active_allele'), self.create_button('inactive_allele')])
+        self.table.add_row([self.create_uilabel('trait', True), self.create_button('dominance'), self.create_uilabel('active', True), self.create_uilabel('inactive', True)])
+        genes = self.bee.genes.asdict()
+        for key in genes:
+            try:
+                allele0 = local[genes[key][0]][bee_species_index]
+                allele1 = local[genes[key][1]][bee_species_index]
+            except IndexError:
+                allele0 = local[genes[key][0]][0] # TODO: remove [0]
+                allele1 = local[genes[key][1]][0]
+            except KeyError:
+                allele0 = genes[key][0].name
+                allele1 = genes[key][1].name
+            dom0 = dominant[genes[key][0]]
+            dom1 = dominant[genes[key][1]]
+            self.table.add_row([self.create_uilabel(key, True),
+                                        self.create_button(key),
+                                        self.create_uilabel(dom_local(allele0, dom0), False, '@Dominant' if dom0 else '@Recessive'),
+                                        self.create_uilabel(dom_local(allele1, dom1), False, '@Dominant' if dom1 else '@Recessive')])
 
     def open_gene_helper(self, gene):
         if CurrentTutorialStage.current_tutorial_stage == TutorialStage.INSPECT_AVAILABLE:
