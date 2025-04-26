@@ -110,6 +110,14 @@ for allele_name, amt in amount_needed_to_analyze_config.items():
     else:
         raise RuntimeError('Encountered repeating alleles in `amount_needed_to_analyze` in config file')
 
+colors_config = config['colors']
+colors = {}
+for allele_name, amt in colors_config.items():
+    if BeeSpecies[allele_name] not in colors:
+        colors[BeeSpecies[allele_name]] = amt
+    else:
+        raise RuntimeError('Encountered repeating alleles in `colors` in config file')
+
 # local
 existing_locals = [i[:-5] for i in os.listdir('locals')] # drop .yaml
 

@@ -312,6 +312,7 @@ resources:
   - PROTON
   - FORCE
   - ELECTRICITY
+
 products:
   FOREST:
     WOOD: [1, 5]
@@ -408,3 +409,42 @@ amount_needed_to_analyze:
   ENERGETIC: 100
   AMPED: 100
   ELECTRIC: 50
+
+colors:
+  FOREST: "#b5fde8ff"
+  MEADOWS: "#ffb69dff"
+  COMMON: "#eee9deff"
+  CULTIVATED: "#9eb7f8ff"
+  NOBLE: "#fff79dff"
+  MAJESTIC: "#e05020ff"
+  IMPERIAL: "#f1f8a0ff"
+  DILIGENT: "#f9a3e8ff"
+  UNWEARY: "#c6ffc0ff"
+  INDUSTRIOUS: "#fdffffff"
+
+  TECHNOLOGICAL: "#EF5200ff"
+
+  FRAME: "#574034ff" # done
+  RESOURCEFUL: "#05C9F0ff"
+  FERTILE: "#EF0566ff"
+  LIVELY: "#F0D905ff"
+
+  MINING: "#333229ff" # done
+  ROCKY: "#575434ff"
+  FERROUS: "#8A8337ff"
+  AURIC: "#F0DD01ff"
+
+  AWARE: "#29605aff" # done
+  SMART: "#449f97ff"
+  CONSCIOUS: "#51bfb5ff"
+  SENTIENT: "#6cfff1ff"
+
+  MANUFACTURING: "#2B2933ff" # done
+  FABRICATING: "#3A3457ff"
+  ASSEMBLING: "#3520A0ff"
+  AUTOMATING: "#2300D3ff"
+
+  EXCITED: "#775448ff" # done
+  ENERGETIC: "#703F2Dff"
+  AMPED: "#A34321ff"
+  ELECTRIC: "#D63900ff"
