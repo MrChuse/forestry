@@ -185,7 +185,7 @@ class Queen(Bee):
         self.children = None
 
     def __eq__(self, other: 'Queen'):
-        return super().__eq__(other) and self.generation == other.generation and self.is_pristine == other.is_pristine
+        return super().__eq__(other) and self.generation == other.generation and self.is_pristine == other.is_pristine and self.die_after == other.die_after
 
     def small_str(self):
         return super().small_str() + ', rem: ' + str(self.remaining_lifespan)
@@ -225,7 +225,7 @@ class Princess(Bee):
         super().__init__(genes, inspected)
 
     def __eq__(self, other: 'Queen'):
-        return super().__eq__(other) and self.generation == other.generation and self.is_pristine == other.is_pristine
+        return super().__eq__(other) and self.generation == other.generation and self.is_pristine == other.is_pristine and self.die_after == other.die_after
 
     def mate(self, other: 'Drone') -> Queen:
         if not isinstance(other, Drone):
