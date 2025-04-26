@@ -32,11 +32,11 @@ def create_custom_resources_row(resources_list: list, resources: dict, container
     return row
 
 class ResourcesPanelOptions(UIWindow):
-    def __init__(self, resources: Resources, config: List[List[Tuple]]):
+    def __init__(self, resources: Resources, config: List[List[Tuple]], rect: pygame.Rect):
         self.resources = resources
         self.config = config
         self.config_recently_changed = False
-        super().__init__(pygame.Rect(200, 200, 400, 400), window_display_title='Resources options')
+        super().__init__(rect, window_display_title='Resources options')
         self.table = UITable(pygame.Rect(0, 0, 400, 400), container=self, fill_jagged=True, resizable=True, kill_on_repopulation=False, object_id='#panel_no_borders')
         self.plus_buttons = []
         self.minus_buttons = []
@@ -149,7 +149,7 @@ class ResourcesPanel(UITable):
         super().populate_table_contents()
         if self.settings_button is not None:
             self.settings_button.kill()
-        self.settings_button = UIButton(pygame.Rect(0, 0, 32, 32), '', container=self, tool_tip_text='Options', object_id='@TooltipDelay')
+        self.settings_button = UIButton(pygame.Rect(0, 0, 90, 32), 'Options', container=self, tool_tip_text='Options', object_id='@TooltipDelay')
         if len(self.resources) > 0 and self.config is not None:
             for row in self.config:
                 custom_resources_row = create_custom_resources_row(row, self.resources, self)
@@ -182,5 +182,5 @@ class ResourcesPanel(UITable):
                     self.resources.add_resources({resource_name:event.y})
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.settings_button:
-                self.settings_window = ResourcesPanelOptions(self.resources, self.config)
+                self.settings_window = ResourcesPanelOptions(self.resources, self.config, pygame.Rect(self.get_abs_rect().right, self.get_abs_rect().top, 400, 400))
         return tmp
