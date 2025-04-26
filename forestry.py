@@ -211,7 +211,7 @@ class Queen(Bee):
                 Drone(self.parent1.genes.crossingover(self.parent2.genes, mutation_chance_multiplier))
                   for i in range(amount)
             ]
-            if self.generation >= self.die_after:
+            if not self.is_pristine and self.generation >= self.die_after:
                 self.children.pop(0)
         return self.children
 
