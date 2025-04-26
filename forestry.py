@@ -856,7 +856,7 @@ class AlvearyUpgrades(Enum):
     BETTERMUTATION = auto()
     MAKEPRISTINE = auto()
 class Alveary(Apiary):
-    cost = {ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250}
+    cost = {ResourceTypes.HONEY: 500, ResourceTypes.ROYAL_JELLY: 100, ResourceTypes.POLLEN_CLUSTER: 100}
 
     def __init__(self, name, resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
         super().__init__(name, resources, add_mating_entry, bestiary)
@@ -887,7 +887,7 @@ class Alveary(Apiary):
 
 
 class Analyzer(Building):
-    cost = {ResourceTypes.STRING: 10, ResourceTypes.GOLD: 10}
+    cost = {ResourceTypes.STRING: 10, ResourceTypes.STINGER: 10}
     hide_from_buildings = True
     def __init__(self, name):
         super().__init__()
@@ -952,9 +952,9 @@ class Analyzer(Building):
     def consumed_enough(self):
         return self.consumed_amount >= self.amount_needed_to_consume
 
-class AnalyzerGold(Analyzer):
+class AnalyzerStinger(Analyzer):
     hide_from_buildings = False
-    cost = {ResourceTypes.GOLD: 20}
+    cost = {ResourceTypes.STINGER: 20}
 
 class AnalyzerString(Analyzer):
     hide_from_buildings = False
@@ -1103,9 +1103,9 @@ class Game:
                 self.resources.remove_resources(Analyzer.cost)
             self.analyzers.append(Analyzer(str(len(self.analyzers))))
             return self.analyzers[-1]
-        elif params[0] == 'analyzergold':
+        elif params[0] == 'analyzerstinger':
             if not free:
-                self.resources.remove_resources(AnalyzerGold.cost)
+                self.resources.remove_resources(AnalyzerStinger.cost)
             self.analyzers.append(Analyzer(str(len(self.analyzers))))
             return self.analyzers[-1]
         elif params[0] == 'analyzerstring':
