@@ -80,7 +80,13 @@ class ResourcesPanelOptions(UIWindow):
                 for row_num, button in enumerate(self.plus_buttons):
                     if event.ui_element == button:
                         # add new resource to the row
-                        self.config[row_num].append((ResourceTypes.HONEY, True))
+                        if self.resources.check_resources_exist({ResourceTypes.HONEY: 1}):
+                            default_resource = ResourceTypes.HONEY
+                        elif self.resources.check_resources_exist({ResourceTypes.WOOD: 1}):
+                            default_resource = ResourceTypes.WOOD
+                        elif self.resources.check_resources_exist({ResourceTypes.FLOWERS: 1}):
+                            default_resource = ResourceTypes.FLOWERS
+                        self.config[row_num].append((default_resource, True))
                         self.config_recently_changed = True
                         self.rebuild_table()
                         break
