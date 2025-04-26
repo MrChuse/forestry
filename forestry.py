@@ -285,7 +285,7 @@ class Resources:
         for k in resources:
             self.res[k] -= resources[k] * config_production_modifier
 
-    def check_enough(self, resources):
+    def check_resources_exist(self, resources):
         for k in resources:
             if k not in self:
                 return False
@@ -691,6 +691,7 @@ class ApiaryProblems(Enum):
     ALL_OK = 'all_ok'
     NO_QUEEN = 'no_queen'
     NO_SPACE = 'no_space'
+    NOT_ENOUGH_RESOURCES = 'not_enough_resources'
 
 class Apiary(Building):
     cost = {ResourceTypes.HONEY: 100, ResourceTypes.WOOD: 50, ResourceTypes.FLOWERS: 50}
@@ -698,14 +699,15 @@ class Apiary(Building):
     mutation_chance_multiplier = 1
     largest_possible_offspring = None
     make_pristine_chance = 0
-    def __init__(self, name, add_resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
+    def __init__(self, name, resources: Resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
         super().__init__()
         self.inv = Inventory(7)
         self.princess = Slot()
         self.drone = Slot()
         self.name = name
         self.problem = ApiaryProblems.NO_QUEEN
-        self.add_resources = add_resources
+        self.problem_explanation = ''
+        self.resources = resources
         self.add_mating_entry = add_mating_entry
         self.bestiary = bestiary
         super().__init__()
@@ -786,7 +788,7 @@ class Apiary(Building):
 
                 self.inv.place_bees(children)
             except SlotOccupiedError:
-                self.problem = ApiaryProblems.NO_SPACE
+                self.set_problem(ApiaryProblems.NO_SPACE)
                 return False
             queen : Queen = self.princess.take()
             for child in children:
@@ -807,28 +809,47 @@ class Apiary(Building):
             return True
         return False
 
+    def set_problem(self, problem, problem_explanation=''):
+        self.problem = problem
+        self.problem_explanation = problem_explanation
+
     @except_print(Exception)
     def update(self):
         if self.princess.is_empty():
-            self.problem = ApiaryProblems.NO_QUEEN
+            self.set_problem(ApiaryProblems.NO_QUEEN)
             return
         queen_died = self.try_queen_die()
-        if not queen_died and self.princess.slot.remaining_lifespan > 0:
-            self.problem = ApiaryProblems.ALL_OK
-            self.princess.slot.remaining_lifespan -= 1
+        if not queen_died and isinstance(self.princess.slot, Queen) and self.princess.slot.remaining_lifespan > 0:
             res = products[self.princess.slot.genes.species[0]]
+            
             resources_to_add = defaultdict(int)
+            resources_to_sub = defaultdict(int)
             for res_name in res:
-                amt, prob = res[res_name]
-                probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * config_production_modifier * (prob)
-                # print(self.princess.slot.genes.speed[0], prob, probability)
-                if probability > 1:
-                    resources_to_add[res_name] = int(probability)
-                    probability -= int(probability)
-                if random.random() < probability:
-                    resources_to_add[res_name] += 1
-            self.add_resources(resources_to_add)
-            self.bestiary.add_produced_resources(self.princess.slot.genes.species[0], resources_to_add)
+                add_or_sub, amt = res[res_name]
+                if add_or_sub == 1: # add
+                    probability = (self.princess.slot.genes.speed[0].value) * (self.production_modifier) * config_production_modifier * (amt)
+                    # print(self.princess.slot.genes.speed[0], prob, probability)
+                    if probability > 1:
+                        resources_to_add[res_name] = int(probability)
+                        probability -= int(probability)
+                    if random.random() < probability:
+                        resources_to_add[res_name] += 1
+                elif add_or_sub == -1: # subtract
+                    resources_to_sub[res_name] += amt
+            
+            try:
+                self.resources.remove_resources(resources_to_sub)
+            except NotEnoughResourcesError as e:
+                self.set_problem(ApiaryProblems.NOT_ENOUGH_RESOURCES, str(e))
+            else:
+                self.resources.add_resources(resources_to_add)
+                self.bestiary.add_produced_resources(self.princess.slot.genes.species[0], resources_to_add)
+                for k in resources_to_sub:
+                    resources_to_sub[k] *= -1
+                self.bestiary.add_produced_resources(self.princess.slot.genes.species[0], resources_to_sub)
+
+                self.set_problem(ApiaryProblems.ALL_OK)
+                self.princess.slot.remaining_lifespan -= 1
 
 class AlvearyUpgrades(Enum):
     AUTOREPLACE = auto()
@@ -837,8 +858,8 @@ class AlvearyUpgrades(Enum):
 class Alveary(Apiary):
     cost = {ResourceTypes.HONEY: 1000, ResourceTypes.ROYAL_JELLY: 250, ResourceTypes.POLLEN_CLUSTER: 250}
 
-    def __init__(self, name, add_resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
-        super().__init__(name, add_resources, add_mating_entry, bestiary)
+    def __init__(self, name, resources, add_mating_entry: Callable[[MatingEntry], MatingEntry], bestiary: Bestiary):
+        super().__init__(name, resources, add_mating_entry, bestiary)
         self.upgrade : Optional[AlvearyUpgrades] = None
 
     def set_upgrage(self, upgrade: AlvearyUpgrades, force=False):
@@ -1063,7 +1084,7 @@ class Game:
             if not free:
                 self.resources.remove_resources(Apiary.cost)
             name = local['Apiary'] + ' ' + str(len(self.apiaries)+1)
-            self.apiaries[name] = Apiary(name, self.resources.add_resources, self.mating_history.append, self.bestiary)
+            self.apiaries[name] = Apiary(name, self.resources, self.mating_history.append, self.bestiary)
             return self.apiaries[name]
         elif params[0] in ['inventory', 'inv', 'i']:
             if not free:
@@ -1075,7 +1096,7 @@ class Game:
             if not free:
                 self.resources.remove_resources(Alveary.cost)
             name = local['Alveary'] + ' ' + str(len(self.alvearies)+1)
-            self.alvearies[name] = Alveary(name, self.resources.add_resources, self.mating_history.append, self.bestiary)
+            self.alvearies[name] = Alveary(name, self.resources, self.mating_history.append, self.bestiary)
             return self.alvearies[name]
         elif params[0] == 'analyzer':
             if not free:
@@ -1119,7 +1140,7 @@ class Game:
     def get_available_build_options(self):
         options = []
         for building_name, cost in Building.all_buildings_costs.items():
-            if self.resources.check_enough(cost):
+            if self.resources.check_resources_exist(cost):
                 options.append((building_name, cost))
         return options
 

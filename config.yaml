@@ -296,7 +296,7 @@ resources:
   - ACCELERATIUM
   - PHEROMONE
   - AMBROSIA
-  - ORE
+  - PICKAXE
   - STONE
   - IRON
   - GOLD
@@ -313,14 +313,18 @@ resources:
   - FORCE
   - ELECTRICITY
 
-products:
-  FOREST:
+# [add_or_subtract, amt]
+# add_or_subtract: 1 to add, -1 to subtract
+# amt: if add, this will be modified by building modifiers
+#      if sub, this is a flat value to be subtracted from resources
+products: 
+  FOREST: # subbed by AWARE tree
     WOOD: [1, 5]
-  MEADOWS:
+  MEADOWS: # subbed by AWARE tree
     FLOWERS: [1, 5]
   COMMON:
     HONEY: [1, 2.5]
-  CULTIVATED:
+  CULTIVATED: # subbed by TECHNOLOGICAL and AUTOMATING tree
     HONEY: [1, 5]
   NOBLE:
     STINGER: [1, 1]
@@ -334,48 +338,85 @@ products:
     STRING: [1, 2]
   INDUSTRIOUS:
     POLLEN_CLUSTER: [1, 1]
+
   TECHNOLOGICAL:
     TOOL: [1, 1]
+    HONEY: [-1, 1]
+
   FRAME:
-    FRAME: [1, 1]
+    FRAME: [1, 0.1]
+    TOOL: [-1, 1]
   RESOURCEFUL:
-    ACCELERATIUM: [1, 1]
+    ACCELERATIUM: [1, 0.1]
+    STINGER: [-1, 2]
+    STRING: [-1, 2]
   FERTILE:
-    PHEROMONE: [1, 1]
+    PHEROMONE: [1, 0.1]
+    ROYAL_JELLY: [-1, 1]
   LIVELY:
-    AMBROSIA: [1, 1]
-  MINING:
-    ORE: [1, 1]
+    AMBROSIA: [1, 0.1]
+    POLLEN_CLUSTER: [-1, 1]
+
+  MINING: # MINING tree will sub more and more pickaxes
+    PICKAXE: [1, 1]
+    TOOL: [-1, 1]
   ROCKY:
     STONE: [1, 1]
+    PICKAXE: [-1, 1]
   FERROUS:
     IRON: [1, 1]
+    STONE: [-1, 1]
+    PICKAXE: [-1, 1]
   AURIC:
     GOLD: [1, 1]
-  AWARE:
+    IRON: [-1, 1]
+    PICKAXE: [-1, 2]
+
+  AWARE: # SENTIENT tree requires base resources, next requires more of previous
     REACTION: [1, 1]
+    FLOWERS: [-1, 1]
+    HONEY: [-1, 2]
   SMART:
     THOUGHT: [1, 1]
+    REACTION: [-1, 2]
   CONSCIOUS:
     MIND: [1, 1]
+    THOUGHT: [-1, 2]
   SENTIENT:
     KNOWLEDGE: [1, 1]
-  MANUFACTURING:
+    MIND: [-1, 2]
+
+  MANUFACTURING: # AUTOMATING tree final resource requires all of previous
     WHEEL: [1, 1]
+    WOOD: [-1, 1]
+    HONEY: [-1, 2]
   FABRICATING:
     GEAR: [1, 1]
+    WHEEL: [-1, 1]
   ASSEMBLING:
     SHAFT: [1, 1]
+    WOOD: [-1, 1]
   AUTOMATING:
     MECHANISM: [1, 1]
-  EXCITED:
+    WHEEL: [-1, 1]
+    GEAR: [-1, 1]
+    SHAFT: [-1, 1]
+
+  EXCITED: # I didn't come up with anything unique
     ELECTRON: [1, 1]
+    STRING: [-1, 1]
+    STINGER: [-1, 1]
   ENERGETIC:
     PROTON: [1, 1]
+    STRING: [-1, 1]
+    STINGER: [-1, 1]
   AMPED:
     FORCE: [1, 1]
+    ELECTRON: [-1, 1]
+    PROTON: [-1, 1]
   ELECTRIC:
     ELECTRICITY: [1, 1]
+    FORCE: [-1, 2]
 
 amount_needed_to_analyze:
   FOREST: 10
