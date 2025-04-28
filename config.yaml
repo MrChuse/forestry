@@ -340,7 +340,7 @@ products:
     POLLEN_CLUSTER: [1, 1]
 
   TECHNOLOGICAL:
-    TOOL: [1, 1]
+    TOOL: [1, 2.5]
     HONEY: [-1, 1]
 
   FRAME:
@@ -358,7 +358,7 @@ products:
     POLLEN_CLUSTER: [-1, 1]
 
   MINING: # MINING tree will sub more and more pickaxes
-    PICKAXE: [1, 1]
+    PICKAXE: [1, 3]
     TOOL: [-1, 1]
   ROCKY:
     STONE: [1, 1]
@@ -373,7 +373,7 @@ products:
     PICKAXE: [-1, 2]
 
   AWARE: # SENTIENT tree requires base resources, next requires more of previous
-    REACTION: [1, 1]
+    REACTION: [1, 2]
     FLOWERS: [-1, 1]
     HONEY: [-1, 2]
   SMART:
@@ -387,7 +387,7 @@ products:
     MIND: [-1, 2]
 
   MANUFACTURING: # AUTOMATING tree final resource requires all of previous
-    WHEEL: [1, 1]
+    WHEEL: [1, 2]
     WOOD: [-1, 1]
     HONEY: [-1, 2]
   FABRICATING:
@@ -403,11 +403,11 @@ products:
     SHAFT: [-1, 1]
 
   EXCITED: # I didn't come up with anything unique
-    ELECTRON: [1, 1]
+    ELECTRON: [1, 2]
     STRING: [-1, 1]
     STINGER: [-1, 1]
   ENERGETIC:
-    PROTON: [1, 1]
+    PROTON: [1, 2]
     STRING: [-1, 1]
     STINGER: [-1, 1]
   AMPED:
