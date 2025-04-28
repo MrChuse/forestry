@@ -35,6 +35,7 @@ buildings:
   Apiary_problem_ALL_OK: Все в порядке
   Apiary_problem_NO_QUEEN: Нет королевы
   Apiary_problem_NO_SPACE: Не хватает места для потомства
+  Apiary_problem_NOT_ENOUGH_RESOURCES: Не хватает ресурсов
   Take: Взять все
   Alveary: Алвеарий
   Analyzer: Анализатор

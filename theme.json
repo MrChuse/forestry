@@ -150,6 +150,14 @@
       }
     }
   },
+  "#Apiary_problem_NOT_ENOUGH_RESOURCES": {
+    "prototype": "@TooltipDelay",
+    "images": {
+      "normal_image": {
+        "path": "assets/icons/Apiary_problem_NOT_ENOUGH_RESOURCES.png"
+      }
+    }
+  },
   "#FOREST_Princess": {
     "prototype": "#BeeButton",
     "images": {
@@ -2106,11 +2114,11 @@
       }
     }
   },
-  "#ORE": {
+  "#PICKAXE": {
     "prototype": "@TooltipDelay",
     "images": {
       "normal_image": {
-        "path": "assets/icons/ORE.png"
+        "path": "assets/icons/PICKAXE.png"
       }
     }
   },

@@ -72,7 +72,10 @@ class ApiaryWindow(UICustomTitleBarWindow):
         if self.problems_indicator is not None:
             self.problems_indicator.kill()
 
-        self.problems_indicator = UIButton(pygame.Rect(6, -23, 36, 36), '', self.ui_manager, container=self, tool_tip_text=local['Apiary_problem_'+problem],object_id='#Apiary_problem_'+problem,
+        tooltip = local['Apiary_problem_'+problem]
+        if self.apiary.problem_explanation is not None:
+            tooltip += '\n' + self.apiary.problem_explanation
+        self.problems_indicator = UIButton(pygame.Rect(6, -23, 36, 36), '', self.ui_manager, container=self, tool_tip_text=tooltip,object_id='#Apiary_problem_'+problem,
             anchors={
                 'left': 'left',
                 'right': 'left',

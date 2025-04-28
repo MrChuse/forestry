@@ -42,6 +42,7 @@ buildings:
   Apiary_problem_ALL_OK: All ok
   Apiary_problem_NO_QUEEN: No queen present
   Apiary_problem_NO_SPACE: Not enough space for offspring
+  Apiary_problem_NOT_ENOUGH_RESOURCES: Not enough resources
   Take: Take all # take all button
   Alveary: Alveary
   Open Inspect Window: Open Inspect Window
@@ -140,7 +141,7 @@ genes_alleles:
     ENERGETIC: [ENERGETIC]
     AMPED: [AMPED]
     ELECTRIC: [ELECTRIC]
-    
+
   BeeFertility:
     ONE: ['Low']
     TWO: ['Medium']
