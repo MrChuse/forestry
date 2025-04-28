@@ -617,6 +617,7 @@ class GUI(Game):
         state['alveary_windows'] = [(window.alveary.name, window.relative_rect) for window in self.alveary_windows]
         state['inventory_windows'] = [(window.inv.name, window.relative_rect) for window in self.inventory_windows]
         state['analyzer_windows'] = [window.relative_rect for window in self.analyzer_windows]
+        state['resource_panel_config'] = self.resources_panel.config
         return state
 
     def load(self, name):
@@ -675,4 +676,5 @@ class GUI(Game):
         if self.mating_history_window is not None:
             self.mating_history_window.mating_history = self.mating_history
             self.mating_history.something_changed = True
+        self.resources_panel.config = state.get('resource_panel_config')
         return state
