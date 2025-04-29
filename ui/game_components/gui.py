@@ -479,6 +479,8 @@ class GUI(Game):
                         if isinstance(window, InventoryWindow):
                             self.most_recent_inventory = window.inv
                             break
+                elif isinstance(event.ui_element, AlvearyWindow):
+                    self.alveary_windows.remove(event.ui_element)
                 elif isinstance(event.ui_element, ApiaryWindow):
                     self.apiary_windows.remove(event.ui_element)
                 elif isinstance(event.ui_element, AnalyzerWindow):
