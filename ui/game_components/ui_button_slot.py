@@ -282,4 +282,7 @@ class UIButtonSlot(UIButton):
             if isinstance(event.ui_element, UIButtonSlot):
                 if event.ui_element.slot.slot is not None and event.ui_element.slot.slot == self.slot.slot:
                     self.unhighlight()
+        elif event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            if isinstance(event.ui_element, UIButtonSlot):
+                self.unhighlight()
         return ret
