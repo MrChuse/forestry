@@ -48,10 +48,6 @@ class GUI(Game):
 
         self.build_dropdown = BuildButtonPanel(self.resources, self.get_available_build_options(), self.left_menu_buttons_height, pygame.Rect(0, 0, resources_panel_rect.size[0]-6, (self.left_menu_buttons_height + 4) * 3),
             anchors={
-                'top':'top',
-                'bottom':'top',
-                'left':'left',
-                'right':'left',
                 'top_target': self.resources_panel
             }, visible=False, fill_jagged=True, kill_on_repopulation=False, resizable=True)
 
@@ -60,10 +56,6 @@ class GUI(Game):
             self.forage_button = None
         self.forage_button = UIButton(pygame.Rect(0, 0, resources_panel_rect.size[0]-6, 40), local['Forage'],
             anchors={
-                'top':'top',
-                'bottom':'top',
-                'left':'left',
-                'right':'left',
                 'top_target': self.build_dropdown
             }
         )
@@ -73,10 +65,6 @@ class GUI(Game):
             self.open_inspect_window_button = None
         self.open_inspect_window_button = UIButton(pygame.Rect(0, 45, resources_panel_rect.size[0]-6, 40), local['Open Inspect Window'],
             anchors={
-                'top':'top',
-                'bottom':'top',
-                'left':'left',
-                'right':'left',
                 'top_target': self.build_dropdown
             },
             visible=False)
