@@ -221,8 +221,7 @@ class GUI(Game):
 
         super().__init__()
 
-        if not new_game:
-            self.load_last()
+        self.load_last()
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
