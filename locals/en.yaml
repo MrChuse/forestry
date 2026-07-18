@@ -7,7 +7,7 @@ genes:
   active: active
   inactive: inactive
   dominance_helper_text: Each of the four genes contains two alleles. <font color=#ec3661>Dominant</font> alleles are shown in <font color=#ec3661>red</font> color and are capitalized. <font color=#3687ec>Recessive</font> alleles are shown in <font color=#3687ec>blue</font> color. If a gene has at least one dominant allele, one of them will be selected to be an active allele.
-  inactive_allele_helper_text: This column represents an inactive allele. They can be inherited by offspring but will the queen bee will not display their effect.
+  inactive_allele_helper_text: This column represents an inactive allele. They can be inherited by offspring but the queen bee will not display their effect.
   active_allele_helper_text: This column represents an active allele. The queen bee will display the effect of the active allele, for example, appearance or lifespan.
   species: Species
   species_helper_text: Species of this bee. Active allele of this gene identifies unique appearance of this bee and the resources the queen produces while alive.
