@@ -14,6 +14,12 @@ theme = {
             'text_horiz_alignment': 'center'
         }
     },
+    '@BottomRight':{
+        'misc':{
+            'text_horiz_alignment': 'right',
+            'text_vert_alignment': 'bottom'
+        }
+    },
     '@Font':{
         'font': {
             'name': 'fira_code',
@@ -45,7 +51,14 @@ theme = {
         'prototype': f'@TooltipDelay'
     },
     '#button_slot_text_box':{
-        'prototype': '@SmallFont'
+        'prototype': '@SmallFont',
+        'colours': {
+            'text_shadow': '#000000'
+        },
+        'misc': {
+            'text_shadow_size': '1',
+            'text_horiz_alignment_padding': '3'
+        }
     },
     'text_box':{
         'prototype': '@Font'

@@ -14,10 +14,8 @@ class Cursor(UIButtonSlot):
 
     def update(self, time_delta: float):
         pos = self.ui_manager.get_mouse_position()
-        self.relative_rect.topleft = pos
-        self.rect.topleft = pos
+        self.set_position(pos)
 
-        self.text_box.rect.size = 30, 30
         self.text_box.rect.bottomright = self.rect.bottomright
         if self.inspected_status is not None:
             self.inspected_status.rect.topright = self.rect.topright
