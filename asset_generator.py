@@ -24,7 +24,10 @@ def screen_blend(color1, color2):
     )
 
 def type0(bs):
-    return pygame.image.load(f'{assets_dir}/{bees_dir}/{bs.name}_Drone.png')
+    res = border.copy()
+    drone = pygame.image.load(f'{elements_dir}/prev_bees/{bs.name}_Drone.png')
+    res.blit(drone, (0, 0))
+    return res
 
 def type1(color):
     color = pygame.Color(color)
@@ -37,7 +40,7 @@ def type1(color):
     res.blit(colored_wing, (0, 0))
     return res
 
-elements_dir = f'{assets_dir}/elements'
+elements_dir = f'{assets_dir}/parts'
 # elements
 border = pygame.image.load(f'{elements_dir}/border.png')
 drone = pygame.image.load(f'{elements_dir}/drone.png')
@@ -48,7 +51,7 @@ CROWN_Queen = pygame.image.load(f'{elements_dir}/CROWN_Queen.png')
 for bee_species in BeeSpecies:
     res = type0(bee_species)
 
-    res.blit(border, (0, 0))
+    # res.blit(border, (0, 0))
     pygame.image.save(res, f'{elements_dir}/new_bees/{bee_species.name}_Drone.png')
 
     res.blit(CROWN_Princess, (0, 0))

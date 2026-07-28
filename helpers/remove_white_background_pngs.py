@@ -11,7 +11,8 @@ for filename in pictures:
         for j, pixel in enumerate(row):
             # if 'COMMON' in filename:
             #     print(i, j, pixel)
-            if np.array_equal(pixel, [255, 255, 255, 255]):
+            if (np.array_equal(pixel, [255, 255, 255, 255]) or 
+                i < 4 or i > 59 or j < 4 or j > 59):
                 # print(i, j, pixel)
                 # print('put transparent')
                 img.putpixel((j, i), (255,255,255,0))
