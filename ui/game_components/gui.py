@@ -221,7 +221,10 @@ class GUI(Game):
 
         super().__init__()
 
-        self.load_last()
+        try:
+            self.load_last()
+        except Exception:
+            pass
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
