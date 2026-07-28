@@ -3,8 +3,9 @@ from pprint import pprint
 
 import pygame
 
-from helpers.helper_constants import assets_dir
-from config import colors
+from helpers.helper_constants import assets_dir, bees_dir
+# from config import colors
+from config import BeeSpecies
 
 def changColor(image: pygame.Surface, color):
     colouredImage = pygame.Surface(image.get_size())
@@ -21,6 +22,9 @@ def screen_blend(color1, color2):
         256 - (256 - color1.b)*(256 - color2.b) / 256,
         256 - (256 - color1.a)*(256 - color2.a) / 256,
     )
+
+def type0(bs):
+    return pygame.image.load(f'{assets_dir}/{bees_dir}/{bs.name}_Drone.png')
 
 def type1(color):
     color = pygame.Color(color)
@@ -41,8 +45,8 @@ wing = pygame.image.load(f'{elements_dir}/wing.png')
 CROWN_Princess = pygame.image.load(f'{elements_dir}/CROWN_Princess.png')
 CROWN_Queen = pygame.image.load(f'{elements_dir}/CROWN_Queen.png')
 
-for bee_species, color in colors.items():
-    res = type1(color)
+for bee_species in BeeSpecies:
+    res = type0(bee_species)
 
     res.blit(border, (0, 0))
     pygame.image.save(res, f'{elements_dir}/new_bees/{bee_species.name}_Drone.png')
@@ -53,4 +57,4 @@ for bee_species, color in colors.items():
     res.blit(CROWN_Queen, (0, 0))
     pygame.image.save(res, f'{elements_dir}/new_bees/{bee_species.name}_Queen.png')
 
-pprint(sorted(pygame.Color(color).hsla for color in list(colors.values())[:10]))
+# pprint(sorted(pygame.Color(color).hsla for color in list(colors.values())[:10]))
