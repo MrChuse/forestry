@@ -2,7 +2,7 @@ import math
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIButton, UIStatusBar, UIWindow
+from pygame_gui.elements import UIButton, UIStatusBar, UIWindow, UIImage
 
 from config import local
 from forestry import Apiary, Drone, Queen, SlotOccupiedError
@@ -18,6 +18,8 @@ class ApiaryWindow(UIWindow):
         self.cursor = cursor
         self.size = relative_rect.size
         super().__init__(relative_rect, manager, local['Apiary'] + ' ' + apiary.name, *args, **kwargs)
+
+        self.background_image = UIImage(pygame.Rect((0, 0), self.ui_container.get_size()), pygame.image.load('assets/apiary background.png'), container=self)
 
         self.button_size = (64, 64)
         self.top_margin2 = 15
