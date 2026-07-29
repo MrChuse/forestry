@@ -24,10 +24,10 @@ def screen_blend(color1, color2):
     )
 
 def type0(bs):
-    res = border.copy()
+    # res = border.copy()
     drone = pygame.image.load(f'{elements_dir}/prev_bees/{bs.name}_Drone.png')
-    res.blit(drone, (0, 0))
-    return res
+    # res.blit(drone, (0, 0))
+    return drone
 
 def type1(color):
     color = pygame.Color(color)
