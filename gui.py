@@ -10,6 +10,8 @@ from ui.custom_events import APPLY_VOLUME_CHANGE
 # keep TutorialStage here because needed for backwards compatibility with pickle.load
 from ui.game_components import GUI, TutorialStage
 
+background_color = "#010F00"
+
 def main():
     game = None
     try:
@@ -33,7 +35,7 @@ def main():
         window_size = window_surface.get_rect().size
 
         background = pygame.Surface(window_size)
-        background.fill(pygame.Color('#000000'))
+        background.fill(background_color)
 
         manager = pygame_gui.UIManager(window_size, 'theme.json', enable_live_theme_updates=False, starting_language=settings['language'])
         cursor_manager = pygame_gui.UIManager(window_size, 'theme.json', starting_language=settings['language'])
@@ -67,7 +69,7 @@ def main():
                         manager.set_window_resolution((event.x, event.y))
                         cursor_manager.set_window_resolution((event.x, event.y))
                         background = pygame.Surface((event.x, event.y))
-                        background.fill(pygame.Color('#000000'))
+                        background.fill(background_color)
                         if game is not None:
                             game.set_dimensions((event.x, event.y))
                 try:

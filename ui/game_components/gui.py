@@ -3,10 +3,11 @@ import os
 from enum import IntEnum
 from traceback import print_exc
 from typing import Union
+from random import randint
 
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIButton, UITextBox, UITextEntryLine
+from pygame_gui.elements import UIButton, UITextBox, UITextEntryLine, UIImage
 from pygame_gui.windows import UIMessageWindow
 
 from config import (ANALYZER_WINDOW_SIZE, INVENTORY_WINDOW_SIZE, APIARY_WINDOW_SIZE,
@@ -219,12 +220,26 @@ class GUI(Game):
         self.filename_entry = None
         self.save_file_selection_list = None
 
+        self.flowers = []
+        self.init_flowers()
+
         super().__init__()
 
         try:
             self.load_last()
         except Exception:
             pass
+
+    def init_flowers(self):
+        for flower in self.flowers:
+            flower.kill()
+
+        flower_img = pygame.image.load('assets/flower.png')
+
+        for _ in range(20):
+            x = randint(0, self.window_size[0])
+            y = randint(0, self.window_size[1])
+            self.flowers.append(UIImage(pygame.Rect((x, y), flower_img.get_size()), flower_img))
 
     def settings_window(self):
         return SettingsWindow(pygame.Rect((0,0), self.window_size), self.ui_manager, local['Settings'])
@@ -366,6 +381,7 @@ class GUI(Game):
         self.esc_menu.set_relative_position(esc_menu_rect.topleft)
         if self.apiary_selection_list is not None:
             self.apiary_selection_list.set_dimensions((self.apiary_selection_list_width, size[1]))
+        self.init_flowers()
 
     def process_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
